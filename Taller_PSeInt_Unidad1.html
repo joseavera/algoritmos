@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taller práctico — Algoritmos en PSeInt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+  body { background: var(--white); }
+
+  .mixtle-tip {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+    background: var(--guinda-light);
+    border: 1px solid #D8A8BA;
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    margin: 2rem 0;
+  }
+  .mixtle-tip img { width: 84px; height: auto; flex-shrink: 0; border-radius: var(--radius-md); }
+  .mixtle-tip .mixtle-name {
+    font-family: var(--font-ui);
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: var(--guinda);
+    font-weight: 700;
+    display: block;
+    margin-bottom: .4rem;
+  }
+  .mixtle-tip p { font-size: .97rem; margin-bottom: 0; }
+
+  .site-header { flex-wrap: wrap; }
+
+  /* ── Paneles de código PSeInt ──────────────────────────────── */
+  .code-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin: 1.25rem 0;
+  }
+  .code-single { margin: 1.25rem 0; }
+  @media (max-width: 700px) { .code-compare { grid-template-columns: 1fr; } }
+
+  .code-panel {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+  .code-panel .code-head {
+    background: var(--guinda);
+    color: var(--white);
+    padding: .6rem 1.1rem;
+    font-family: var(--font-ui);
+    font-size: .82rem;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    gap: .5rem;
+    flex-wrap: wrap;
+  }
+  .code-panel .code-head .badge {
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    background: rgba(255,255,255,.18);
+    padding: .1rem .5rem;
+    border-radius: 999px;
+  }
+  .code-panel pre {
+    margin: 0;
+    padding: 1.1rem 1.25rem;
+    background: var(--white);
+    font-family: var(--font-mono);
+    font-size: .82rem;
+    line-height: 1.7;
+    color: var(--ink);
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .code-panel .code-verdict {
+    padding: .65rem 1.1rem;
+    background: var(--surface);
+    font-family: var(--font-ui);
+    font-size: .8rem;
+    color: var(--guinda-dark);
+    font-weight: 600;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── Ficha de sintaxis ─────────────────────────────────────── */
+  .syntax-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .5rem 1.5rem;
+    margin-top: .75rem;
+  }
+  @media (max-width: 700px) { .syntax-grid { grid-template-columns: 1fr; } }
+  .syntax-grid code {
+    font-family: var(--font-mono);
+    font-size: .82rem;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: .2rem .45rem;
+    color: var(--guinda-dark);
+  }
+  .syntax-grid .syntax-item { font-size: .88rem; display: flex; gap: .5rem; align-items: baseline; flex-wrap: wrap; }
+  .syntax-grid .syntax-item span.what { color: var(--ink-secondary); }
+
+  /* ── Hoja de registro ──────────────────────────────────────── */
+  .log-table td input {
+    width: 100%;
+    border: none;
+    border-bottom: 1px dashed var(--border-strong);
+    background: transparent;
+    font-family: var(--font-mono);
+    font-size: .9rem;
+    padding: .2rem 0;
+    color: var(--ink);
+  }
+  .log-table td.classify { font-style: italic; color: var(--ink-muted); }
+
+  @media (max-width: 640px) {
+    .class-hero h1 { font-size: 1.9rem; }
+    .mixtle-tip { flex-direction: column; align-items: center; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo-wrap">
+    <img src="imagen1.png" alt="Mixtle, mascota del curso">
+  </div>
+  <div class="header-text">
+    <span class="inst-name">Instituto de Educación Digital del Estado de Puebla</span>
+    <span class="doc-title">Licenciatura en Sistemas Computacionales · Análisis y Diseño de Algoritmos (LSC626175)</span>
+  </div>
+</header>
+
+<section class="class-hero">
+  <div class="page-wrapper" style="padding:0;">
+    <span class="class-label">Unidad 1 · Fundamentos del Análisis Algorítmico · Taller práctico</span>
+    <h1>Aterrizando los algoritmos en PSeInt</h1>
+    <span class="class-subtitle">De la teoría al contador que sube en pantalla: programa, ejecuta y mide el crecimiento de tus propios algoritmos.</span>
+
+    <div class="meta-row">
+      <div class="meta-item">Programa educativo<span>Lic. en Sistemas Computacionales</span></div>
+      <div class="meta-item">Asignatura<span>Análisis y Diseño de Algoritmos</span></div>
+      <div class="meta-item">Unidad<span>1. Fundamentos del Análisis Algorítmico</span></div>
+      <div class="meta-item">Tema<span>1.1–1.2 en práctica: algoritmos y su complejidad</span></div>
+      <div class="meta-item">Fecha<span>26 de septiembre de 2026</span></div>
+    </div>
+  </div>
+</section>
+
+<main class="page-wrapper">
+
+  <section class="section">
+    <span class="section-label">Al finalizar este taller, el estudiante podrá</span>
+    <h2 class="section-title">Competencias a desarrollar</h2>
+
+    <div class="competency-card">
+      <span class="comp-num">01</span>
+      <span class="comp-text"><strong>Traducir</strong> un algoritmo diseñado en pseudocódigo a una implementación funcional en PSeInt.</span>
+    </div>
+    <div class="competency-card">
+      <span class="comp-num">02</span>
+      <span class="comp-text"><strong>Instrumentar</strong> un algoritmo con un contador de operaciones para medir de forma empírica cómo crece su trabajo conforme aumenta <em>n</em>.</span>
+    </div>
+    <div class="competency-card">
+      <span class="comp-num">03</span>
+      <span class="comp-text"><strong>Contrastar</strong> el crecimiento observado al ejecutar el programa con la clasificación teórica de Big-O revisada en la Sesión 2.</span>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <section class="section">
+    <span class="section-label">Herramienta de trabajo</span>
+    <h2 class="section-title">¿Qué es PSeInt y por qué lo usamos?</h2>
+    <p><strong>PSeInt</strong> es un entorno gratuito para escribir y ejecutar pseudocódigo en español. Te deja concentrarte en la lógica del algoritmo —las mismas propiedades que estudiamos en la Sesión 1— sin preocuparte todavía por la sintaxis de C# u otro lenguaje. Lo que escribas aquí es, literalmente, el algoritmo antes de convertirse en programa.</p>
+
+    <div class="concept-box">
+      <span class="concept-title">Sintaxis mínima que usarás hoy</span>
+      <div class="syntax-grid">
+        <div class="syntax-item"><code>Proceso ... FinProceso</code><span class="what">delimita el algoritmo completo</span></div>
+        <div class="syntax-item"><code>Definir x Como Entero</code><span class="what">declara una variable</span></div>
+        <div class="syntax-item"><code>Leer x</code> / <code>Escribir x</code><span class="what">entrada y salida</span></div>
+        <div class="syntax-item"><code>Para i &lt;- 1 Hasta n Hacer ... FinPara</code><span class="what">ciclo controlado por contador</span></div>
+        <div class="syntax-item"><code>Mientras cond Hacer ... FinMientras</code><span class="what">ciclo controlado por condición</span></div>
+        <div class="syntax-item"><code>Si cond Entonces ... SiNo ... FinSi</code><span class="what">decisión</span></div>
+      </div>
+    </div>
+
+    <div class="callout note">
+      <p><strong>Cómo trabajar hoy.</strong> Descarga PSeInt (gratuito) desde su sitio oficial, pega cada algoritmo de este taller en el editor, presiona <strong>Ejecutar</strong> (F5) y prueba con distintos valores de entrada. No necesitas escribir código desde cero: hoy vas a <em>correr</em>, <em>medir</em> y <em>clasificar</em>.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <span class="section-label">Ejercicio guiado</span>
+    <h2 class="section-title">1 · Un algoritmo que ya diseñaste</h2>
+    <p>En la Sesión 1 diseñaste en papel el algoritmo para promediar tres calificaciones. Aquí está, aterrizado en PSeInt. Ejecútalo y verifica que el resultado coincide con lo que calculaste a mano.</p>
+
+    <div class="code-single">
+      <div class="code-panel">
+        <div class="code-head">PromedioCalificaciones <span class="badge">O(1)</span></div>
+        <pre>Proceso PromedioCalificaciones
+    Definir cal1, cal2, cal3, suma, promedio Como Real;
+
+    Escribir "Ingresa la primera calificación:";
+    Leer cal1;
+    Escribir "Ingresa la segunda calificación:";
+    Leer cal2;
+    Escribir "Ingresa la tercera calificación:";
+    Leer cal3;
+
+    suma &lt;- cal1 + cal2 + cal3;
+    promedio &lt;- suma / 3;
+
+    Escribir "El promedio es: ", promedio;
+FinProceso</pre>
+        <div class="code-verdict">Sin ciclos: el número de pasos no cambia sin importar los valores capturados.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <span class="section-label">Ejercicio guiado</span>
+    <h2 class="section-title">2 · Contando operaciones con un ciclo</h2>
+    <p>Estos dos programas hacen exactamente lo que viste en la Sesión 2: uno recorre una lista una vez, el otro la recorre contra sí misma. Ambos llevan un <strong>contador</strong> que se incrementa cada vez que se ejecuta el trabajo real, para que el crecimiento deje de ser teoría y lo veas imprimido en pantalla.</p>
+
+    <div class="code-single">
+      <div class="code-panel">
+        <div class="code-head">ContadorLineal <span class="badge">O(n)</span></div>
+        <pre>Proceso ContadorLineal
+    Definir n, i, contador Como Entero;
+
+    Escribir "¿Cuántos elementos tiene tu lista?";
+    Leer n;
+    contador &lt;- 0;
+
+    Para i &lt;- 1 Hasta n Con Paso 1 Hacer
+        contador &lt;- contador + 1;
+    FinPara
+
+    Escribir "Operaciones realizadas: ", contador;
+FinProceso</pre>
+        <div class="code-verdict">1 ciclo → el contador termina exactamente en n.</div>
+      </div>
+    </div>
+
+    <div class="code-single">
+      <div class="code-panel">
+        <div class="code-head">ContadorCuadratico <span class="badge">O(n²)</span></div>
+        <pre>Proceso ContadorCuadratico
+    Definir n, i, j, contador Como Entero;
+
+    Escribir "¿Cuántos elementos tiene tu lista?";
+    Leer n;
+    contador &lt;- 0;
+
+    Para i &lt;- 1 Hasta n Con Paso 1 Hacer
+        Para j &lt;- 1 Hasta n Con Paso 1 Hacer
+            contador &lt;- contador + 1;
+        FinPara
+    FinPara
+
+    Escribir "Operaciones realizadas: ", contador;
+FinProceso</pre>
+        <div class="code-verdict">Ciclo anidado → el contador termina exactamente en n × n.</div>
+      </div>
+    </div>
+
+    <p>Ejecuta cada uno con <em>n</em> = 5, luego con <em>n</em> = 10 y luego con <em>n</em> = 20. Anota el valor final del contador en la hoja de registro más abajo.</p>
+  </section>
+
+  <section class="section">
+    <span class="section-label">Reto</span>
+    <h2 class="section-title">3 · Clasifica un algoritmo nuevo</h2>
+    <p>Este algoritmo busca un número dentro de una lista de 10 valores, deteniéndose en cuanto lo encuentra. Ejecútalo varias veces buscando números distintos (algunos al principio de la lista, otros al final o que no existan) y observa cómo cambia el contador.</p>
+
+    <div class="code-single">
+      <div class="code-panel">
+        <div class="code-head">BusquedaLineal <span class="badge">¿O(?) — complétalo tú</span></div>
+        <pre>Proceso BusquedaLineal
+	
+    Definir lista Como Entero;
+    Dimension lista[10];
+	
+    Definir i, buscado, contador Como Entero;
+    Definir encontrado Como Logico;
+	
+    // Llenar la lista
+    Para i <- 0 Hasta 9 Con Paso 1 Hacer
+        lista[i] <- (i + 1) * 3;
+    FinPara
+	
+    Escribir "¿Qué número buscas?";
+    Leer buscado;
+	
+    contador <- 5;
+    encontrado <- Falso;
+    i <- 0;
+	
+    // Búsqueda lineal
+    Mientras i <= 9 Y encontrado = Falso Hacer
+		
+        contador <- contador + 1;
+		
+        Si lista[i] = buscado Entonces
+            encontrado <- Verdadero;
+        FinSi
+		
+        i <- i + 1;
+		
+    FinMientras
+	
+    Si encontrado Entonces
+        Escribir "Encontrado. Operaciones usadas: ", contador;
+    SiNo
+        Escribir "No encontrado. Operaciones usadas: ", contador;
+    FinSi
+	
+FinProceso
+</pre>
+        <div class="code-verdict">Pista: compara el contador cuando el número está en la posición 1 contra cuando no existe en la lista. ¿Qué caso de la Sesión 2 es cada uno?</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <span class="section-label">Registro de resultados</span>
+    <h2 class="section-title">Hoja de ejercicios: complejidad observada</h2>
+    <p>Ejecuta cada programa con los valores de <em>n</em> indicados y anota el contador que arroja PSeInt. Con esos datos, escribe tu clasificación Big-O.</p>
+
+    <table class="log-table">
+      <thead>
+        <tr><th>Algoritmo</th><th>Contador con n = 5</th><th>Contador con n = 10</th><th>Contador con n = 20</th><th>Clasificación Big-O</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>ContadorLineal</td>
+          <td><input type="text" placeholder="…"></td>
+          <td><input type="text" placeholder="…"></td>
+          <td><input type="text" placeholder="…"></td>
+          <td class="classify"><input type="text" placeholder="O( … )"></td>
+        </tr>
+        <tr>
+          <td>ContadorCuadratico</td>
+          <td><input type="text" placeholder="…"></td>
+          <td><input type="text" placeholder="…"></td>
+          <td><input type="text" placeholder="…"></td>
+          <td class="classify"><input type="text" placeholder="O( … )"></td>
+        </tr>
+        <tr>
+          <td>BusquedaLineal (peor caso)</td>
+          <td colspan="3"><input type="text" placeholder="describe qué número buscaste y el contador"></td>
+          <td class="classify"><input type="text" placeholder="O( … )"></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="mixtle-tip">
+    <img src="imagen2.png" alt="Mixtle">
+    <div>
+      <span class="mixtle-name">Consejo de Mixtle</span>
+      <p>Un contador que se incrementa dentro del ciclo es la forma más honesta de "ver" la complejidad de un algoritmo: no estás adivinando ni memorizando fórmulas, estás contando exactamente lo que la computadora hizo. Si duplicas <em>n</em> y el contador se duplica, sospecha de O(n). Si se cuadruplica, sospecha de O(n²). Esa intuición te va a acompañar el resto del cuatrimestre.</p>
+    </div>
+  </div>
+
+  <hr class="section-rule">
+
+  <section class="section">
+    <span class="section-label">Cierre del taller</span>
+    <h2 class="section-title">Conclusión</h2>
+    <p>Escribir un algoritmo en PSeInt y agregarle un contador de operaciones convierte la notación Big-O de una fórmula abstracta en un número que ves crecer en pantalla. Al comparar el comportamiento de <code>ContadorLineal</code>, <code>ContadorCuadratico</code> y <code>BusquedaLineal</code> frente a distintos valores de <em>n</em>, practicaste exactamente lo que exige el problemario técnico de la Unidad 1: calcular y demostrar la complejidad temporal de un código real, no solo citarla de memoria. Guarda tu hoja de registro: es la base directa de esa entrega.</p>
+  </section>
+
+  <section class="section">
+    <span class="section-label">Consulta</span>
+    <h2 class="section-title">Referencias y recursos</h2>
+    <ul style="font-size:.92rem; color: var(--ink-secondary);">
+      <li>PSeInt — Entorno de pseudocódigo para aprender a programar. Disponible gratuitamente en <em>pseint.sourceforge.net</em>.</li>
+      <li>Ramírez, J. L. (2023). Análisis asintótico y eficiencia de algoritmos en la computación moderna. <em>Revista de Sistemas y Computación</em> (México), 12(1), 45-58.</li>
+      <li>García, A. (2022). <em>Introducción a la algoritmia y lógica de programación: Una base sólida para sistemas</em>. Universidad Nacional Autónoma de México (UNAM).</li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <span><strong>Análisis y Diseño de Algoritmos</strong> — Unidad 1 · Taller práctico en PSeInt</span>
+  <span>Mtro. José Armando Vera Rodríguez · IEDEP · 26 de septiembre de 2026</span>
+</footer>
+
+</body>
+</html>
