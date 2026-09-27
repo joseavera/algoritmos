@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Temario — Análisis y Diseño de Algoritmos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+  body { background: var(--white); }
+
+  /* ── Tarjeta de unidad ─────────────────────────────────────── */
+  .units-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    margin: 1.5rem 0;
+  }
+  @media (max-width: 760px) {
+    .units-grid { grid-template-columns: 1fr; }
+  }
+
+  .unit-card {
+    background: var(--off-white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .unit-card .unit-head {
+    background: var(--guinda);
+    color: var(--white);
+    padding: 1.1rem 1.4rem;
+    display: flex;
+    align-items: baseline;
+    gap: .85rem;
+  }
+
+  .unit-card .unit-num {
+    font-family: var(--font-display);
+    font-size: 1.9rem;
+    font-weight: 600;
+    line-height: 1;
+    flex-shrink: 0;
+    color: rgba(255,255,255,.85);
+  }
+
+  .unit-card .unit-title {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .unit-card .unit-hours {
+    font-family: var(--font-ui);
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: rgba(255,255,255,.65);
+    margin-top: .3rem;
+    display: block;
+  }
+
+  .unit-card .unit-body {
+    padding: 1.2rem 1.4rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: .9rem;
+    flex: 1;
+  }
+
+  .unit-card .unit-proposito {
+    font-size: .92rem;
+    line-height: 1.6;
+    color: var(--ink-secondary);
+  }
+
+  .unit-card .unit-subtemas {
+    list-style: none;
+    font-size: .92rem;
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+  }
+
+  .unit-card .unit-subtemas li {
+    padding-left: 1.1rem;
+    position: relative;
+  }
+  .unit-card .unit-subtemas li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: .55em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--guinda-rule);
+  }
+
+  .unit-card .unit-producto {
+    margin-top: auto;
+    background: var(--guinda-light);
+    border: 1px solid #D8A8BA;
+    border-radius: var(--radius-sm);
+    padding: .6rem .85rem;
+    font-size: .85rem;
+  }
+  .unit-card .unit-producto strong {
+    color: var(--guinda-dark);
+    font-family: var(--font-ui);
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    display: block;
+    margin-bottom: .2rem;
+  }
+
+  /* ── Bibliografía por unidad ───────────────────────────────── */
+  .biblio-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem 2rem;
+    margin: 1.25rem 0;
+  }
+  @media (max-width: 760px) {
+    .biblio-grid { grid-template-columns: 1fr; }
+  }
+  .biblio-group h4 {
+    color: var(--guinda);
+    font-family: var(--font-ui);
+    font-size: .8rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: .6rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: .35rem;
+  }
+  .biblio-group ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: .55rem;
+  }
+  .biblio-group li {
+    font-size: .85rem;
+    line-height: 1.55;
+    color: var(--ink-secondary);
+  }
+
+  .mixtle-tip {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+    background: var(--guinda-light);
+    border: 1px solid #D8A8BA;
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    margin: 2rem 0;
+  }
+  .mixtle-tip img { width: 76px; height: auto; flex-shrink: 0; border-radius: var(--radius-md); }
+  .mixtle-tip .mixtle-name {
+    font-family: var(--font-ui);
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--guinda);
+    font-weight: 700;
+    display: block;
+    margin-bottom: .35rem;
+  }
+  .mixtle-tip p { font-size: .93rem; margin-bottom: 0; }
+
+  .eval-table td.pct { font-family: var(--font-mono); text-align: right; white-space: nowrap; }
+  .eval-table tfoot td { font-weight: 600; color: var(--guinda-dark); border-top: 2px solid var(--guinda); }
+
+  @media (max-width: 640px) {
+    .class-hero h1 { font-size: 1.9rem; }
+    .mixtle-tip { flex-direction: column; align-items: center; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo-wrap">
+    <img src="imagen1.png" alt="Mixtle, mascota del curso">
+  </div>
+  <div class="header-text">
+    <span class="inst-name">Instituto de Educación Digital del Estado de Puebla</span>
+    <span class="doc-title">Licenciatura en Sistemas Computacionales · Temario del curso</span>
+  </div>
+</header>
+
+<section class="class-hero">
+  <div class="page-wrapper" style="padding:0;">
+    <span class="class-label">Primer cuatrimestre · Modalidad mixta</span>
+    <h1>Análisis y Diseño de Algoritmos</h1>
+    <span class="class-subtitle">Del problema a la solución eficiente: cuatro unidades para aprender a pensar, comparar y construir algoritmos con criterio profesional.</span>
+
+    <div class="meta-row">
+      <div class="meta-item">Clave<span>LSC626175</span></div>
+      <div class="meta-item">Horas conducidas<span>32</span></div>
+      <div class="meta-item">Horas independientes<span>80</span></div>
+      <div class="meta-item">Total de horas<span>112</span></div>
+      <div class="meta-item">Créditos<span>7</span></div>
+    </div>
+  </div>
+</section>
+
+<main class="page-wrapper">
+
+  <section class="section">
+    <span class="section-label">Por qué existe esta asignatura</span>
+    <h2 class="section-title">Propósito general</h2>
+    <p>Implementar soluciones algorítmicas eficientes para problemas computacionales de alta complejidad, mediante la aplicación de paradigmas avanzados, uso de estructuras de datos optimizadas y análisis riguroso de la complejidad asintótica, con el propósito de desarrollar sistemas escalables que optimicen recursos logísticos y tecnológicos bajo criterios de viabilidad técnica y profesional.</p>
+  </section>
+
+  <section class="section">
+    <span class="section-label">Al concluir el curso, el estudiante será capaz de</span>
+    <h2 class="section-title">Fines de aprendizaje</h2>
+
+    <div class="competency-card">
+      <span class="comp-num">01</span>
+      <span class="comp-text"><strong>Categorizar</strong> los límites de tratabilidad de problemas informáticos mediante el estudio de la notación asintótica (O, Ω, Θ), los teoremas fundamentales de complejidad y la diferenciación de las clases P, NP y NP-completo.</span>
+    </div>
+    <div class="competency-card">
+      <span class="comp-num">02</span>
+      <span class="comp-text"><strong>Desarrollar</strong> soluciones de optimización de alta eficiencia mediante estructuras de datos avanzadas y paradigmas de diseño, para resolver problemas reales de logística, rutas y gestión de recursos.</span>
+    </div>
+    <div class="competency-card">
+      <span class="comp-num">03</span>
+      <span class="comp-text"><strong>Evaluar</strong> con sentido crítico y ético la implementación de soluciones heurísticas o aproximadas, priorizando la prudencia técnica y la responsabilidad social ante la incertidumbre algorítmica.</span>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <section class="section">
+    <span class="section-label">Ruta del curso</span>
+    <h2 class="section-title">Las cuatro unidades</h2>
+
+    <div class="units-grid">
+
+      <article class="unit-card">
+        <div class="unit-head">
+          <span class="unit-num">1</span>
+          <div>
+            <span class="unit-title">Fundamentos del Análisis Algorítmico</span>
+            <span class="unit-hours">8 h conducidas · 20 h independientes</span>
+          </div>
+        </div>
+        <div class="unit-body">
+          <p class="unit-proposito">Clasificar algoritmos según su eficiencia, mediante notaciones de complejidad y comparación de casos prácticos, a fin de evaluar la viabilidad de su implementación en contextos reales.</p>
+          <ul class="unit-subtemas">
+            <li>Concepto de algoritmo y propiedades</li>
+            <li>Notación Big-O, Big-Ω y Big-Θ</li>
+            <li>Complejidad temporal y espacial</li>
+            <li>Casos mejor, promedio y peor</li>
+          </ul>
+          <div class="unit-producto"><strong>Producto de aprendizaje</strong>Problemario técnico: hoja de ejercicios de complejidad temporal y espacial.</div>
+        </div>
+      </article>
+
+      <article class="unit-card">
+        <div class="unit-head">
+          <span class="unit-num">2</span>
+          <div>
+            <span class="unit-title">Estrategias de Diseño de Algoritmos</span>
+            <span class="unit-hours">8 h conducidas · 20 h independientes</span>
+          </div>
+        </div>
+        <div class="unit-body">
+          <p class="unit-proposito">Aplicar paradigmas de diseño algorítmico, basándose en la resolución de problemas clásicos y modernos, para crear algoritmos eficientes y reutilizables en distintos escenarios.</p>
+          <ul class="unit-subtemas">
+            <li>Divide y vencerás</li>
+            <li>Programación dinámica</li>
+            <li>Algoritmos voraces (greedy)</li>
+            <li>Backtracking y ramificación-poda</li>
+          </ul>
+          <div class="unit-producto"><strong>Producto de aprendizaje</strong>Reporte de práctica: métricas de rendimiento y gráficas comparativas entre paradigmas de ordenamiento.</div>
+        </div>
+      </article>
+
+      <article class="unit-card">
+        <div class="unit-head">
+          <span class="unit-num">3</span>
+          <div>
+            <span class="unit-title">Estructuras de Datos Avanzadas</span>
+            <span class="unit-hours">8 h conducidas · 20 h independientes</span>
+          </div>
+        </div>
+        <div class="unit-body">
+          <p class="unit-proposito">Optimizar el rendimiento de sistemas computacionales mediante la selección e implementación de estructuras de datos avanzadas, garantizando búsquedas eficientes y análisis de conectividad a gran escala.</p>
+          <ul class="unit-subtemas">
+            <li>Árboles balanceados (AVL, Red-Black)</li>
+            <li>Grafos y algoritmos de recorrido (DFS, BFS)</li>
+            <li>Tablas hash y estructuras de búsqueda</li>
+            <li>Colas de prioridad y heaps</li>
+          </ul>
+          <div class="unit-producto"><strong>Producto de aprendizaje</strong>Proyecto de software funcional: optimización de rutas sobre un grafo ponderado.</div>
+        </div>
+      </article>
+
+      <article class="unit-card">
+        <div class="unit-head">
+          <span class="unit-num">4</span>
+          <div>
+            <span class="unit-title">Algoritmos de Optimización y Complejidad</span>
+            <span class="unit-hours">8 h conducidas · 20 h independientes</span>
+          </div>
+        </div>
+        <div class="unit-body">
+          <p class="unit-proposito">Analizar problemas de alta complejidad apoyándose en técnicas de optimización y heurísticas, para diseñar soluciones factibles donde no existen algoritmos exactos eficientes.</p>
+          <ul class="unit-subtemas">
+            <li>Problemas NP, NP-completos y NP-difíciles</li>
+            <li>Algoritmos aproximados</li>
+            <li>Heurísticas y metaheurísticas (p. ej. genéticos)</li>
+            <li>Aplicaciones reales (logística, redes, IA)</li>
+          </ul>
+          <div class="unit-producto"><strong>Producto de aprendizaje</strong>Informe técnico: heurística específica para un problema matemático complejo.</div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <div class="mixtle-tip">
+    <img src="imagen2.png" alt="Mixtle">
+    <div>
+      <span class="mixtle-name">Consejo de Mixtle</span>
+      <p>Cada unidad se apoya en la anterior: sin dominar las propiedades de un algoritmo y sus notaciones de complejidad (Unidad 1), es difícil justificar por qué una estrategia de diseño (Unidad 2) es mejor que otra. Revisa este temario antes de cada sesión para ubicar dónde estás parado en la ruta completa.</p>
+    </div>
+  </div>
+
+  <hr class="section-rule">
+
+  <section class="section">
+    <span class="section-label">Cómo se acredita el curso</span>
+    <h2 class="section-title">Criterios de evaluación</h2>
+
+    <table class="eval-table">
+      <thead>
+        <tr><th>Criterio</th><th>Instrumento</th><th>Ponderación</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Problemario técnico</td>
+          <td>Hoja de ejercicios de complejidad temporal y espacial para diversos códigos</td>
+          <td class="pct">20 %</td>
+        </tr>
+        <tr>
+          <td>Reporte de práctica</td>
+          <td>Métricas de rendimiento y gráficas comparativas entre paradigmas de ordenamiento</td>
+          <td class="pct">30 %</td>
+        </tr>
+        <tr>
+          <td>Proyecto de software funcional</td>
+          <td>Solución de optimización de rutas sobre un grafo ponderado y documentado</td>
+          <td class="pct">30 %</td>
+        </tr>
+        <tr>
+          <td>Informe técnico</td>
+          <td>Heurística específica para la solución de problemas matemáticos complejos</td>
+          <td class="pct">20 %</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr><td colspan="2">Total</td><td class="pct">100 %</td></tr>
+      </tfoot>
+    </table>
+  </section>
+
+  <section class="section">
+    <span class="section-label">Con qué trabajamos</span>
+    <h2 class="section-title">Recursos didácticos</h2>
+    <div class="grid-2">
+      <ul style="font-size:.92rem;">
+        <li>Repositorios digitales: biblioteca virtual y revistas académicas</li>
+        <li>Bibliotecas físicas y recursos impresos</li>
+        <li>Pizarras digitales interactivas (Smart Board, FigJam, Miro, Mural, Whiteboard de Microsoft)</li>
+      </ul>
+      <ul style="font-size:.92rem;">
+        <li>Laboratorios remotos o virtuales</li>
+        <li>Canales institucionales de comunicación</li>
+        <li>Inteligencia artificial generativa</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <span class="section-label">Para profundizar</span>
+    <h2 class="section-title">Bibliografía por unidad</h2>
+
+    <div class="biblio-grid">
+      <div class="biblio-group">
+        <h4>Unidad I</h4>
+        <ul>
+          <li>García, A. (2022). <em>Introducción a la algoritmia y lógica de programación</em>. UNAM.</li>
+          <li>Ramírez, J. L. (2023). Análisis asintótico y eficiencia de algoritmos en la computación moderna. <em>Revista de Sistemas y Computación</em>, 12(1), 45-58.</li>
+          <li>Sánchez, R. (2024). <em>Modelado probabilístico para el análisis del caso promedio en algoritmos de búsqueda</em>. Editorial Tecnológica de Monterrey.</li>
+          <li>Torres, M. y Morales, S. (2021). <em>Optimización de recursos: complejidad en algoritmos distribuidos</em>. Universidad de los Andes.</li>
+        </ul>
+      </div>
+      <div class="biblio-group">
+        <h4>Unidad II</h4>
+        <ul>
+          <li>Castro, G. (2023). Resolución de subproblemas superpuestos mediante programación dinámica en bioinformática. <em>Journal of Computer Science &amp; Technology Latam</em>, 5(2), 112-128.</li>
+          <li>Flores, V. (2024). <em>Exploración de espacios de estados: técnicas de poda en algoritmos de búsqueda exhaustiva</em>. Revista de Ingeniería de Software.</li>
+          <li>Méndez, F. (2022). <em>Paradigmas de diseño: divide y vencerás</em>. Tecnológico Nacional de México.</li>
+          <li>Ortega, L. (2021). Eficiencia de los algoritmos voraces en problemas de selección de intervalos. Universidad de Buenos Aires.</li>
+        </ul>
+      </div>
+      <div class="biblio-group">
+        <h4>Unidad III</h4>
+        <ul>
+          <li>Jiménez, H. (2025). <em>Implementación de montículos binarios para la gestión de tareas en tiempo real</em>. Editorial Académica Española.</li>
+          <li>Paredes, J. (2022). Estructuras jerárquicas balanceadas y su impacto en bases de datos. Universidad Nacional de La Plata.</li>
+          <li>Ruiz, A. (2021). <em>Colisiones y funciones hash: optimización de búsquedas</em>. Universidad de Santiago de Chile.</li>
+          <li>Silva, D. (2023). Modelado de redes sociales mediante grafos, BFS y DFS. <em>Revista Iberoamericana de Ciencias Informáticas</em>, 17(1), 30-45.</li>
+        </ul>
+      </div>
+      <div class="biblio-group">
+        <h4>Unidad IV</h4>
+        <ul>
+          <li>Blanco, P. (2023). Garantías de rendimiento en algoritmos de aproximación para el problema del viajante. <em>Revista de Matemática Aplicada</em>.</li>
+          <li>Martínez, O. y Soto, K. (2024). Algoritmos genéticos en la optimización de procesos industriales. <em>Revista de Innovación y Tecnología</em>.</li>
+          <li>Salazar, M. (2022). <em>Teoría de la computabilidad: P vs NP</em>. Universidad Nacional de San Agustín.</li>
+          <li>Vargas, S. (2021). Inteligencia artificial y logística mediante algoritmos de grafos. <em>Revista Iberoamericana de Inteligencia Artificial</em>, 24(68), 54-70.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <span><strong>Análisis y Diseño de Algoritmos</strong> — Temario completo · LSC626175</span>
+  <span>Mtro. José Armando Vera Rodríguez · IEDEP</span>
+</footer>
+
+</body>
+</html>
