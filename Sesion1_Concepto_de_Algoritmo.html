@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sesión 1 — Concepto de Algoritmo y sus Propiedades</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+  /* Ajustes específicos de esta sesión (no modifican base.css) */
+  .mixtle-tip {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+    background: var(--guinda-light);
+    border: 1px solid #D8A8BA;
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    margin: 2rem 0;
+  }
+  .mixtle-tip img {
+    width: 84px;
+    height: auto;
+    flex-shrink: 0;
+    border-radius: var(--radius-md);
+  }
+  .mixtle-tip .mixtle-name {
+    font-family: var(--font-ui);
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: var(--guinda);
+    font-weight: 700;
+    display: block;
+    margin-bottom: .4rem;
+  }
+  .mixtle-tip p { font-size: .97rem; margin-bottom: 0; }
+
+  .site-header .logo-wrap + .logo-wrap { margin-left: -.5rem; }
+  .site-header { flex-wrap: wrap; }
+
+  .props-table td.prop-name { font-weight: 600; color: var(--guinda-dark); white-space: nowrap; }
+
+  .closing-figure img {
+    max-width: 220px;
+  }
+
+  @media (max-width: 640px) {
+    .class-hero h1 { font-size: 1.9rem; }
+    .mixtle-tip { flex-direction: column; align-items: center; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo-wrap">
+    <img src="imagen1.png" alt="Mixtle, mascota del curso">
+  </div>
+  <div class="header-text">
+    <span class="inst-name">Instituto de Educación Digital del Estado de Puebla</span>
+    <span class="doc-title">Licenciatura en Sistemas Computacionales · Análisis y Diseño de Algoritmos (LSC626175)</span>
+  </div>
+</header>
+
+<section class="class-hero">
+  <div class="page-wrapper" style="padding:0;">
+    <span class="class-label">Unidad 1 · Fundamentos del Análisis Algorítmico · Sesión 1</span>
+    <h1>Concepto de Algoritmo y sus Propiedades</h1>
+    <span class="class-subtitle">De la idea a la solución: cómo pensar como un algoritmo antes de escribir una sola línea de código.</span>
+
+    <div class="meta-row">
+      <div class="meta-item">Programa educativo<span>Lic. en Sistemas Computacionales</span></div>
+      <div class="meta-item">Asignatura<span>Análisis y Diseño de Algoritmos</span></div>
+      <div class="meta-item">Unidad<span>1. Fundamentos del Análisis Algorítmico</span></div>
+      <div class="meta-item">Tema<span>1.1 Concepto de algoritmo y propiedades</span></div>
+      <div class="meta-item">Fecha<span>20 de septiembre de 2026</span></div>
+    </div>
+  </div>
+</section>
+
+<main class="page-wrapper">
+
+  <section class="section">
+    <span class="section-label">Al finalizar esta sesión, el estudiante podrá</span>
+    <h2 class="section-title">Competencias a desarrollar</h2>
+
+    <div class="competency-card">
+      <span class="comp-num">01</span>
+      <span class="comp-text"><strong>Comprender</strong> el concepto de algoritmo y su papel como base de toda solución computacional, antes de traducirlo a código.</span>
+    </div>
+    <div class="competency-card">
+      <span class="comp-num">02</span>
+      <span class="comp-text"><strong>Identificar y explicar</strong> las cinco propiedades que debe cumplir todo algoritmo: finitud, definición o precisión, entrada, salida y efectividad.</span>
+    </div>
+    <div class="competency-card">
+      <span class="comp-num">03</span>
+      <span class="comp-text"><strong>Diferenciar</strong> un algoritmo de un programa de cómputo, mediante ejemplos cotidianos y ejemplos aplicados a la programación.</span>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <section class="section">
+    <span class="section-label">Punto de partida</span>
+    <h2 class="section-title">¿Qué es un algoritmo?</h2>
+
+    <p>Antes de escribir una sola línea de código, todo programador resuelve un problema en su cabeza: decide qué pasos seguir, en qué orden y qué hacer con la información que recibe. A esa secuencia ordenada y precisa de pasos que resuelve un problema o realiza una tarea se le llama <strong>algoritmo</strong>.</p>
+
+    <div class="concept-box">
+      <span class="concept-title">Definición formal</span>
+      <p>Un <strong>algoritmo</strong> es un conjunto finito y ordenado de instrucciones, claras y precisas, que permiten resolver un problema o realizar una tarea, transformando una entrada (datos iniciales) en una salida (resultado) mediante un número finito de pasos.</p>
+    </div>
+
+    <p>Esta idea no es exclusiva de la computación: la usamos todos los días sin darnos cuenta.</p>
+
+    <div class="callout">
+      <p><strong>Analogía — La receta de cocina.</strong> Una receta es, en esencia, un algoritmo: tiene ingredientes (la entrada), una secuencia numerada de pasos que deben seguirse en orden (el proceso) y un platillo terminado (la salida). Si alteras el orden de los pasos, o si un paso es ambiguo ("cocina hasta que esté listo"), el resultado deja de ser confiable, exactamente igual que con un algoritmo mal diseñado.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <span class="section-label">El corazón del tema</span>
+    <h2 class="section-title">Las cinco propiedades de un algoritmo</h2>
+
+    <p>No cualquier lista de pasos es un algoritmo. Para que una secuencia de instrucciones merezca ese nombre, debe cumplir las siguientes cinco propiedades:</p>
+
+    <table class="props-table">
+      <thead>
+        <tr>
+          <th>Propiedad</th>
+          <th>¿Qué exige?</th>
+          <th>Analogía cotidiana</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="prop-name">Finitud</td>
+          <td>El algoritmo debe terminar después de un número finito de pasos.</td>
+          <td>Una receta tiene un último paso: "sirve y disfruta". No se cocina para siempre.</td>
+        </tr>
+        <tr>
+          <td class="prop-name">Definición (precisión)</td>
+          <td>Cada paso debe estar definido con exactitud, sin ambigüedad, de modo que cualquiera lo interprete igual.</td>
+          <td>"Agrega 200 g de harina" es preciso; "agrega harina al gusto" no lo es.</td>
+        </tr>
+        <tr>
+          <td class="prop-name">Entrada</td>
+          <td>El algoritmo recibe cero o más datos iniciales sobre los que trabajará.</td>
+          <td>Los ingredientes que colocas sobre la mesa antes de empezar a cocinar.</td>
+        </tr>
+        <tr>
+          <td class="prop-name">Salida</td>
+          <td>El algoritmo produce al menos un resultado, relacionado con la entrada.</td>
+          <td>El platillo terminado que sale de la cocina.</td>
+        </tr>
+        <tr>
+          <td class="prop-name">Efectividad</td>
+          <td>Cada instrucción debe ser lo bastante básica y realizable como para poder ejecutarse en un tiempo finito, con los recursos disponibles.</td>
+          <td>"Corta la cebolla en cubos" es realizable con un cuchillo; "licúa la cebolla con luz de luna" no lo es.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout note">
+      <p><strong>Nota.</strong> Si a una secuencia de pasos le falta la finitud, en programación se convierte en un ciclo infinito. Si le falta la precisión, el programa se comporta de forma distinta cada vez que se ejecuta. Estas propiedades no son teoría abstracta: son la causa raíz de la mayoría de los errores de lógica que verás a lo largo del cuatrimestre.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <span class="section-label">Aplicándolo a la programación</span>
+    <h2 class="section-title">Algoritmo vs. programa: no son lo mismo</h2>
+
+    <div class="grid-2">
+      <div class="card">
+        <span class="card-title">Algoritmo</span>
+        <p style="font-size:.95rem;">Es la idea, el diseño de la solución. Es independiente del lenguaje de programación y puede expresarse en lenguaje natural, pseudocódigo o un diagrama de flujo.</p>
+      </div>
+      <div class="card">
+        <span class="card-title">Programa</span>
+        <p style="font-size:.95rem;">Es la traducción de ese algoritmo a un lenguaje que la computadora puede ejecutar (por ejemplo, C#, Python o Java). Un mismo algoritmo puede convertirse en muchos programas distintos.</p>
+      </div>
+    </div>
+
+    <p>Piénsalo así: el algoritmo es la partitura musical; el programa es la interpretación de esa partitura con un instrumento específico. La partitura no cambia, pero puede tocarse en piano, guitarra o violín.</p>
+  </section>
+
+  <section class="section">
+    <span class="section-label">Ejemplo paso a paso</span>
+    <h2 class="section-title">Diseñando un algoritmo desde cero</h2>
+
+    <div class="example-block">
+      <div class="example-header">Problema: calcular el promedio de tres calificaciones</div>
+      <div class="example-body">
+        <div class="example-statement">
+          Un estudiante presenta tres exámenes parciales. Se necesita un algoritmo que reciba las tres calificaciones y determine el promedio final del cuatrimestre.
+        </div>
+
+        <ol class="step-list">
+          <li>
+            <span class="step-n">1</span>
+            <span class="step-content"><strong>Entrada:</strong> leer las tres calificaciones (cal1, cal2, cal3).</span>
+          </li>
+          <li>
+            <span class="step-n">2</span>
+            <span class="step-content"><strong>Proceso:</strong> sumar las tres calificaciones: suma = cal1 + cal2 + cal3.</span>
+          </li>
+          <li>
+            <span class="step-n">3</span>
+            <span class="step-content"><strong>Proceso:</strong> dividir la suma entre el número de calificaciones: promedio = suma / 3.</span>
+          </li>
+          <li>
+            <span class="step-n">4</span>
+            <span class="step-content"><strong>Salida:</strong> mostrar el valor de "promedio" al estudiante.</span>
+          </li>
+        </ol>
+
+        <div class="result-line">Entrada: 8.5, 9.0, 7.5 → Salida: promedio = 8.33</div>
+      </div>
+    </div>
+
+    <p>Observa que este algoritmo cumple las cinco propiedades: es finito (termina en 4 pasos), está definido con precisión (cada operación es exacta), tiene entrada (las tres calificaciones), tiene salida (el promedio) y es efectivo (sumar y dividir son operaciones realizables). En la siguiente sesión aprenderás a medir <em>qué tan eficiente</em> es un algoritmo como este frente a otros que resuelven el mismo problema.</p>
+  </section>
+
+  <div class="mixtle-tip">
+    <img src="imagen2.png" alt="Mixtle">
+    <div>
+      <span class="mixtle-name">Consejo de Mixtle</span>
+      <p>Antes de programar, dibuja o escribe tu algoritmo en papel y pruébalo "a mano" con un ejemplo concreto, como hicimos con las calificaciones. Si el algoritmo falla en papel, fallará también en código; y es mucho más barato corregirlo antes de escribir una sola línea.</p>
+    </div>
+  </div>
+
+  <hr class="section-rule">
+
+  <section class="section">
+    <span class="section-label">Cierre de la sesión</span>
+    <h2 class="section-title">Conclusión</h2>
+    <p>Un algoritmo es mucho más que una receta de pasos: es una solución precisa, finita y verificable a un problema, construida sobre cinco propiedades que garantizan que pueda ejecutarse de manera confiable. Distinguir un algoritmo del programa que lo implementa es el primer hábito mental de todo desarrollador, porque permite diseñar la solución antes de preocuparse por la sintaxis de un lenguaje. Con esta base, en la Sesión 2 aprenderás a comparar algoritmos entre sí mediante la notación Big-O, Big-Ω y Big-Θ, para responder una pregunta clave: de dos algoritmos que resuelven el mismo problema, ¿cuál es mejor y por qué?</p>
+  </section>
+
+  <section class="section">
+    <span class="section-label">Consulta</span>
+    <h2 class="section-title">Referencias bibliográficas</h2>
+    <ul style="font-size:.92rem; color: var(--ink-secondary);">
+      <li>García, A. (2022). <em>Introducción a la algoritmia y lógica de programación: Una base sólida para sistemas</em>. Universidad Nacional Autónoma de México (UNAM).</li>
+      <li>Ramírez, J. L. (2023). Análisis asintótico y eficiencia de algoritmos en la computación moderna. <em>Revista de Sistemas y Computación</em> (México), 12(1), 45-58.</li>
+      <li>Sánchez, R. (2024). <em>Modelado probabilístico para el análisis del caso promedio en algoritmos de búsqueda</em>. Editorial Tecnológica de Monterrey (México).</li>
+      <li>Torres, M. y Morales, S. (2021). <em>Optimización de recursos: Medición de la complejidad en algoritmos distribuidos</em>. Universidad de los Andes (Colombia).</li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <span><strong>Análisis y Diseño de Algoritmos</strong> — Unidad 1, Sesión 1</span>
+  <span>Mtro. José Armando Vera Rodríguez · IEDEP · 20 de septiembre de 2026</span>
+</footer>
+
+</body>
+</html>
