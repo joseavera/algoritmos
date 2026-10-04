@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guía rápida · Notación Big-O y log n</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+
+<style>
+  .site-header { flex-wrap: wrap; }
+
+  .mixtle-tip { display: flex; gap: 1.25rem; align-items: flex-start; background: var(--guinda-light); border: 1px solid #D8A8BA; border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin: 1.8rem 0; }
+  .mixtle-tip img { width: 84px; height: auto; flex-shrink: 0; border-radius: var(--radius-md); }
+  .mixtle-tip .mixtle-name { font-family: var(--font-ui); font-size: .78rem; text-transform: uppercase; letter-spacing: .12em; color: var(--guinda); font-weight: 700; display: block; margin-bottom: .4rem; }
+  .mixtle-tip p { font-size: .97rem; margin-bottom: 0; }
+
+  .big { font-family: var(--font-mono); font-weight: 600; color: var(--guinda-dark); white-space: nowrap; }
+
+  /* Tarjetas de clases de crecimiento */
+  .clases { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 1.2rem 0; }
+  .clase { background: var(--white); border: 1px solid var(--border); border-top: 4px solid var(--guinda); border-radius: var(--radius-lg); padding: 1rem 1.2rem; }
+  .clase .nombre { font-family: var(--font-mono); font-size: 1.5rem; font-weight: 600; color: var(--guinda); }
+  .clase .apodo { font-family: var(--font-ui); font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-muted); display: block; margin-bottom: .5rem; }
+  .clase p { font-size: .95rem; margin: .3rem 0 0; }
+  .clase.c1 { border-top-color: #C9A3B8; }
+  .clase.c2 { border-top-color: #A8689A; }
+  .clase.c3 { border-top-color: #7C2D78; }
+  .clase.c4 { border-top-color: #490b58; }
+
+  /* Pasos del juego de adivinar */
+  .halving { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; margin: 1rem 0; font-family: var(--font-mono); }
+  .halving .h { background: var(--guinda-light); border: 1px solid #D8A8BA; color: var(--guinda-dark); padding: .35rem .7rem; border-radius: var(--radius-md); font-size: .95rem; }
+  .halving .h.fin { background: var(--guinda); color: var(--white); border-color: var(--guinda); }
+  .halving .arrow { color: var(--guinda-rule); }
+
+  /* Calculadora */
+  .calc { background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-lg); padding: 1.3rem 1.5rem; margin: 1.2rem 0; }
+  .calc label { font-family: var(--font-ui); font-weight: 600; color: var(--guinda); font-size: .9rem; display: block; margin-bottom: .6rem; }
+  .calc input[type="range"] { width: 100%; accent-color: #490b58; }
+  .calc .n-val { font-family: var(--font-display); font-size: 2.2rem; font-weight: 700; color: var(--guinda-dark); }
+  .calc table { margin-top: 1rem; }
+  .calc td.num { font-family: var(--font-mono); text-align: right; }
+  .barra { height: 10px; background: var(--guinda-light); border-radius: 99px; overflow: hidden; min-width: 90px; }
+  .barra i { display: block; height: 100%; background: var(--guinda); border-radius: 99px; transition: width .25s; }
+  .calc .nota-pie { font-family: var(--font-ui); font-size: .82rem; color: var(--ink-muted); margin-top: .6rem; }
+
+  .tres { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.2rem 0; }
+  .tres .card { text-align: center; }
+  .tres .sym { font-family: var(--font-mono); font-size: 1.8rem; color: var(--guinda); font-weight: 600; display: block; }
+
+  @media (max-width: 720px) {
+    .clases, .tres { grid-template-columns: 1fr; }
+    .mixtle-tip { flex-direction: column; align-items: center; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo-wrap">
+    <img src="imagen1.png" alt="Mixtle, mascota del curso">
+  </div>
+  <div class="header-text">
+    <span class="inst-name">Instituto de Educación Digital del Estado de Puebla</span>
+    <span class="doc-title">Licenciatura en Sistemas Computacionales · Análisis y Diseño de Algoritmos</span>
+  </div>
+</header>
+
+<section class="class-hero">
+  <div class="page-wrapper" style="padding:0;">
+    <span class="class-label">Unidad 1 · Fundamentos del Análisis Algorítmico · Guía rápida</span>
+    <h1>Notación Big-O y log n, explicadas fácil</h1>
+    <span class="class-subtitle">Cuántos pasos da un algoritmo cuando los datos crecen, sin fórmulas complicadas.</span>
+
+    <div class="meta-row">
+      <div class="meta-item">Programa educativo<span>Lic. en Sistemas Computacionales</span></div>
+      <div class="meta-item">Asignatura<span>Análisis y Diseño de Algoritmos</span></div>
+      <div class="meta-item">Unidad<span>1. Fundamentos del Análisis Algorítmico</span></div>
+      <div class="meta-item">Tema<span>1.2 Notación Big-O, Big-Ω y Big-Θ</span></div>
+      <div class="meta-item">Fecha<span>4 de octubre de 2026</span></div>
+    </div>
+  </div>
+</section>
+
+<main class="page-wrapper">
+
+  <section class="section">
+    <span class="section-label">Competencia a desarrollar</span>
+    <div class="competency-card">
+      <span class="comp-num">01</span>
+      <span class="comp-text"><strong>Explicar</strong> con tus propias palabras qué significan O(1), O(log n), O(n), O(n log n) y O(n²), y <strong>reconocer</strong> cuál corresponde a un algoritmo sencillo.</span>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 1 -->
+  <section class="section">
+    <span class="section-label">Paso 1</span>
+    <h2 class="section-title">¿Para qué sirve Big-O?</h2>
+
+    <p>Imagina que quieres repartir una circular entre los alumnos de una escuela. Si hay 10 alumnos, tardas poco. Si hay 1,000, tardas mucho más. La pregunta importante no es <em>cuántos minutos</em> tardas, sino <strong>cómo crece el trabajo cuando crece el número de alumnos</strong>.</p>
+
+    <div class="concept-box">
+      <span class="concept-title">Idea central</span>
+      <p style="margin:0"><strong>Big-O</strong> describe cómo crece la cantidad de pasos de un algoritmo cuando aumenta el tamaño de los datos. Ese tamaño se llama <strong>n</strong>. No mide segundos: mide <em>tendencia</em>, por eso funciona igual en una computadora lenta o en una rápida.</p>
+    </div>
+
+    <div class="callout note">
+      Se lee así: <span class="big">O(n)</span> = "orden n" o "Big-O de n". La letra O viene de <em>orden de crecimiento</em>.
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 2 -->
+  <section class="section">
+    <span class="section-label">Paso 2</span>
+    <h2 class="section-title">Las cuatro familias que más verás</h2>
+    <p>Cada una tiene un ejemplo de la vida diaria para que no se te olvide.</p>
+
+    <div class="clases">
+      <div class="clase c1">
+        <span class="apodo">Constante</span>
+        <span class="nombre">O(1)</span>
+        <p><strong>Abrir el primer cajón.</strong> No importa cuántos cajones haya: siempre das un solo paso.</p>
+      </div>
+      <div class="clase c2">
+        <span class="apodo">Logarítmico</span>
+        <span class="nombre">O(log n)</span>
+        <p><strong>Buscar una palabra en el diccionario</strong> abriéndolo por la mitad y descartando media hoja cada vez.</p>
+      </div>
+      <div class="clase c3">
+        <span class="apodo">Lineal</span>
+        <span class="nombre">O(n)</span>
+        <p><strong>Pasar lista.</strong> Si hay el doble de alumnos, tardas el doble: uno por uno.</p>
+      </div>
+      <div class="clase c4">
+        <span class="apodo">Cuadrático</span>
+        <span class="nombre">O(n²)</span>
+        <p><strong>Un saludo entre todos.</strong> Cada persona saluda a todas las demás: con el doble de personas hay el cuádruple de saludos.</p>
+      </div>
+    </div>
+
+    <p>Entre O(n) y O(n²) está también <span class="big">O(n log n)</span> (linealítmico), típico de los buenos algoritmos de ordenamiento: algo más lento que lineal, pero mucho mejor que cuadrático.</p>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 3 -->
+  <section class="section">
+    <span class="section-label">Paso 3</span>
+    <h2 class="section-title">¿Qué significa log n?</h2>
+
+    <p>El <strong>logaritmo</strong> responde una pregunta muy simple: <em>¿cuántas veces puedo partir algo a la mitad hasta quedarme con uno solo?</em> En computación casi siempre usamos base 2 (mitades).</p>
+
+    <div class="example-block">
+      <div class="example-header">Juego: adivina un número del 1 al 1,000</div>
+      <div class="example-body">
+        <p>Piensa en un número. Yo pregunto: "¿es mayor que 500?". Con cada respuesta descarto la mitad de las opciones:</p>
+        <div class="halving">
+          <span class="h">1000</span><span class="arrow">→</span>
+          <span class="h">500</span><span class="arrow">→</span>
+          <span class="h">250</span><span class="arrow">→</span>
+          <span class="h">125</span><span class="arrow">→</span>
+          <span class="h">62</span><span class="arrow">→</span>
+          <span class="h">31</span><span class="arrow">→</span>
+          <span class="h">15</span><span class="arrow">→</span>
+          <span class="h">7</span><span class="arrow">→</span>
+          <span class="h">3</span><span class="arrow">→</span>
+          <span class="h fin">1</span>
+        </div>
+        <div class="result-line">Con solo unas 10 preguntas encuentro tu número entre 1,000. Por eso log₂(1000) ≈ 10.</div>
+      </div>
+    </div>
+
+    <p>Lo sorprendente es lo poco que crece. Si duplicas los datos, solo agregas <strong>un paso más</strong>:</p>
+
+    <table>
+      <thead><tr><th>Datos (n)</th><th>Pasos con log₂ n</th><th>Pasos con n (lineal)</th></tr></thead>
+      <tbody>
+        <tr><td>1,000</td><td class="big">≈ 10</td><td>1,000</td></tr>
+        <tr><td>1,000,000</td><td class="big">≈ 20</td><td>1,000,000</td></tr>
+        <tr><td>1,000,000,000</td><td class="big">≈ 30</td><td>1,000,000,000</td></tr>
+      </tbody>
+    </table>
+
+    <div class="mixtle-tip">
+      <img src="imagen2.png" alt="Mixtle">
+      <div>
+        <span class="mixtle-name">Consejo de Mixtle</span>
+        <p>Cuando veas un algoritmo que <strong>divide el problema a la mitad</strong> en cada paso (como la búsqueda binaria), piensa en <strong>log n</strong>. Es una de las mejores velocidades que puedes tener después de O(1).</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 4 calculadora -->
+  <section class="section">
+    <span class="section-label">Paso 4 · Pruébalo tú</span>
+    <h2 class="section-title">Mueve la barra y compara</h2>
+    <p>Elige el tamaño de los datos y mira cuántos pasos da cada familia. El tiempo supone una computadora que hace mil millones de pasos por segundo.</p>
+
+    <div class="calc">
+      <label for="rango">Tamaño de los datos (n)</label>
+      <div class="n-val" id="n-val">1,000</div>
+      <input type="range" id="rango" min="1" max="6" step="1" value="3" aria-label="Tamaño de los datos">
+
+      <table>
+        <thead><tr><th>Orden</th><th>Pasos</th><th>Tiempo aproximado</th><th></th></tr></thead>
+        <tbody id="calc-body"></tbody>
+      </table>
+      <div class="nota-pie">Las barras usan una escala comprimida (por potencias de diez) para que todas se alcancen a ver.</div>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 5 -->
+  <section class="section">
+    <span class="section-label">Paso 5</span>
+    <h2 class="section-title">Big-O, Big-Ω y Big-Θ en una frase</h2>
+    <p>Imagina un viaje en autobús de tu casa a la escuela:</p>
+
+    <div class="tres">
+      <div class="card">
+        <span class="sym">O</span>
+        <span class="card-title">Big-O</span>
+        <p>"Máximo": en el peor tráfico, tardas <em>como mucho</em> 60 minutos. Es el <strong>peor caso</strong>.</p>
+      </div>
+      <div class="card">
+        <span class="sym">Ω</span>
+        <span class="card-title">Big-Ω</span>
+        <p>"Mínimo": sin tráfico, tardas <em>por lo menos</em> 20 minutos. Es el <strong>mejor caso</strong>.</p>
+      </div>
+      <div class="card">
+        <span class="sym">Θ</span>
+        <span class="card-title">Big-Θ</span>
+        <p>"Justo": si el viaje casi siempre dura lo mismo, el máximo y el mínimo coinciden. Es la <strong>cota ajustada</strong>.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 6 truco -->
+  <section class="section">
+    <span class="section-label">Paso 6</span>
+    <h2 class="section-title">Truco para clasificar código</h2>
+
+    <ol class="step-list">
+      <li><span class="step-n">1</span><span class="step-content"><strong>Sin ciclos</strong> (solo operaciones sueltas): O(1).</span></li>
+      <li><span class="step-n">2</span><span class="step-content"><strong>Un ciclo</strong> que recorre los n datos: O(n).</span></li>
+      <li><span class="step-n">3</span><span class="step-content"><strong>Un ciclo dentro de otro</strong>, ambos de n repeticiones: O(n²).</span></li>
+      <li><span class="step-n">4</span><span class="step-content"><strong>Un ciclo que divide a la mitad</strong> el problema en cada vuelta: O(log n).</span></li>
+    </ol>
+
+    <div class="callout note">
+      Regla de oro: en Big-O se ignoran los números pequeños. Si un algoritmo hace 3n + 5 pasos, se dice simplemente <span class="big">O(n)</span>, porque cuando n es enorme lo que manda es n.
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- Conclusión -->
+  <section class="section">
+    <span class="section-label">Cierre</span>
+    <h2 class="section-title">Conclusión</h2>
+    <p>Big-O no mide segundos, mide <strong>cómo crece el trabajo</strong> cuando crecen los datos. Las familias O(1), O(log n), O(n), O(n log n) y O(n²) van de la más rápida a la más lenta, y log n significa "cuántas veces puedo partir a la mitad". Con esta idea podrás elegir mejores algoritmos desde antes de programarlos.</p>
+  </section>
+
+  <section class="section">
+    <span class="section-label">Para profundizar</span>
+    <h2 class="section-title">Referencias bibliográficas</h2>
+    <div class="card">
+      <p style="margin:0 0 .8rem">Cormen, T. H., Leiserson, C. E., Rivest, R. L., &amp; Stein, C. (2022). <em>Introduction to algorithms</em> (4.ª ed.). MIT Press.</p>
+      <p style="margin:0 0 .8rem">Levitin, A. (2012). <em>Introduction to the design and analysis of algorithms</em> (3.ª ed.). Pearson.</p>
+      <p style="margin:0">Sedgewick, R., &amp; Wayne, K. (2011). <em>Algorithms</em> (4.ª ed.). Addison-Wesley.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <span><strong>Análisis y Diseño de Algoritmos</strong> — Unidad 1 · Guía rápida</span>
+  <span>Mtro. José Armando Vera Rodríguez · IEDEP · 4 de octubre de 2026</span>
+</footer>
+
+<script>
+(function () {
+  var potencias = [10, 100, 1000, 10000, 100000, 1000000];
+  var familias = [
+    { nombre: 'O(1)',       f: function () { return 1; } },
+    { nombre: 'O(log n)',   f: function (n) { return Math.log2(n); } },
+    { nombre: 'O(n)',       f: function (n) { return n; } },
+    { nombre: 'O(n log n)', f: function (n) { return n * Math.log2(n); } },
+    { nombre: 'O(n²)',      f: function (n) { return n * n; } }
+  ];
+
+  function miles(x) { return Math.round(x).toLocaleString('es-MX'); }
+
+  function tiempo(pasos) {
+    var s = pasos / 1e9;
+    if (s < 1e-6) return 'instantáneo';
+    if (s < 1e-3) return Math.round(s * 1e6) + ' microsegundos';
+    if (s < 1)    return Math.round(s * 1e3) + ' milisegundos';
+    if (s < 60)   return s.toFixed(1) + ' segundos';
+    if (s < 3600) return (s / 60).toFixed(1) + ' minutos';
+    if (s < 86400) return (s / 3600).toFixed(1) + ' horas';
+    return (s / 86400).toFixed(1) + ' días';
+  }
+
+  function pintar() {
+    var n = potencias[document.getElementById('rango').value - 1];
+    document.getElementById('n-val').textContent = n.toLocaleString('es-MX');
+    var maxLog = Math.log10(n * n + 1);
+    var html = '';
+    familias.forEach(function (fam) {
+      var p = fam.f(n);
+      var ancho = Math.max(3, Math.log10(p + 1) / maxLog * 100);
+      html += '<tr><td class="big">' + fam.nombre + '</td>' +
+              '<td class="num">' + miles(p) + '</td>' +
+              '<td>' + tiempo(p) + '</td>' +
+              '<td><div class="barra"><i style="width:' + ancho + '%"></i></div></td></tr>';
+    });
+    document.getElementById('calc-body').innerHTML = html;
+  }
+
+  document.getElementById('rango').addEventListener('input', pintar);
+  pintar();
+})();
+</script>
+</body>
+</html>

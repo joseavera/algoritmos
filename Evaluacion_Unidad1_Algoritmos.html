@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evaluación · Unidad 1 · Análisis y Diseño de Algoritmos</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+
+<style>
+  /* ── Reglas propias de la evaluación (base.css no se modifica) ── */
+  html, body, body * {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  input[type="text"] { -webkit-user-select: text; user-select: text; }
+
+  .site-header { flex-wrap: wrap; }
+  [hidden] { display: none !important; }
+
+  /* Marca de agua inclinada */
+  #marca-agua {
+    position: fixed; inset: 0; z-index: 40;
+    pointer-events: none;
+    background-repeat: repeat;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* Barra de avance del examen */
+  .exam-bar {
+    position: sticky; top: 0; z-index: 60;
+    background: var(--white);
+    border-bottom: 2px solid var(--guinda);
+    box-shadow: var(--shadow-md);
+  }
+  .exam-bar-inner {
+    max-width: 960px; margin: 0 auto; padding: .65rem 1.25rem;
+    display: grid; grid-template-columns: 1fr auto auto; gap: 1.25rem; align-items: center;
+    font-family: var(--font-ui); font-size: .85rem; color: var(--ink-secondary);
+  }
+  .exam-bar .who { font-weight: 600; color: var(--guinda); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .exam-bar .prog-text { display: block; margin-bottom: .3rem; }
+  .prog-track { height: 6px; background: var(--guinda-light); border-radius: 99px; overflow: hidden; }
+  .prog-fill { height: 100%; width: 0; background: var(--guinda); transition: width .25s; }
+  .timer { font-family: var(--font-mono); font-weight: 500; font-size: 1.05rem; color: var(--guinda-dark); }
+  .timer.urgente { color: #B3261E; }
+  .alertas { font-weight: 600; color: #B3261E; }
+
+  /* Pantalla de inicio */
+  .start-card { max-width: 640px; }
+  .field { margin: 1.1rem 0; }
+  .field label { display: block; font-family: var(--font-ui); font-size: .8rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--guinda); margin-bottom: .4rem; }
+  .field input {
+    width: 100%; padding: .75rem .9rem; font-size: 1.05rem; font-family: var(--font-ui);
+    border: 1.5px solid var(--border-strong); border-radius: var(--radius-md); background: var(--white); color: var(--ink);
+  }
+  .field input:focus { outline: 2px solid var(--guinda); border-color: var(--guinda); }
+  .msg-error { color: #B3261E; font-family: var(--font-ui); font-size: .88rem; margin-top: .4rem; min-height: 1.2em; }
+  .info-list { list-style: none; padding: 0; margin: .8rem 0 0; font-family: var(--font-ui); font-size: .95rem; }
+  .info-list li { padding: .4rem 0 .4rem 1.4rem; position: relative; border-bottom: 1px dashed var(--border); }
+  .info-list li::before { content: "▸"; position: absolute; left: 0; color: var(--guinda-rule); }
+
+  .btn {
+    display: inline-block; cursor: pointer;
+    font-family: var(--font-ui); font-weight: 600; font-size: .98rem;
+    padding: .8rem 1.6rem; border-radius: var(--radius-md);
+    border: 1.5px solid var(--guinda); background: var(--guinda); color: var(--white);
+    transition: background .15s;
+  }
+  .btn:hover { background: var(--guinda-dark); }
+  .btn.sec { background: var(--white); color: var(--guinda); }
+  .btn.sec:hover { background: var(--guinda-light); }
+
+  /* Reactivos */
+  .q { display: flex; gap: .9rem; align-items: flex-start; padding: .95rem 1.1rem; margin: .7rem 0; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+  .q-n { flex-shrink: 0; width: 2rem; height: 2rem; border-radius: 50%; background: var(--guinda-light); color: var(--guinda); font-family: var(--font-ui); font-weight: 700; font-size: .85rem; display: flex; align-items: center; justify-content: center; }
+  .q-body { flex: 1; font-size: 1.04rem; line-height: 1.9; }
+  .q.hecho { border-color: var(--guinda-rule); }
+  .q.hecho .q-n { background: var(--guinda); color: var(--white); }
+
+  select.resp {
+    font-family: var(--font-ui); font-size: .95rem; padding: .3rem .5rem;
+    border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm);
+    background: var(--surface); color: var(--ink); max-width: 100%; cursor: pointer;
+  }
+  select.resp:focus { outline: 2px solid var(--guinda); }
+  select.resp.lleno { border-color: var(--guinda); background: var(--guinda-light); color: var(--guinda-dark); font-weight: 600; }
+
+  /* Asociar columnas */
+  .match { display: grid; grid-template-columns: 1fr 1.25fr; gap: 1.25rem; margin: .9rem 0 1.4rem; }
+  .match h3 { font-family: var(--font-ui); font-size: .78rem; text-transform: uppercase; letter-spacing: .1em; color: var(--guinda); margin: 0 0 .5rem; }
+  .match-left .q { margin: .5rem 0; align-items: center; }
+  .match-left .q-body { display: flex; align-items: center; justify-content: space-between; gap: .6rem; line-height: 1.4; }
+  .match-left .term { font-family: var(--font-mono); font-weight: 500; color: var(--guinda-dark); }
+  .opt-card { display: flex; gap: .7rem; align-items: flex-start; padding: .65rem .85rem; margin: .5rem 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); font-size: .98rem; line-height: 1.45; }
+  .opt-card b { flex-shrink: 0; width: 1.6rem; height: 1.6rem; border-radius: var(--radius-sm); background: var(--guinda); color: var(--white); font-family: var(--font-ui); font-size: .82rem; display: flex; align-items: center; justify-content: center; }
+
+  /* Pseudocódigo */
+  .code-box { margin: 1rem 0 1.4rem; border: 1px solid var(--border-strong); border-left: 4px solid var(--guinda); border-radius: var(--radius-md); background: var(--white); overflow: hidden; }
+  .code-box .code-head { background: var(--guinda-light); padding: .5rem 1rem; font-family: var(--font-ui); font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--guinda); }
+  .code-box pre { margin: 0; padding: 1rem 1.1rem; font-family: var(--font-mono); font-size: .9rem; line-height: 2.1; overflow-x: auto; white-space: pre; color: var(--ink); background: var(--surface); }
+  .code-box pre select.resp { font-family: var(--font-mono); font-size: .88rem; }
+  .code-note { padding: .8rem 1.1rem; border-top: 1px solid var(--border); font-size: 1rem; line-height: 1.9; }
+
+  /* Cortina de salida de la ventana y modal */
+  .cortina { position: fixed; inset: 0; z-index: 100; background: rgba(40,10,50,.99); display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+  .cortina-box { background: var(--white); border-radius: var(--radius-lg); padding: 1.8rem 2rem; max-width: 460px; text-align: center; border-top: 5px solid var(--guinda); }
+  .cortina-box img { width: 90px; margin-bottom: .6rem; }
+  .cortina-box h2 { font-family: var(--font-display); color: var(--guinda); margin: 0 0 .6rem; font-size: 1.7rem; }
+  .cortina-box p { font-size: 1rem; margin-bottom: 1.1rem; }
+
+  /* Resultado */
+  .result-card { text-align: center; border: 2px solid var(--guinda); border-radius: var(--radius-lg); padding: 2rem 1.5rem; background: var(--white); margin-bottom: 1.5rem; }
+  .result-card .alumno { font-family: var(--font-display); font-size: 2rem; color: var(--guinda); font-weight: 700; }
+  .result-card .nota { font-family: var(--font-display); font-size: 4.6rem; line-height: 1.05; color: var(--guinda-dark); font-weight: 700; margin: .4rem 0 0; }
+  .result-card .nota small { font-size: 1.6rem; color: var(--ink-muted); }
+  .result-card .aciertos { font-family: var(--font-ui); color: var(--ink-secondary); margin-top: .3rem; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .8rem; margin: 1.3rem 0 1.5rem; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: .8rem; font-family: var(--font-ui); }
+  .stat span { display: block; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-muted); margin-bottom: .25rem; }
+  .stat b { font-size: 1.15rem; color: var(--guinda-dark); }
+  .stat b.rojo { color: #B3261E; }
+  .sec-row { display: flex; justify-content: space-between; font-family: var(--font-ui); padding: .5rem 0; border-bottom: 1px dashed var(--border); font-size: .95rem; }
+  .rev { padding: .9rem 1.1rem; border: 1px solid var(--border); border-left: 4px solid #B3261E; border-radius: var(--radius-md); margin: .7rem 0; background: var(--white); }
+  .rev .rev-q { font-size: 1rem; margin-bottom: .4rem; }
+  .rev .rev-a { font-family: var(--font-ui); font-size: .88rem; color: var(--ink-secondary); }
+  .rev .rev-a b { color: var(--guinda-dark); }
+  .rev .rev-por { font-size: .95rem; margin-top: .4rem; font-style: italic; }
+
+  .mixtle-tip { display: flex; gap: 1.25rem; align-items: flex-start; background: var(--guinda-light); border: 1px solid #D8A8BA; border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin: 1.5rem 0; }
+  .mixtle-tip img { width: 84px; height: auto; flex-shrink: 0; border-radius: var(--radius-md); }
+  .mixtle-tip .mixtle-name { font-family: var(--font-ui); font-size: .78rem; text-transform: uppercase; letter-spacing: .12em; color: var(--guinda); font-weight: 700; display: block; margin-bottom: .4rem; }
+  .mixtle-tip p { font-size: .97rem; margin-bottom: 0; }
+
+  @media (max-width: 720px) {
+    .match { grid-template-columns: 1fr; }
+    .exam-bar-inner { grid-template-columns: 1fr auto; }
+    .exam-bar .progreso { grid-column: 1 / -1; order: 3; }
+    .mixtle-tip { flex-direction: column; align-items: center; text-align: center; }
+    .result-card .nota { font-size: 3.6rem; }
+  }
+
+  @media print {
+    .no-print, .exam-bar, .cortina { display: none !important; }
+    body.examen-activo .exam-wrap { display: none !important; }
+    .result-card, .rev, .stat { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<noscript><p style="padding:2rem;font-family:sans-serif">Esta evaluación necesita JavaScript activado en el navegador.</p></noscript>
+
+<div id="marca-agua" hidden></div>
+
+<header class="site-header">
+  <div class="logo-wrap">
+    <img src="imagen1.png" alt="Mixtle, mascota del curso">
+  </div>
+  <div class="header-text">
+    <span class="inst-name">Instituto de Educación Digital del Estado de Puebla</span>
+    <span class="doc-title">Licenciatura en Sistemas Computacionales · Análisis y Diseño de Algoritmos</span>
+  </div>
+</header>
+
+<div class="exam-bar no-print" id="barra" hidden>
+  <div class="exam-bar-inner">
+    <div class="who" id="barra-nombre"></div>
+    <div class="timer" id="barra-tiempo">30:00</div>
+    <div class="alertas" id="barra-alertas" hidden></div>
+    <div class="progreso">
+      <span class="prog-text" id="barra-texto">Contestadas: 0 de 25</span>
+      <div class="prog-track"><div class="prog-fill" id="barra-fill"></div></div>
+    </div>
+  </div>
+</div>
+
+<section class="class-hero">
+  <div class="page-wrapper" style="padding:0;">
+    <span class="class-label">Unidad 1 · Fundamentos del Análisis Algorítmico · Evaluación</span>
+    <h1>Evaluación de conocimientos</h1>
+    <span class="class-subtitle">Concepto de algoritmo, notación Big-O y práctica con pseudocódigo.</span>
+
+    <div class="meta-row">
+      <div class="meta-item">Programa educativo<span>Lic. en Sistemas Computacionales</span></div>
+      <div class="meta-item">Asignatura<span>Análisis y Diseño de Algoritmos</span></div>
+      <div class="meta-item">Unidad<span>1. Fundamentos del Análisis Algorítmico</span></div>
+      <div class="meta-item">Temas<span>1.1 Concepto de algoritmo · 1.2 Notación Big-O, Big-Ω y Big-Θ</span></div>
+      <div class="meta-item">Fecha<span>4 de octubre de 2026</span></div>
+    </div>
+  </div>
+</section>
+
+<main class="page-wrapper">
+
+  <!-- ═════════ PANTALLA DE INICIO ═════════ -->
+  <section id="pantalla-inicio" class="section">
+    <span class="section-label">Antes de comenzar</span>
+    <h2 class="section-title">Bienvenida y datos del estudiante</h2>
+
+    <div class="card start-card">
+      <div class="mixtle-tip" style="margin-top:0">
+        <img src="imagen2.png" alt="Mixtle">
+        <div>
+          <span class="mixtle-name">Mensaje de Mixtle</span>
+          <p>¡Hola! Esta evaluación repasa lo que vimos en clase. Lee con calma cada reactivo, elige tu respuesta en las listas desplegables y confía en lo que aprendiste. ¡Mucho éxito!</p>
+        </div>
+      </div>
+
+      <ul class="info-list">
+        <li>Son <strong>25 reactivos</strong> divididos en cuatro secciones.</li>
+        <li>Tienes <strong>30 minutos</strong> para responder.</li>
+        <li>Al terminar, presiona <strong>Enviar evaluación</strong> para ver tu resultado.</li>
+      </ul>
+
+      <div class="field">
+        <label for="in-nombre">Nombre completo</label>
+        <input type="text" id="in-nombre" maxlength="60" autocomplete="off" placeholder="Nombre y apellidos">
+      </div>
+      <div class="field" id="campo-codigo" hidden>
+        <label for="in-codigo">Código de acceso</label>
+        <input type="text" id="in-codigo" maxlength="20" autocomplete="off" placeholder="Te lo proporciona tu docente">
+      </div>
+      <div class="msg-error" id="msg-inicio"></div>
+      <button class="btn" id="btn-comenzar" type="button">Comenzar evaluación</button>
+    </div>
+  </section>
+
+  <!-- ═════════ PANTALLA DE EXAMEN ═════════ -->
+  <div id="pantalla-examen" class="exam-wrap" hidden>
+    <div id="contenedor-examen"></div>
+
+    <div style="text-align:center;margin:2.5rem 0 1rem" class="no-print">
+      <button class="btn" id="btn-enviar" type="button">Enviar evaluación</button>
+    </div>
+  </div>
+
+  <!-- ═════════ PANTALLA DE RESULTADO ═════════ -->
+  <section id="pantalla-resultado" hidden>
+    <div class="result-card">
+      <div style="font-family:var(--font-ui);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-muted)">Resultado de</div>
+      <div class="alumno" id="res-nombre"></div>
+      <div class="nota"><span id="res-nota">0</span> <small>/ 10</small></div>
+      <div class="aciertos" id="res-aciertos"></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span>Infracciones</span><b id="res-infr">0</b></div>
+      <div class="stat"><span>Intento</span><b id="res-intento">1</b></div>
+      <div class="stat"><span>Tiempo empleado</span><b id="res-tiempo">0:00</b></div>
+      <div class="stat"><span>Folio de verificación</span><b id="res-folio" style="font-family:var(--font-mono)"></b></div>
+    </div>
+    <p id="res-motivo" style="font-family:var(--font-ui);font-size:.9rem;color:#B3261E" hidden></p>
+
+    <div class="mixtle-tip">
+      <img src="imagen2.png" alt="Mixtle">
+      <div>
+        <span class="mixtle-name">Mensaje de Mixtle</span>
+        <p id="res-mixtle"></p>
+      </div>
+    </div>
+
+    <h2 class="section-title" style="font-size:1.5rem">Resultado por sección</h2>
+    <div id="res-secciones"></div>
+
+    <div id="res-repaso-wrap">
+      <h2 class="section-title" style="font-size:1.5rem;margin-top:2rem">Repaso de reactivos por reforzar</h2>
+      <div id="res-repaso"></div>
+    </div>
+
+    <div style="text-align:center;margin:2rem 0 1rem" class="no-print">
+      <button class="btn sec" id="btn-imprimir" type="button">Imprimir o guardar resultado en PDF</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- Cortina al regresar a la ventana -->
+<div class="cortina" id="cortina" hidden>
+  <div class="cortina-box">
+    <img src="imagen2.png" alt="Mixtle">
+    <h2>Salida registrada</h2>
+    <p id="cortina-texto"></p>
+    <button class="btn" id="btn-cortina" type="button">Continuar con la evaluación</button>
+  </div>
+</div>
+
+<!-- Confirmación de envío -->
+<div class="cortina" id="confirmar" hidden>
+  <div class="cortina-box">
+    <img src="imagen2.png" alt="Mixtle">
+    <h2>¿Enviar evaluación?</h2>
+    <p id="confirmar-texto"></p>
+    <button class="btn sec" id="btn-seguir" type="button">Seguir contestando</button>
+    <button class="btn" id="btn-confirmar" type="button">Sí, enviar</button>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <span><strong>Análisis y Diseño de Algoritmos</strong> — Unidad 1 · Evaluación</span>
+  <span>Mtro. José Armando Vera Rodríguez · IEDEP · 4 de octubre de 2026</span>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ═══════════ CONFIGURACIÓN (solo para el docente) ═══════════ */
+  var DURACION_MIN   = 30;          // minutos disponibles
+  var MAX_INFRACCION = 5;           // al llegar a este número, la evaluación se envía sola
+  var CODIGO_ACCESO  = '';          // ej. 'ADA2026'; vacío = sin código de acceso
+  var CODIGO_REINICIO = 'ADA-REINICIO-2026'; // abrir la página con ?reiniciar=ADA-REINICIO-2026 borra el estado de este equipo
+  var SAL_FOLIO      = 'iedep-ada-u1-2026';
+  var CLAVE          = 'iedep_eval_ada_u1_2026_10_04';
+
+  /* ═══════════ BANCO DE REACTIVOS ═══════════
+     En "op" la PRIMERA opción es la correcta; el orden se mezcla por alumno. */
+  var SECCIONES = [
+    { id: 'I', titulo: 'Sección I. Autocompleta las frases',
+      ayuda: 'Elige en cada espacio la palabra o expresión que completa correctamente la frase.',
+      tipo: 'frase',
+      items: [
+        { id: 'a1', antes: 'Un algoritmo es una secuencia', despues: 'de pasos ordenados que resuelve un problema.',
+          op: ['finita', 'infinita', 'aleatoria', 'secreta'],
+          por: 'Un algoritmo siempre tiene un número limitado de pasos: es una secuencia finita.' },
+        { id: 'a2', antes: 'La propiedad de', despues: 'garantiza que el algoritmo termina después de un número limitado de pasos.',
+          op: ['finitud', 'precisión', 'entrada', 'salida'],
+          por: 'La finitud asegura que el algoritmo no se queda repitiendo pasos para siempre.' },
+        { id: 'a3', antes: 'Cada paso de un algoritmo debe estar definido con', despues: ', de modo que se entienda de una sola manera.',
+          op: ['precisión', 'rapidez', 'azar', 'adornos'],
+          por: 'La definición precisa evita ambigüedades: todos interpretan el paso de la misma forma.' },
+        { id: 'a4', antes: 'Un', despues: 'es un algoritmo escrito en un lenguaje de programación que la computadora puede ejecutar.',
+          op: ['programa', 'problema', 'resultado', 'comentario'],
+          por: 'El algoritmo es la idea (la receta); el programa es esa idea escrita en un lenguaje de programación.' },
+        { id: 'a5', antes: 'La notación Big-O describe la cota superior, es decir, el', despues: 'de un algoritmo.',
+          op: ['peor caso', 'mejor caso', 'caso promedio', 'tamaño del archivo'],
+          por: 'Big-O es la cota superior: indica lo máximo que puede tardar el algoritmo (peor caso).' },
+        { id: 'a6', antes: 'La notación Big-Ω describe la cota inferior, es decir, el', despues: 'de un algoritmo.',
+          op: ['mejor caso', 'peor caso', 'caso promedio', 'nombre del programador'],
+          por: 'Big-Ω es la cota inferior: indica lo mínimo que tardará el algoritmo (mejor caso).' },
+        { id: 'a7', antes: 'Si el número de operaciones crece al mismo ritmo que n, el algoritmo es de orden', despues: '.',
+          op: ['O(n)', 'O(1)', 'O(n²)', 'O(log n)'],
+          por: 'Cuando las operaciones crecen proporcionalmente a n, el orden es lineal: O(n).' },
+        { id: 'a8', antes: 'Dos ciclos anidados que recorren n elementos cada uno producen un orden', despues: '.',
+          op: ['O(n²)', 'O(n)', 'O(1)', 'O(log n)'],
+          por: 'Si por cada elemento se recorren de nuevo los n elementos, se hacen n × n operaciones: O(n²).' }
+      ] },
+
+    { id: 'II', titulo: 'Sección II. Asocia las columnas',
+      ayuda: 'En cada columna izquierda elige la letra de la descripción que le corresponde.',
+      tipo: 'asociar',
+      grupos: [
+        { titulo: 'Propiedades de un algoritmo', izq: 'Propiedad', der: 'Descripción',
+          pares: [
+            { id: 'b1', t: 'Finitud',   d: 'El algoritmo termina después de un número limitado de pasos.' },
+            { id: 'b2', t: 'Precisión', d: 'Cada paso se entiende de una sola manera, sin ambigüedades.' },
+            { id: 'b3', t: 'Entrada',   d: 'Datos con los que el algoritmo comienza a trabajar.' },
+            { id: 'b4', t: 'Salida',    d: 'Resultado que el algoritmo entrega al terminar.' }
+          ] },
+        { titulo: 'Notación y situación cotidiana', izq: 'Orden', der: 'Situación',
+          pares: [
+            { id: 'b5', t: 'O(1)',     d: 'Consultar el primer elemento de una lista.' },
+            { id: 'b6', t: 'O(log n)', d: 'Buscar un nombre en una lista ordenada, dividiéndola a la mitad en cada paso.' },
+            { id: 'b7', t: 'O(n)',     d: 'Recorrer una lista completa una sola vez.' },
+            { id: 'b8', t: 'O(n²)',    d: 'Comparar cada elemento de una lista contra todos los demás.' }
+          ] }
+      ] },
+
+    { id: 'III', titulo: 'Sección III. Completa el pseudocódigo',
+      ayuda: 'Cada programa está escrito en PSeInt. Elige la opción que completa cada espacio numerado.',
+      tipo: 'codigo',
+      programas: [
+        { nombre: 'PromedioCalificaciones',
+          lineas: [
+            'Proceso PromedioCalificaciones',
+            '    Definir c1, c2, c3, promedio Como Real;',
+            '    {{c1}} c1, c2, c3;',
+            '    promedio <- (c1 + c2 + c3) / {{c2}};',
+            '    Escribir "El promedio es: ", promedio;',
+            'FinProceso'
+          ],
+          blancos: {
+            c1: { op: ['Leer', 'Escribir', 'Si', 'Mientras'],
+                  por: 'Leer pide los datos al usuario. Aquí se leen las tres calificaciones.' },
+            c2: { op: ['3', '2', '1', '10'],
+                  por: 'Son tres calificaciones, por lo tanto la suma se divide entre 3.' }
+          } },
+        { nombre: 'ContadorLineal',
+          lineas: [
+            'Proceso ContadorLineal',
+            '    Definir n, i, contador Como Entero;',
+            '    Leer n;',
+            '    contador <- 0;',
+            '    Para i <- 1 Hasta n Con Paso 1 Hacer',
+            '        contador <- contador + {{c3}};',
+            '    {{c4}}',
+            '    Escribir "Operaciones realizadas: ", contador;',
+            'FinProceso'
+          ],
+          blancos: {
+            c3: { op: ['1', 'n', 'i', '0'],
+                  por: 'Para contar operaciones se suma 1 en cada repetición del ciclo.' },
+            c4: { op: ['FinPara', 'FinSi', 'FinMientras', 'FinProceso'],
+                  por: 'Todo ciclo Para se cierra con FinPara.' }
+          },
+          nota: 'Como el ciclo se repite n veces, este algoritmo es de orden {{c5}}.',
+          blancosNota: {
+            c5: { op: ['O(n)', 'O(1)', 'O(n²)', 'O(log n)'],
+                  por: 'Un solo ciclo que se repite n veces produce un crecimiento lineal: O(n).' }
+          } }
+      ] },
+
+    { id: 'IV', titulo: 'Sección IV. Verdadero o falso',
+      ayuda: 'Elige si cada afirmación es verdadera o falsa.',
+      tipo: 'vf',
+      items: [
+        { id: 'd1', texto: 'Un algoritmo puede tener pasos poco claros, siempre que el programador entienda la idea.', ok: 'Falso',
+          por: 'Cada paso debe estar definido con precisión; un paso ambiguo incumple esta propiedad.' },
+        { id: 'd2', texto: 'Un programa escrito en PSeInt es una forma de expresar un algoritmo.', ok: 'Verdadero',
+          por: 'PSeInt permite escribir algoritmos en pseudocódigo y probarlos paso a paso.' },
+        { id: 'd3', texto: 'Cuando n aumenta, un algoritmo O(n²) crece más rápido que uno O(n).', ok: 'Verdadero',
+          por: 'El orden cuadrático crece mucho más rápido que el lineal conforme n se hace grande.' },
+        { id: 'd4', texto: 'Un ciclo que se repite sin fin cumple con la propiedad de finitud.', ok: 'Falso',
+          por: 'Un ciclo infinito nunca termina, así que no cumple con la finitud.' }
+      ] }
+  ];
+  var TOTAL = 25;
+
+  /* ═══════════ UTILIDADES ═══════════ */
+  var $ = function (id) { return document.getElementById(id); };
+
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  function mezclar(arr, rnd) {
+    var r = arr.slice();
+    for (var i = r.length - 1; i > 0; i--) {
+      var j = Math.floor(rnd() * (i + 1));
+      var t = r[i]; r[i] = r[j]; r[j] = t;
+    }
+    return r;
+  }
+  function cyrb53(str) {
+    var h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (var i = 0; i < str.length; i++) {
+      var ch = str.charCodeAt(i);
+      h1 = Math.imul(h1 ^ ch, 2654435761);
+      h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+  }
+  function el(tag, cls, txt) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (txt !== undefined) e.textContent = txt;
+    return e;
+  }
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function mmss(ms) {
+    var s = Math.max(0, Math.round(ms / 1000));
+    return Math.floor(s / 60) + ':' + pad2(s % 60);
+  }
+  function escXml(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  /* ═══════════ ESTADO PERSISTENTE ═══════════ */
+  var estado = null, memoria = null;
+
+  function leerAlmacen(almacen) {
+    try { var s = almacen.getItem(CLAVE); return s ? JSON.parse(s) : null; } catch (e) { return null; }
+  }
+  function cargar() {
+    var a = leerAlmacen(window.localStorage || {getItem: function(){return null;}});
+    var b = null;
+    try { b = leerAlmacen(window.sessionStorage); } catch (e) {}
+    function peso(x) { return x ? (x.loads || 0) + (x.infr || 0) + (x.done ? 100 : 0) : -1; }
+    return peso(a) >= peso(b) ? a : b;
+  }
+  function guardar() {
+    memoria = estado;
+    var s = JSON.stringify(estado);
+    try { localStorage.setItem(CLAVE, s); } catch (e) {}
+    try { sessionStorage.setItem(CLAVE, s); } catch (e) {}
+  }
+  function borrarEstado() {
+    try { localStorage.removeItem(CLAVE); } catch (e) {}
+    try { sessionStorage.removeItem(CLAVE); } catch (e) {}
+    memoria = null;
+  }
+
+  /* ═══════════ CONSTRUCCIÓN DEL EXAMEN ═══════════ */
+  var blancos = [];      // definiciones de cada reactivo en el orden mostrado
+  var porSeccion = {};   // id sección -> ids de reactivos
+
+  function crearSelect(def, numero, soloNumero) {
+    var s = el('select', 'resp');
+    s.setAttribute('data-id', def.id);
+    s.setAttribute('aria-label', 'Reactivo ' + numero);
+    var ph = el('option', null, soloNumero ? numero + '. Elegir…' : 'Elegir…');
+    ph.value = '';
+    s.appendChild(ph);
+    def.opciones.forEach(function (o) {
+      var op = el('option', null, o.t);
+      op.value = o.v;
+      s.appendChild(op);
+    });
+    s.addEventListener('change', function () {
+      estado.answers[def.id] = s.value;
+      s.classList.toggle('lleno', s.value !== '');
+      var q = s.closest('.q'); if (q) q.classList.toggle('hecho', s.value !== '');
+      guardar(); actualizarProgreso();
+    });
+    var previa = estado.answers[def.id];
+    if (previa) { s.value = previa; s.classList.add('lleno'); }
+    def.nodo = s;
+    return s;
+  }
+
+  function registrar(def, secId) {
+    blancos.push(def);
+    (porSeccion[secId] = porSeccion[secId] || []).push(def.id);
+  }
+  function opcionesDe(lista, rnd) {
+    return mezclar(lista.map(function (t) { return { v: t, t: t }; }), rnd);
+  }
+
+  function construir() {
+    blancos = []; porSeccion = {};
+    var rnd = mulberry32(estado.seed);
+    var cont = $('contenedor-examen');
+    cont.innerHTML = '';
+    var n = 0;
+
+    SECCIONES.forEach(function (sec) {
+      var bloque = el('section', 'section');
+      bloque.appendChild(el('span', 'section-label', sec.ayuda));
+      bloque.appendChild(el('h2', 'section-title', sec.titulo));
+
+      if (sec.tipo === 'frase') {
+        mezclar(sec.items, rnd).forEach(function (it) {
+          n++;
+          var def = { id: it.id, sec: sec.id, ok: it.op[0], por: it.por, num: n,
+                      opciones: opcionesDe(it.op, rnd),
+                      enunciado: it.antes + ' ______ ' + it.despues };
+          def.verTxt = function (v) { return v; };
+          registrar(def, sec.id);
+          var q = el('div', 'q'); q.appendChild(el('div', 'q-n', String(n)));
+          var b = el('div', 'q-body');
+          b.appendChild(document.createTextNode(it.antes + ' '));
+          b.appendChild(crearSelect(def, n));
+          b.appendChild(document.createTextNode(' ' + it.despues));
+          q.appendChild(b); bloque.appendChild(q);
+          if (estado.answers[def.id]) q.classList.add('hecho');
+        });
+      }
+
+      if (sec.tipo === 'asociar') {
+        sec.grupos.forEach(function (g) {
+          bloque.appendChild(el('h3', null, g.titulo)).style.cssText =
+            'font-family:var(--font-ui);font-size:1rem;color:var(--guinda-dark);margin:1.2rem 0 0;';
+          var der = mezclar(g.pares, rnd);
+          var letras = ['A', 'B', 'C', 'D', 'E', 'F'];
+          var letraDe = {};
+          der.forEach(function (p, i) { letraDe[p.id] = letras[i]; });
+          var opLetras = der.map(function (p, i) { return { v: letras[i], t: letras[i] }; });
+
+          var grid = el('div', 'match');
+          var izq = el('div', 'match-left');
+          izq.appendChild(el('h3', null, g.izq));
+          mezclar(g.pares, rnd).forEach(function (p) {
+            n++;
+            var def = { id: p.id, sec: sec.id, ok: letraDe[p.id], por: p.t + ': ' + p.d, num: n,
+                        opciones: opLetras,
+                        enunciado: 'Asocia: ' + p.t };
+            def.verTxt = function (v) {
+              if (!v) return '(sin responder)';
+              var m = der.filter(function (x, i) { return letras[i] === v; })[0];
+              return v + ' — ' + (m ? m.d : '');
+            };
+            registrar(def, sec.id);
+            var q = el('div', 'q'); q.appendChild(el('div', 'q-n', String(n)));
+            var b = el('div', 'q-body');
+            b.appendChild(el('span', 'term', p.t));
+            b.appendChild(crearSelect(def, n));
+            q.appendChild(b); izq.appendChild(q);
+            if (estado.answers[def.id]) q.classList.add('hecho');
+          });
+          var derDiv = el('div', 'match-right');
+          derDiv.appendChild(el('h3', null, g.der));
+          der.forEach(function (p, i) {
+            var c = el('div', 'opt-card');
+            c.appendChild(el('b', null, letras[i]));
+            c.appendChild(el('span', null, p.d));
+            derDiv.appendChild(c);
+          });
+          grid.appendChild(izq); grid.appendChild(derDiv);
+          bloque.appendChild(grid);
+        });
+      }
+
+      if (sec.tipo === 'codigo') {
+        mezclar(sec.programas, rnd).forEach(function (pr) {
+          var caja = el('div', 'code-box');
+          caja.appendChild(el('div', 'code-head', 'Programa en PSeInt · ' + pr.nombre));
+          var pre = el('pre');
+          var todos = {};
+          Object.keys(pr.blancos).forEach(function (k) { todos[k] = pr.blancos[k]; });
+          var orden = [];
+          pr.lineas.forEach(function (ln, idx) {
+            var partes = ln.split(/\{\{(\w+)\}\}/);
+            partes.forEach(function (parte, i) {
+              if (i % 2 === 0) { pre.appendChild(document.createTextNode(parte)); }
+              else {
+                orden.push(parte);
+              }
+            });
+          });
+          // numeración en el orden de aparición dentro del código, luego la nota
+          var mapaNum = {};
+          function defDe(k, info) {
+            n++;
+            mapaNum[k] = n;
+            var def = { id: k, sec: sec.id, ok: info.op[0], por: info.por, num: n,
+                        opciones: opcionesDe(info.op, rnd),
+                        enunciado: 'Programa ' + pr.nombre + ', espacio ' + n };
+            def.verTxt = function (v) { return v || '(sin responder)'; };
+            registrar(def, sec.id);
+            return def;
+          }
+          var defs = {};
+          orden.forEach(function (k) { defs[k] = defDe(k, pr.blancos[k]); });
+          pre.textContent = '';
+          pr.lineas.forEach(function (ln, idx) {
+            var partes = ln.split(/\{\{(\w+)\}\}/);
+            partes.forEach(function (parte, i) {
+              if (i % 2 === 0) pre.appendChild(document.createTextNode(parte));
+              else pre.appendChild(crearSelect(defs[parte], defs[parte].num, true));
+            });
+            if (idx < pr.lineas.length - 1) pre.appendChild(document.createTextNode('\n'));
+          });
+          caja.appendChild(pre);
+
+          if (pr.nota) {
+            var nota = el('div', 'code-note');
+            pr.nota.split(/\{\{(\w+)\}\}/).forEach(function (parte, i) {
+              if (i % 2 === 0) nota.appendChild(document.createTextNode(parte));
+              else {
+                var d = defDe(parte, pr.blancosNota[parte]);
+                d.enunciado = 'Orden de crecimiento del programa ' + pr.nombre;
+                nota.appendChild(crearSelect(d, d.num, true));
+              }
+            });
+            caja.appendChild(nota);
+          }
+          bloque.appendChild(caja);
+        });
+      }
+
+      if (sec.tipo === 'vf') {
+        mezclar(sec.items, rnd).forEach(function (it) {
+          n++;
+          var def = { id: it.id, sec: sec.id, ok: it.ok, por: it.por, num: n,
+                      opciones: mezclar([{ v: 'Verdadero', t: 'Verdadero' }, { v: 'Falso', t: 'Falso' }], rnd),
+                      enunciado: it.texto };
+          def.verTxt = function (v) { return v || '(sin responder)'; };
+          registrar(def, sec.id);
+          var q = el('div', 'q'); q.appendChild(el('div', 'q-n', String(n)));
+          var b = el('div', 'q-body');
+          b.appendChild(document.createTextNode(it.texto + ' '));
+          b.appendChild(crearSelect(def, n));
+          q.appendChild(b); bloque.appendChild(q);
+          if (estado.answers[def.id]) q.classList.add('hecho');
+        });
+      }
+
+      cont.appendChild(bloque);
+      cont.appendChild(Object.assign(el('hr', 'section-rule')));
+    });
+    actualizarProgreso();
+  }
+
+  function actualizarProgreso() {
+    var hechas = blancos.filter(function (b) { return estado.answers[b.id]; }).length;
+    $('barra-texto').textContent = 'Contestadas: ' + hechas + ' de ' + blancos.length;
+    $('barra-fill').style.width = (blancos.length ? hechas / blancos.length * 100 : 0) + '%';
+    return hechas;
+  }
+
+  /* ═══════════ MARCA DE AGUA ═══════════ */
+  function marcaAgua(nombre, intensidad) {
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="420" height="260">' +
+      '<text x="210" y="130" text-anchor="middle" dominant-baseline="middle" ' +
+      'font-family="Inter, Arial, sans-serif" font-size="26" font-weight="700" ' +
+      'fill="rgba(73,11,88,' + intensidad + ')" transform="rotate(-30 210 130)">' +
+      escXml(nombre) + '</text></svg>';
+    var m = $('marca-agua');
+    m.style.backgroundImage = 'url("data:image/svg+xml;utf8,' + encodeURIComponent(svg) + '")';
+    m.hidden = false;
+  }
+
+  /* ═══════════ PROTECCIONES (silenciosas) ═══════════ */
+  var examenActivo = false;
+  var fuera = false;
+
+  function bloquear(e) { e.preventDefault(); return false; }
+  ['copy', 'cut', 'paste', 'contextmenu', 'dragstart', 'drop'].forEach(function (ev) {
+    document.addEventListener(ev, bloquear, true);
+  });
+  document.addEventListener('selectstart', function (e) {
+    var t = e.target;
+    if (t && t.tagName === 'INPUT') return;
+    e.preventDefault();
+  }, true);
+  document.addEventListener('keydown', function (e) {
+    var k = (e.key || '').toLowerCase();
+    var ctrl = e.ctrlKey || e.metaKey;
+    var prohibido =
+      (ctrl && ['c', 'v', 'x', 'a', 'u', 's'].indexOf(k) > -1) ||
+      (ctrl && k === 'p' && examenActivo) ||
+      (ctrl && e.shiftKey && ['i', 'j', 'c'].indexOf(k) > -1) ||
+      k === 'f12' || (e.key === 'Insert' && (e.shiftKey || ctrl));
+    if (prohibido) { e.preventDefault(); e.stopPropagation(); return false; }
+  }, true);
+  document.addEventListener('keyup', function (e) {
+    if (e.key === 'PrintScreen') {
+      try { navigator.clipboard.writeText(''); } catch (x) {}
+    }
+  }, true);
+
+  function salidaDetectada() {
+    if (!examenActivo || fuera) return;
+    fuera = true;
+    estado.infr = (estado.infr || 0) + 1;
+    guardar();
+    actualizarAlertas();
+    $('cortina-texto').textContent =
+      'Se registró que saliste de la ventana de la evaluación. Salidas registradas hasta ahora: ' + estado.infr + '.';
+    $('cortina').hidden = false;
+    if (estado.infr >= MAX_INFRACCION) finalizar('infracciones');
+  }
+  function regresoDetectado() { fuera = false; }
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) salidaDetectada(); else regresoDetectado();
+  });
+  window.addEventListener('blur', function () {
+    setTimeout(function () { if (!document.hasFocus()) salidaDetectada(); }, 200);
+  });
+  window.addEventListener('focus', regresoDetectado);
+
+  function actualizarAlertas() {
+    var a = $('barra-alertas');
+    if (estado && estado.infr > 0) { a.hidden = false; a.textContent = 'Salidas: ' + estado.infr; }
+    else a.hidden = true;
+  }
+
+  /* ═══════════ TEMPORIZADOR ═══════════ */
+  var reloj = null;
+  function iniciarReloj() {
+    clearInterval(reloj);
+    function tick() {
+      var resta = estado.inicio + DURACION_MIN * 60000 - Date.now();
+      $('barra-tiempo').textContent = mmss(resta);
+      $('barra-tiempo').classList.toggle('urgente', resta < 5 * 60000);
+      if (resta <= 0) { finalizar('tiempo'); }
+    }
+    tick();
+    reloj = setInterval(tick, 500);
+  }
+
+  /* ═══════════ INICIO Y FLUJO ═══════════ */
+  function mostrar(pantalla) {
+    ['pantalla-inicio', 'pantalla-examen', 'pantalla-resultado'].forEach(function (id) {
+      $(id).hidden = (id !== pantalla);
+    });
+    $('barra').hidden = (pantalla !== 'pantalla-examen');
+    examenActivo = (pantalla === 'pantalla-examen');
+    document.body.classList.toggle('examen-activo', examenActivo);
+    window.scrollTo(0, 0);
+  }
+
+  function normalizarNombre(s) { return s.replace(/\s+/g, ' ').trim(); }
+
+  function comenzar() {
+    var nombre = normalizarNombre($('in-nombre').value);
+    var msg = $('msg-inicio'); msg.textContent = '';
+    if (nombre.length < 6 || nombre.indexOf(' ') < 0) {
+      msg.textContent = 'Escribe tu nombre completo (nombre y apellidos) para continuar.'; return;
+    }
+    if (CODIGO_ACCESO && $('in-codigo').value.trim() !== CODIGO_ACCESO) {
+      msg.textContent = 'El código de acceso no es correcto. Pídelo a tu docente.'; return;
+    }
+    estado = {
+      nombre: nombre,
+      seed: Math.floor(Math.random() * 2147483647) + 1,
+      inicio: Date.now(),
+      answers: {},
+      infr: 0,
+      loads: 1,
+      started: true,
+      done: false
+    };
+    guardar();
+    entrarAlExamen();
+  }
+
+  function entrarAlExamen() {
+    marcaAgua(estado.nombre, 0.05);
+    $('barra-nombre').textContent = estado.nombre;
+    construir();
+    actualizarAlertas();
+    mostrar('pantalla-examen');
+    iniciarReloj();
+  }
+
+  /* ═══════════ CALIFICACIÓN Y RESULTADO ═══════════ */
+  function evaluar() {
+    var ok = 0, porSec = {}, fallos = [];
+    SECCIONES.forEach(function (s) { porSec[s.id] = { bien: 0, total: 0 }; });
+    blancos.forEach(function (b) {
+      var v = estado.answers[b.id] || '';
+      porSec[b.sec].total++;
+      if (v === b.ok) { ok++; porSec[b.sec].bien++; }
+      else fallos.push({ def: b, resp: v });
+    });
+    return { ok: ok, total: blancos.length, porSec: porSec, fallos: fallos };
+  }
+
+  function finalizar(motivo) {
+    if (!examenActivo && !(estado && !estado.done)) return;
+    if (estado.done) return;
+    clearInterval(reloj);
+    estado.done = true;
+    estado.fin = Date.now();
+    estado.motivo = motivo || 'envio';
+    var r = evaluar();
+    estado.nota = Math.round(r.ok / r.total * 100) / 10;
+    estado.folio = folio(r.ok);
+    guardar();
+    $('cortina').hidden = true;
+    $('confirmar').hidden = true;
+    mostrarResultado(r);
+  }
+
+  function folio(aciertos) {
+    var h = cyrb53([estado.nombre, aciertos, estado.infr, estado.loads, estado.inicio, SAL_FOLIO].join('|'))
+      .toString(36).toUpperCase().padStart(8, '0').slice(-8);
+    return h.slice(0, 4) + '-' + h.slice(4);
+  }
+
+  function mostrarResultado(r) {
+    marcaAgua(estado.nombre, 0.09);
+    mostrar('pantalla-resultado');
+    $('res-nombre').textContent = estado.nombre;
+    $('res-nota').textContent = (Math.round(r.ok / r.total * 100) / 10).toFixed(1);
+    $('res-aciertos').textContent = r.ok + ' aciertos de ' + r.total + ' reactivos';
+    var inf = $('res-infr');
+    inf.textContent = String(estado.infr || 0);
+    inf.className = (estado.infr || 0) > 0 ? 'rojo' : '';
+    $('res-intento').textContent = String(estado.loads || 1);
+    $('res-tiempo').textContent = mmss((estado.fin || Date.now()) - estado.inicio);
+    $('res-folio').textContent = estado.folio || folio(r.ok);
+
+    var mot = $('res-motivo');
+    if (estado.motivo === 'tiempo') { mot.hidden = false; mot.textContent = 'La evaluación se envió automáticamente porque se terminó el tiempo.'; }
+    else if (estado.motivo === 'infracciones') { mot.hidden = false; mot.textContent = 'La evaluación se envió automáticamente por el número de salidas registradas.'; }
+    else mot.hidden = true;
+
+    var nota = r.ok / r.total * 10, msj;
+    if (nota >= 9) msj = '¡Excelente trabajo! Dominas los fundamentos de los algoritmos y de la notación Big-O. Sigue practicando en PSeInt para llegar aún más lejos.';
+    else if (nota >= 7) msj = '¡Muy bien! Tienes una buena base. Revisa el repaso de abajo, repite los ejercicios del taller de PSeInt y reforzarás lo que falta.';
+    else msj = 'Aún hay temas por reforzar, y eso es parte de aprender. Vuelve a leer las sesiones 1 y 2, practica con el taller de PSeInt y pregunta tus dudas a tu docente.';
+    $('res-mixtle').textContent = msj;
+
+    var cont = $('res-secciones'); cont.innerHTML = '';
+    SECCIONES.forEach(function (s) {
+      var f = el('div', 'sec-row');
+      f.appendChild(el('span', null, s.titulo));
+      f.appendChild(el('strong', null, r.porSec[s.id].bien + ' de ' + r.porSec[s.id].total));
+      cont.appendChild(f);
+    });
+
+    var rep = $('res-repaso'); rep.innerHTML = '';
+    if (!r.fallos.length) {
+      $('res-repaso-wrap').hidden = true;
+    } else {
+      $('res-repaso-wrap').hidden = false;
+      r.fallos.forEach(function (f) {
+        var d = el('div', 'rev');
+        d.appendChild(el('div', 'rev-q', f.def.enunciado));
+        var a = el('div', 'rev-a');
+        a.appendChild(document.createTextNode('Tu respuesta: ' + f.def.verTxt(f.resp) + '  ·  Respuesta correcta: '));
+        a.appendChild(el('b', null, f.def.verTxt(f.def.ok)));
+        d.appendChild(a);
+        d.appendChild(el('div', 'rev-por', f.def.por));
+        rep.appendChild(d);
+      });
+    }
+  }
+
+  function pedirEnvio() {
+    var hechas = actualizarProgreso();
+    var faltan = blancos.length - hechas;
+    $('confirmar-texto').textContent = faltan > 0
+      ? 'Todavía tienes ' + faltan + (faltan === 1 ? ' reactivo sin contestar.' : ' reactivos sin contestar.') + ' ¿Deseas enviar de todos modos?'
+      : 'Contestaste todos los reactivos. Una vez enviada, ya no podrás cambiar tus respuestas.';
+    $('confirmar').hidden = false;
+  }
+
+  /* ═══════════ ARRANQUE ═══════════ */
+  function arrancar() {
+    if (CODIGO_ACCESO) $('campo-codigo').hidden = false;
+
+    var q = (location.search || '');
+    if (q.indexOf('reiniciar=' + CODIGO_REINICIO) > -1) {
+      borrarEstado();
+      try { history.replaceState(null, '', location.pathname); } catch (e) {}
+    }
+
+    estado = cargar();
+    $('btn-comenzar').addEventListener('click', comenzar);
+    $('in-nombre').addEventListener('keydown', function (e) { if (e.key === 'Enter') comenzar(); });
+    $('btn-enviar').addEventListener('click', pedirEnvio);
+    $('btn-seguir').addEventListener('click', function () { $('confirmar').hidden = true; });
+    $('btn-confirmar').addEventListener('click', function () { finalizar('envio'); });
+    $('btn-cortina').addEventListener('click', function () { $('cortina').hidden = true; });
+    $('btn-imprimir').addEventListener('click', function () { window.print(); });
+
+    if (estado && estado.started) {
+      if (estado.done) {
+        // Ya había terminado: se muestra de nuevo su resultado.
+        construir();
+        mostrarResultado(evaluar());
+      } else {
+        // Actualizó la página en pleno examen: cuenta como un intento más.
+        estado.loads = (estado.loads || 1) + 1;
+        guardar();
+        entrarAlExamen();
+        if (estado.inicio + DURACION_MIN * 60000 <= Date.now()) finalizar('tiempo');
+      }
+    } else {
+      estado = null;
+      mostrar('pantalla-inicio');
+    }
+  }
+
+  arrancar();
+})();
+</script>
+</body>
+</html>
