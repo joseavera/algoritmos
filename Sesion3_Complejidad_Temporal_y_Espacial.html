@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sesión 3 — Complejidad temporal y espacial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+  body { background: var(--white); }
+  .site-header { flex-wrap: wrap; }
+
+  .mixtle-tip { display: flex; gap: 1.25rem; align-items: flex-start; background: var(--guinda-light); border: 1px solid #D8A8BA; border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin: 2rem 0; }
+  .mixtle-tip img { width: 84px; height: auto; flex-shrink: 0; border-radius: var(--radius-md); }
+  .mixtle-tip .mixtle-name { font-family: var(--font-ui); font-size: .78rem; text-transform: uppercase; letter-spacing: .12em; color: var(--guinda); font-weight: 700; display: block; margin-bottom: .4rem; }
+  .mixtle-tip p { font-size: .97rem; margin-bottom: 0; }
+
+  .big { font-family: var(--font-mono); font-weight: 600; color: var(--guinda-dark); white-space: nowrap; }
+
+  /* Dos recursos */
+  .dos { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.2rem 0; }
+  .recurso { background: var(--white); border: 1px solid var(--border); border-top: 4px solid var(--guinda); border-radius: var(--radius-lg); padding: 1.1rem 1.3rem; }
+  .recurso.esp { border-top-color: var(--guinda-rule); }
+  .recurso .sym { font-family: var(--font-mono); font-size: 1.7rem; font-weight: 600; color: var(--guinda); display: block; }
+  .recurso .quien { font-family: var(--font-ui); font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-muted); display: block; margin: .1rem 0 .5rem; }
+  .recurso p { font-size: .95rem; margin: .3rem 0 0; }
+
+  /* Tabla de conteo de pasos */
+  .conteo td.cod, .conteo th.cod { font-family: var(--font-mono); font-size: .86rem; white-space: pre; }
+  .conteo td.veces { font-family: var(--font-mono); font-weight: 600; color: var(--guinda-dark); white-space: nowrap; }
+  .conteo tfoot td { padding: .65rem 1rem; font-size: .95rem; font-weight: 700; background: var(--guinda-light); color: var(--guinda-dark); }
+  .code-scroll { overflow-x: auto; }
+
+  /* Celdas de memoria */
+  .mem-fila { display: flex; align-items: center; gap: .35rem; flex-wrap: wrap; margin: .5rem 0; font-family: var(--font-ui); font-size: .8rem; color: var(--ink-secondary); }
+  .mem-fila .etq { min-width: 150px; font-weight: 600; color: var(--guinda); }
+  .celda { width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: .85rem; border: 1.5px solid var(--guinda); border-radius: var(--radius-sm); background: var(--white); color: var(--ink); }
+  .celda.nueva { background: var(--guinda); color: var(--white); }
+  .celda.aux { background: var(--guinda-light); border-style: dashed; }
+  .mem-total { font-family: var(--font-ui); font-size: .9rem; margin-top: .6rem; }
+
+  /* Calculadora de estrategias */
+  .calc { background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-lg); padding: 1.3rem 1.5rem; margin: 1.2rem 0; }
+  .calc label { font-family: var(--font-ui); font-weight: 600; color: var(--guinda); font-size: .9rem; display: block; margin-bottom: .4rem; }
+  .calc input[type="range"] { width: 100%; accent-color: #490b58; }
+  .calc .n-val { font-family: var(--font-display); font-size: 2.2rem; font-weight: 700; color: var(--guinda-dark); }
+  .calc td.num { font-family: var(--font-mono); text-align: right; white-space: nowrap; }
+  .barra { height: 10px; background: var(--guinda-light); border-radius: 99px; overflow: hidden; min-width: 80px; }
+  .barra i { display: block; height: 100%; background: var(--guinda); border-radius: 99px; transition: width .25s; }
+  .calc .nota-pie { font-family: var(--font-ui); font-size: .82rem; color: var(--ink-muted); margin-top: .6rem; }
+
+  /* Autoevaluación */
+  details.reto { background: var(--white); border: 1px solid var(--border); border-left: 4px solid var(--guinda); border-radius: var(--radius-md); padding: .8rem 1.1rem; margin: .8rem 0; }
+  details.reto summary { cursor: pointer; font-weight: 600; font-size: 1rem; }
+  details.reto .resp { margin-top: .6rem; padding-top: .6rem; border-top: 1px dashed var(--border); font-size: .97rem; }
+
+  @media (max-width: 720px) {
+    .dos { grid-template-columns: 1fr; }
+    .mixtle-tip { flex-direction: column; align-items: center; text-align: center; }
+    .mem-fila .etq { min-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo-wrap">
+    <img src="imagen1.png" alt="Mixtle, mascota del curso">
+  </div>
+  <div class="header-text">
+    <span class="inst-name">Instituto de Educación Digital del Estado de Puebla</span>
+    <span class="doc-title">Licenciatura en Sistemas Computacionales · Análisis y Diseño de Algoritmos</span>
+  </div>
+</header>
+
+<section class="class-hero">
+  <div class="page-wrapper" style="padding:0;">
+    <span class="class-label">Unidad 1 · Fundamentos del Análisis Algorítmico · Sesión 3</span>
+    <h1>Complejidad temporal y espacial</h1>
+    <span class="class-subtitle">No solo importa qué tan rápido es un algoritmo: también cuánta memoria necesita para lograrlo.</span>
+
+    <div class="meta-row">
+      <div class="meta-item">Programa educativo<span>Lic. en Sistemas Computacionales</span></div>
+      <div class="meta-item">Asignatura<span>Análisis y Diseño de Algoritmos</span></div>
+      <div class="meta-item">Unidad<span>1. Fundamentos del Análisis Algorítmico</span></div>
+      <div class="meta-item">Tema<span>1.3 Complejidad temporal y espacial</span></div>
+      <div class="meta-item">Fecha<span>11 de octubre de 2026</span></div>
+    </div>
+  </div>
+</section>
+
+<main class="page-wrapper">
+
+  <!-- COMPETENCIAS -->
+  <section class="section">
+    <span class="section-label">Al finalizar esta sesión, el estudiante podrá</span>
+    <h2 class="section-title">Competencias a desarrollar</h2>
+
+    <div class="competency-card">
+      <span class="comp-num">01</span>
+      <span class="comp-text"><strong>Distinguir</strong> la complejidad temporal (cuántos pasos da un algoritmo) de la complejidad espacial (cuánta memoria necesita).</span>
+    </div>
+    <div class="competency-card">
+      <span class="comp-num">02</span>
+      <span class="comp-text"><strong>Contar</strong> los pasos y las casillas de memoria de un algoritmo sencillo y expresar el resultado con notación Big-O.</span>
+    </div>
+    <div class="competency-card">
+      <span class="comp-num">03</span>
+      <span class="comp-text"><strong>Explicar</strong> el compromiso entre tiempo y espacio, y justificar cuándo conviene gastar memoria para ganar velocidad.</span>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 1. PUNTO DE PARTIDA -->
+  <section class="section">
+    <span class="section-label">Punto de partida</span>
+    <h2 class="section-title">Dos recursos que se gastan</h2>
+
+    <p>Imagina que vas a preparar tacos para una fiesta. Para saber si te va a alcanzar, te haces dos preguntas muy distintas: <strong>¿cuánto tiempo voy a tardar?</strong> y <strong>¿cuánto espacio necesito en la cocina?</strong> (mesas, platos, ollas). Puedes tardar poco pero ocupar toda la cocina, o usar una sola olla pero tardar toda la tarde.</p>
+
+    <p>Los algoritmos funcionan igual: al ejecutarse gastan dos recursos de la computadora.</p>
+
+    <div class="dos">
+      <div class="recurso">
+        <span class="sym">T(n)</span>
+        <span class="quien">Complejidad temporal</span>
+        <p><strong>El reloj.</strong> Cuenta cuántos <em>pasos</em> da el algoritmo cuando los datos tienen tamaño <em>n</em>. Se lee "T de n".</p>
+      </div>
+      <div class="recurso esp">
+        <span class="sym">S(n)</span>
+        <span class="quien">Complejidad espacial</span>
+        <p><strong>La mesa.</strong> Cuenta cuántas <em>casillas de memoria</em> necesita el algoritmo. Se lee "S de n" (la S viene de <em>space</em>, "espacio" en inglés).</p>
+      </div>
+    </div>
+
+    <div class="concept-box">
+      <span class="concept-title">Definiciones</span>
+      <p style="margin:0 0 .6rem"><strong>Complejidad temporal:</strong> cómo crece el número de pasos de un algoritmo cuando crece el tamaño de los datos.</p>
+      <p style="margin:0"><strong>Complejidad espacial:</strong> cómo crece la memoria que necesita un algoritmo cuando crece el tamaño de los datos.</p>
+    </div>
+
+    <p>Ambas se expresan con la misma notación que vimos en la sesión anterior: O(1), O(log n), O(n), O(n²)…</p>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 2. COMPLEJIDAD TEMPORAL -->
+  <section class="section">
+    <span class="section-label">Primer recurso: el tiempo</span>
+    <h2 class="section-title">Cómo contar los pasos de un algoritmo</h2>
+
+    <p>No hace falta cronometrar. Basta con <strong>contar cuántas veces se ejecuta cada instrucción</strong>. Para hacerlo, sigue estas cuatro reglas:</p>
+
+    <ol class="step-list">
+      <li><span class="step-n">1</span><span class="step-content"><strong>Una instrucción simple vale 1 paso</strong> (leer, escribir, asignar, comparar o hacer una operación aritmética).</span></li>
+      <li><span class="step-n">2</span><span class="step-content"><strong>Un ciclo que se repite n veces multiplica por n</strong> lo que tiene adentro.</span></li>
+      <li><span class="step-n">3</span><span class="step-content"><strong>Los bloques que van uno tras otro se suman.</strong></span></li>
+      <li><span class="step-n">4</span><span class="step-content"><strong>Al final te quedas con el término que más crece</strong> y quitas los números que acompañan. Por ejemplo, 4n + 3 se convierte en O(n).</span></li>
+    </ol>
+
+    <div class="example-block">
+      <div class="example-header">Ejemplo: sumar y encontrar el mayor de n números</div>
+      <div class="example-body">
+        <p class="example-statement">Un programa en PSeInt lee n calificaciones, calcula su suma y busca la más alta. ¿Cuántos pasos da?</p>
+
+        <div class="code-scroll">
+        <table class="conteo">
+          <thead>
+            <tr><th>Línea</th><th class="cod">Instrucción</th><th>Veces que se ejecuta</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td class="cod">Leer n;</td><td class="veces">1</td></tr>
+            <tr><td>2</td><td class="cod">Para i &lt;- 1 Hasta n ... Leer datos[i];</td><td class="veces">n</td></tr>
+            <tr><td>3</td><td class="cod">suma &lt;- 0;</td><td class="veces">1</td></tr>
+            <tr><td>4</td><td class="cod">maximo &lt;- datos[1];</td><td class="veces">1</td></tr>
+            <tr><td>5</td><td class="cod">Para i &lt;- 1 Hasta n ... suma &lt;- suma + datos[i];</td><td class="veces">n</td></tr>
+            <tr><td>6</td><td class="cod">Si datos[i] &gt; maximo ...</td><td class="veces">n</td></tr>
+            <tr><td>7</td><td class="cod">maximo &lt;- datos[i];  (solo cuando es mayor)</td><td class="veces">hasta n</td></tr>
+          </tbody>
+          <tfoot>
+            <tr><td colspan="2">Total en el peor caso</td><td class="veces">4n + 3</td></tr>
+          </tfoot>
+        </table>
+        </div>
+
+        <div class="result-line">T(n) = 4n + 3  →  se quita el 4 y el 3  →  complejidad temporal O(n)</div>
+        <p style="margin:.8rem 0 0">¿Por qué se vale quitar el 4 y el 3? Porque cuando n es enorme (un millón de datos, por ejemplo), el 3 casi no pesa y el 4 solo cambia la rapidez de la computadora, no la <em>tendencia</em> de crecimiento.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 3. COMPLEJIDAD ESPACIAL -->
+  <section class="section">
+    <span class="section-label">Segundo recurso: la memoria</span>
+    <h2 class="section-title">Cómo contar la memoria que usa un algoritmo</h2>
+
+    <p>Todo dato que guardas ocupa una <strong>casilla de memoria</strong>: una variable ocupa una casilla, y una lista de n elementos ocupa n casillas. La complejidad espacial cuenta cuántas casillas hacen falta.</p>
+
+    <div class="concept-box">
+      <span class="concept-title">Acuerdo para este curso</span>
+      <p style="margin:0">Cuando digamos "complejidad espacial" nos referiremos al <strong>espacio auxiliar</strong>: la memoria <em>extra</em> que el algoritmo crea además de los datos de entrada. Algunos libros incluyen también la entrada, así que conviene aclarar siempre cuál se está usando.</p>
+    </div>
+
+    <div class="code-scroll">
+    <table>
+      <thead><tr><th>Lo que el algoritmo guarda</th><th>Casillas</th><th>Espacio</th></tr></thead>
+      <tbody>
+        <tr><td>Unas cuantas variables sueltas (contador, suma, bandera)</td><td>siempre las mismas</td><td class="big">O(1)</td></tr>
+        <tr><td>Una copia de la lista de n elementos</td><td>n</td><td class="big">O(n)</td></tr>
+        <tr><td>Una tabla de n filas por n columnas</td><td>n × n</td><td class="big">O(n²)</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="example-block">
+      <div class="example-header">Ejemplo: invertir una lista de 6 números</div>
+      <div class="example-body">
+        <p class="example-statement">Dos formas de dar vuelta la lista [1, 2, 3, 4, 5, 6]. Las dos tardan lo mismo, pero no gastan la misma memoria.</p>
+
+        <p style="margin-bottom:.2rem"><strong>Fragmento A.</strong> Se intercambian los elementos dentro de la misma lista, usando una sola casilla auxiliar para el cambio (como cuando cambias dos libros de lugar con una mano libre).</p>
+        <div class="mem-fila"><span class="etq">Lista original</span>
+          <span class="celda">1</span><span class="celda">2</span><span class="celda">3</span><span class="celda">4</span><span class="celda">5</span><span class="celda">6</span></div>
+        <div class="mem-fila"><span class="etq">Casilla auxiliar</span><span class="celda aux">aux</span></div>
+        <div class="mem-total">Memoria extra: <strong>1 casilla</strong> → <span class="big">O(1)</span></div>
+
+        <hr style="border:none;border-top:1px dashed var(--border);margin:1.2rem 0">
+
+        <p style="margin-bottom:.2rem"><strong>Fragmento B.</strong> Se crea una lista nueva y se copian los elementos al revés (como sacar todos los libros a otra repisa).</p>
+        <div class="mem-fila"><span class="etq">Lista original</span>
+          <span class="celda">1</span><span class="celda">2</span><span class="celda">3</span><span class="celda">4</span><span class="celda">5</span><span class="celda">6</span></div>
+        <div class="mem-fila"><span class="etq">Lista nueva</span>
+          <span class="celda nueva">6</span><span class="celda nueva">5</span><span class="celda nueva">4</span><span class="celda nueva">3</span><span class="celda nueva">2</span><span class="celda nueva">1</span></div>
+        <div class="mem-total">Memoria extra: <strong>n casillas</strong> (6 en este ejemplo) → <span class="big">O(n)</span></div>
+
+        <div class="result-line">Mismo resultado y mismo tiempo, O(n) en ambos. Espacio: A usa O(1) y B usa O(n).</div>
+      </div>
+    </div>
+
+    <div class="mixtle-tip">
+      <img src="imagen2.png" alt="Mixtle">
+      <div>
+        <span class="mixtle-name">Consejo de Mixtle</span>
+        <p>Cuando analices el espacio, pregúntate: <strong>"¿creo algo nuevo que crece con n?"</strong> Si solo usas variables sueltas, es O(1). Si creas una lista, una tabla o una copia del tamaño de los datos, el espacio crece con n.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 4. CASOS CONOCIDOS -->
+  <section class="section">
+    <span class="section-label">Algoritmos conocidos</span>
+    <h2 class="section-title">Tiempo y espacio lado a lado</h2>
+    <p>Fíjate que ningún algoritmo es el mejor en todo. Cada uno tiene su propia combinación.</p>
+
+    <div class="code-scroll">
+    <table>
+      <thead>
+        <tr><th>Algoritmo</th><th>Tiempo</th><th>Espacio extra</th><th>En palabras</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Búsqueda lineal</td><td class="big">O(n)</td><td class="big">O(1)</td><td>Revisa uno por uno, sin guardar nada más.</td></tr>
+        <tr><td>Búsqueda binaria (iterativa)</td><td class="big">O(log n)</td><td class="big">O(1)</td><td>Parte la lista a la mitad; requiere lista ordenada.</td></tr>
+        <tr><td>Ordenamiento burbuja</td><td class="big">O(n²)</td><td class="big">O(1)</td><td>Lento, pero ordena en la misma lista.</td></tr>
+        <tr><td>Ordenamiento por mezcla (merge sort)</td><td class="big">O(n log n)</td><td class="big">O(n)</td><td>Rápido, pero necesita listas auxiliares.</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="callout note">
+      Observa la burbuja contra merge sort: uno gasta poca memoria y mucho tiempo; el otro, al revés. A esta situación se le llama <strong>compromiso entre tiempo y espacio</strong> (en inglés, <em>time–space trade-off</em>).
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 5. COMPROMISO -->
+  <section class="section">
+    <span class="section-label">El corazón del tema</span>
+    <h2 class="section-title">Gastar memoria para ganar velocidad</h2>
+
+    <p>Piensa en las tablas de multiplicar. Podrías calcular 7 × 8 desde cero cada vez que lo necesites (tardas más), o <strong>memorizar el resultado</strong> (gastas un lugarcito en tu cabeza, pero respondes al instante). Eso es intercambiar espacio por tiempo.</p>
+
+    <p>Veamos un caso real con la <strong>sucesión de Fibonacci</strong>, donde cada número es la suma de los dos anteriores: 1, 1, 2, 3, 5, 8, 13…</p>
+
+    <ol class="step-list">
+      <li><span class="step-n">1</span><span class="step-content"><strong>Recursivo ingenuo:</strong> para calcular un número vuelve a calcular los dos anteriores, y estos a su vez los suyos. Repite el mismo cálculo una y otra vez.</span></li>
+      <li><span class="step-n">2</span><span class="step-content"><strong>Con memoria:</strong> cada resultado se guarda en una tabla la primera vez que se calcula, y nunca se vuelve a calcular. Gasta memoria, pero ahorra muchísimo tiempo.</span></li>
+      <li><span class="step-n">3</span><span class="step-content"><strong>Iterativo:</strong> solo recuerda los dos últimos números. Es rápido y casi no usa memoria.</span></li>
+    </ol>
+
+    <div class="calc">
+      <label for="rango">Mueve la barra: ¿qué número de Fibonacci quieres calcular?</label>
+      <div class="n-val" id="n-val">30</div>
+      <input type="range" id="rango" min="5" max="40" step="1" value="30" aria-label="Número de Fibonacci a calcular">
+
+      <div class="code-scroll">
+      <table style="margin-top:1rem">
+        <thead><tr><th>Estrategia</th><th>Pasos</th><th>Casillas de memoria</th><th>Tiempo / Espacio</th><th></th></tr></thead>
+        <tbody id="calc-body"></tbody>
+      </table>
+      </div>
+      <div class="nota-pie">Los pasos del recursivo ingenuo son las veces que se llama a la función. Las barras usan escala comprimida (por potencias de diez) para que todas se alcancen a ver.</div>
+    </div>
+
+    <div class="mixtle-tip">
+      <img src="imagen2.png" alt="Mixtle">
+      <div>
+        <span class="mixtle-name">Consejo de Mixtle</span>
+        <p>Con n = 30, el recursivo ingenuo hace <strong>más de 2.6 millones de llamadas</strong>, y la versión con memoria solo 30 pasos. Un poco de memoria bien usada puede valer millones de pasos. Pero ojo: en un celular o en un dispositivo pequeño la memoria también es limitada, así que siempre hay que equilibrar.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 6. AUTOEVALUACIÓN -->
+  <section class="section">
+    <span class="section-label">Pon a prueba lo aprendido</span>
+    <h2 class="section-title">Preguntas rápidas</h2>
+    <p>Intenta contestar antes de abrir la respuesta.</p>
+
+    <details class="reto">
+      <summary>1. Un algoritmo hace 5n² + 2n + 7 pasos. ¿Cuál es su complejidad temporal?</summary>
+      <div class="resp">O(n²). El término que más crece es 5n²; el 5, el 2n y el 7 se descartan.</div>
+    </details>
+
+    <details class="reto">
+      <summary>2. Un programa copia una lista de n nombres en una lista nueva. ¿Cuál es su espacio auxiliar?</summary>
+      <div class="resp">O(n), porque crea n casillas nuevas que antes no existían.</div>
+    </details>
+
+    <details class="reto">
+      <summary>3. Verdadero o falso: un algoritmo rápido siempre usa poca memoria.</summary>
+      <div class="resp">Falso. Merge sort es muy rápido, O(n log n), pero necesita O(n) de memoria extra. Rapidez y poca memoria no siempre van juntas.</div>
+    </details>
+
+    <details class="reto">
+      <summary>4. Menciona un ejemplo cotidiano en el que gastes memoria para ahorrar tiempo.</summary>
+      <div class="resp">Guardar los contactos en el teléfono en lugar de buscar el número cada vez, o memorizar las tablas de multiplicar. En ambos casos guardas información para no repetir el trabajo.</div>
+    </details>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- CONCLUSIÓN -->
+  <section class="section">
+    <span class="section-label">Cierre de la sesión</span>
+    <h2 class="section-title">Conclusión</h2>
+    <p>Todo algoritmo gasta dos recursos: tiempo y memoria. La complejidad temporal T(n) cuenta los pasos; la complejidad espacial S(n) cuenta las casillas de memoria extra. Ambas se expresan con notación Big-O y se obtienen contando, sumando bloques y quedándose con el término dominante. Rara vez un algoritmo gana en las dos cosas a la vez, por eso es importante reconocer el compromiso entre tiempo y espacio y elegir según el problema: ¿tengo poca memoria o poco tiempo? En la Sesión 4 estudiaremos el Tema 1.4: casos mejor, promedio y peor, para responder otra pregunta clave: ¿un mismo algoritmo siempre tarda lo mismo?</p>
+  </section>
+
+  <section class="section">
+    <span class="section-label">Consulta</span>
+    <h2 class="section-title">Referencias bibliográficas</h2>
+    <ul style="font-size:.92rem; color: var(--ink-secondary);">
+      <li>Ramírez, J. L. (2023). Análisis asintótico y eficiencia de algoritmos en la computación moderna. <em>Revista de Sistemas y Computación</em> (México), 12(1), 45-58.</li>
+      <li>García, A. (2022). <em>Introducción a la algoritmia y lógica de programación: Una base sólida para sistemas</em>. Universidad Nacional Autónoma de México (UNAM).</li>
+      <li>Sánchez, R. (2024). <em>Modelado probabilístico para el análisis del caso promedio en algoritmos de búsqueda</em>. Editorial Tecnológica de Monterrey (México).</li>
+      <li>Torres, M. y Morales, S. (2021). <em>Optimización de recursos: Medición de la complejidad en algoritmos distribuidos</em>. Universidad de los Andes (Colombia).</li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <span><strong>Análisis y Diseño de Algoritmos</strong> — Unidad 1, Sesión 3</span>
+  <span>Mtro. José Armando Vera Rodríguez · IEDEP · 11 de octubre de 2026</span>
+</footer>
+
+<script>
+(function () {
+  function llamadas(n) {            // llamadas del Fibonacci recursivo ingenuo
+    if (n < 2) return 1;
+    var a = 1, b = 1;
+    for (var i = 2; i <= n; i++) { var t = a + b + 1; a = b; b = t; }
+    return b;
+  }
+  function f(x) { return x.toLocaleString('es-MX'); }
+
+  function pintar() {
+    var n = parseInt(document.getElementById('rango').value, 10);
+    document.getElementById('n-val').textContent = n;
+    var filas = [
+      { nom: 'Recursivo ingenuo', pasos: llamadas(n), mem: n, ot: 'O(2ⁿ) aprox.', oe: 'O(n)' },
+      { nom: 'Con memoria',       pasos: n,            mem: n + 1, ot: 'O(n)', oe: 'O(n)' },
+      { nom: 'Iterativo',         pasos: n,            mem: 3, ot: 'O(n)', oe: 'O(1)' }
+    ];
+    var maxLog = Math.log10(llamadas(40) + 1);
+    var html = '';
+    filas.forEach(function (r) {
+      var ancho = Math.max(3, Math.log10(r.pasos + 1) / maxLog * 100);
+      html += '<tr><td><strong>' + r.nom + '</strong></td>' +
+              '<td class="num">' + f(r.pasos) + '</td>' +
+              '<td class="num">' + f(r.mem) + '</td>' +
+              '<td class="big">' + r.ot + ' / ' + r.oe + '</td>' +
+              '<td><div class="barra"><i style="width:' + ancho + '%"></i></div></td></tr>';
+    });
+    document.getElementById('calc-body').innerHTML = html;
+  }
+  document.getElementById('rango').addEventListener('input', pintar);
+  pintar();
+})();
+</script>
+</body>
+</html>
