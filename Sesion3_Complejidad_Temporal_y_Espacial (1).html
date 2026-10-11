@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sesión 3 — Complejidad temporal y espacial (práctica en PSeInt Web)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+  body { background: var(--white); }
+  .site-header { flex-wrap: wrap; }
+
+  .mixtle-tip { display: flex; gap: 1.25rem; align-items: flex-start; background: var(--guinda-light); border: 1px solid #D8A8BA; border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin: 1.8rem 0; }
+  .mixtle-tip img { width: 84px; height: auto; flex-shrink: 0; border-radius: var(--radius-md); }
+  .mixtle-tip .mixtle-name { font-family: var(--font-ui); font-size: .78rem; text-transform: uppercase; letter-spacing: .12em; color: var(--guinda); font-weight: 700; display: block; margin-bottom: .4rem; }
+  .mixtle-tip p { font-size: .97rem; margin-bottom: 0; }
+
+  .big { font-family: var(--font-mono); font-weight: 600; color: var(--guinda-dark); white-space: nowrap; }
+
+  /* Dos ideas */
+  .dos { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.2rem 0; }
+  .recurso { background: var(--white); border: 1px solid var(--border); border-top: 4px solid var(--guinda); border-radius: var(--radius-lg); padding: 1.1rem 1.3rem; }
+  .recurso.esp { border-top-color: var(--guinda-rule); }
+  .recurso .quien { font-family: var(--font-ui); font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-muted); display: block; margin-bottom: .3rem; }
+  .recurso .titulo { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; color: var(--guinda); display: block; margin-bottom: .3rem; }
+  .recurso p { font-size: .95rem; margin: 0; }
+
+  /* Botón */
+  .btn { display: inline-block; cursor: pointer; text-decoration: none; font-family: var(--font-ui); font-weight: 600; font-size: .92rem; padding: .65rem 1.3rem; border-radius: var(--radius-md); border: 1.5px solid var(--guinda); background: var(--guinda); color: var(--white); }
+  .btn:hover { background: var(--guinda-dark); }
+  .btn.sec { background: var(--white); color: var(--guinda); }
+  .btn.sec:hover { background: var(--guinda-light); }
+
+  /* Paneles de código */
+  .code-panel { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; margin: 1.1rem 0; }
+  .code-panel .code-head { background: var(--guinda); color: var(--white); padding: .5rem 1rem; font-family: var(--font-ui); font-size: .82rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; gap: .6rem; flex-wrap: wrap; }
+  .code-panel .code-head .badge { font-family: var(--font-mono); font-size: .72rem; background: rgba(255,255,255,.18); padding: .1rem .5rem; border-radius: 999px; }
+  .copiar { cursor: pointer; font-family: var(--font-ui); font-size: .75rem; font-weight: 600; color: var(--guinda); background: var(--white); border: none; border-radius: var(--radius-sm); padding: .3rem .7rem; }
+  .copiar:hover { background: var(--guinda-light); }
+  .code-panel pre { margin: 0; padding: 1rem 1.2rem; background: var(--white); font-family: var(--font-mono); font-size: .82rem; line-height: 1.7; color: var(--ink); overflow-x: auto; white-space: pre; }
+  .code-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
+
+  /* Pasos de práctica */
+  .ejercicio-num { display: inline-block; font-family: var(--font-ui); font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; background: var(--guinda); color: var(--white); padding: .2rem .7rem; border-radius: 99px; margin-bottom: .5rem; }
+
+  /* Tablas de registro */
+  .registro td, .registro th { vertical-align: middle; }
+  .registro td.etq { font-family: var(--font-mono); font-weight: 500; }
+  input.resp, select.resp {
+    font-family: var(--font-mono); font-size: .92rem; padding: .35rem .5rem;
+    border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm);
+    background: var(--white); color: var(--ink); max-width: 100%;
+  }
+  input.resp { width: 6.5rem; }
+  select.resp { font-family: var(--font-ui); cursor: pointer; }
+  input.resp:focus, select.resp:focus { outline: 2px solid var(--guinda); border-color: var(--guinda); }
+  .resp.ok  { border-color: #2E7D32; background: #EEF7EE; }
+  .resp.bad { border-color: #B3261E; background: #FCEDEC; }
+
+  .pregunta { margin: .9rem 0; display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; font-size: .98rem; }
+  .comprobar-fila { margin-top: 1rem; display: flex; gap: .8rem; align-items: center; flex-wrap: wrap; }
+  .veredicto { font-family: var(--font-ui); font-size: .9rem; font-weight: 600; }
+  .veredicto.ok { color: #2E7D32; }
+  .veredicto.bad { color: #B3261E; }
+  .explica { display: none; margin-top: .9rem; }
+  .explica.ver { display: block; }
+
+  details.reto { background: var(--white); border: 1px solid var(--border); border-left: 4px solid var(--guinda); border-radius: var(--radius-md); padding: .8rem 1.1rem; margin: .8rem 0; }
+  details.reto summary { cursor: pointer; font-weight: 600; font-size: 1rem; }
+  details.reto .resp-txt { margin-top: .6rem; padding-top: .6rem; border-top: 1px dashed var(--border); font-size: .97rem; }
+
+  .code-scroll { overflow-x: auto; }
+
+  @media (max-width: 720px) {
+    .dos, .code-compare { grid-template-columns: 1fr; }
+    .mixtle-tip { flex-direction: column; align-items: center; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo-wrap">
+    <img src="imagen1.png" alt="Mixtle, mascota del curso">
+  </div>
+  <div class="header-text">
+    <span class="inst-name">Instituto de Educación Digital del Estado de Puebla</span>
+    <span class="doc-title">Licenciatura en Sistemas Computacionales · Análisis y Diseño de Algoritmos</span>
+  </div>
+</header>
+
+<section class="class-hero">
+  <div class="page-wrapper" style="padding:0;">
+    <span class="class-label">Unidad 1 · Fundamentos del Análisis Algorítmico · Sesión 3 · Práctica</span>
+    <h1>Complejidad temporal y espacial</h1>
+    <span class="class-subtitle">Cuenta los pasos y la memoria de programas reales ejecutándolos tú mismo en PSeInt Web.</span>
+
+    <div class="meta-row">
+      <div class="meta-item">Programa educativo<span>Lic. en Sistemas Computacionales</span></div>
+      <div class="meta-item">Asignatura<span>Análisis y Diseño de Algoritmos</span></div>
+      <div class="meta-item">Unidad<span>1. Fundamentos del Análisis Algorítmico</span></div>
+      <div class="meta-item">Tema<span>1.3 Complejidad temporal y espacial</span></div>
+      <div class="meta-item">Fecha<span>11 de octubre de 2026</span></div>
+    </div>
+  </div>
+</section>
+
+<main class="page-wrapper">
+
+  <!-- COMPETENCIAS -->
+  <section class="section">
+    <span class="section-label">Al finalizar esta sesión, el estudiante podrá</span>
+    <h2 class="section-title">Competencias a desarrollar</h2>
+
+    <div class="competency-card">
+      <span class="comp-num">01</span>
+      <span class="comp-text"><strong>Medir</strong> cuántos pasos da un programa usando un contador y ejecutándolo en PSeInt Web con distintos valores de <em>n</em>.</span>
+    </div>
+    <div class="competency-card">
+      <span class="comp-num">02</span>
+      <span class="comp-text"><strong>Contar</strong> las casillas de memoria que usa un programa y reconocer cuándo crecen con los datos.</span>
+    </div>
+    <div class="competency-card">
+      <span class="comp-num">03</span>
+      <span class="comp-text"><strong>Clasificar</strong> programas sencillos como O(1), O(n) u O(n²) a partir de lo que observaste.</span>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 1. IDEA -->
+  <section class="section">
+    <span class="section-label">La idea en dos minutos</span>
+    <h2 class="section-title">Todo programa gasta dos cosas</h2>
+
+    <p>Piensa en preparar tacos para una fiesta: te importa <strong>cuánto tardas</strong> y <strong>cuánto espacio ocupas</strong> en la cocina. Los programas también gastan dos recursos:</p>
+
+    <div class="dos">
+      <div class="recurso">
+        <span class="quien">Complejidad temporal</span>
+        <span class="titulo">Los pasos</span>
+        <p>¿Cuántas veces trabaja el programa? Lo mediremos con un <strong>contador</strong>.</p>
+      </div>
+      <div class="recurso esp">
+        <span class="quien">Complejidad espacial</span>
+        <span class="titulo">Las casillas</span>
+        <p>¿Cuántos datos guarda? Cada variable es <strong>1 casilla</strong>; una lista de 10 datos son <strong>10 casillas</strong>.</p>
+      </div>
+    </div>
+
+    <div class="callout note">
+      <p>Hoy no vas a memorizar fórmulas: vas a <strong>ejecutar, observar y concluir</strong>. Cada ejercicio tiene tres momentos: predice, ejecuta y comprueba.</p>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 2. HERRAMIENTA -->
+  <section class="section">
+    <span class="section-label">Prepara tu herramienta</span>
+    <h2 class="section-title">Cómo usar PSeInt Web</h2>
+
+    <ol class="step-list">
+      <li><span class="step-n">1</span><span class="step-content">Abre <strong>PSeInt Web</strong> en una pestaña nueva (botón de abajo) y deja esta página abierta en otra pestaña.</span></li>
+      <li><span class="step-n">2</span><span class="step-content">En el editor, <strong>borra el código de ejemplo</strong> que aparezca.</span></li>
+      <li><span class="step-n">3</span><span class="step-content">En esta página presiona <strong>Copiar código</strong> en el programa del ejercicio y <strong>pégalo</strong> en el editor.</span></li>
+      <li><span class="step-n">4</span><span class="step-content">Presiona el botón para <strong>ejecutar</strong> (el ícono de reproducir).</span></li>
+      <li><span class="step-n">5</span><span class="step-content">Cuando el programa te pida un dato, <strong>escríbelo en la consola</strong> y presiona Enter. Anota el resultado aquí.</span></li>
+    </ol>
+
+    <p style="margin-top:1.2rem"><a class="btn" href="https://www.pseint-web.app/" target="_blank" rel="noopener">Abrir PSeInt Web</a></p>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- EJ 1 -->
+  <section class="section">
+    <span class="ejercicio-num">Ejercicio 1</span>
+    <h2 class="section-title">Un ciclo: el contador sigue a n</h2>
+    <p>Este programa repite un trabajo <em>n</em> veces y cuenta cuántas veces lo hizo. <strong>Predice:</strong> si n = 5, ¿cuánto crees que marcará el contador?</p>
+
+    <div class="code-panel">
+      <div class="code-head">ContadorLineal <span class="badge">1 ciclo</span></div>
+      <pre>Proceso ContadorLineal
+    Definir n, i, contador Como Entero;
+    Escribir "¿Cuántos elementos tiene tu lista?";
+    Leer n;
+    contador <- 0;
+    Para i <- 1 Hasta n Hacer
+        contador <- contador + 1;
+    FinPara
+    Escribir "Operaciones realizadas: ", contador;
+FinProceso</pre>
+    </div>
+
+    <p><strong>Ejecuta</strong> el programa tres veces y escribe el valor que muestra "Operaciones realizadas":</p>
+
+    <div class="code-scroll">
+    <table class="registro" data-grupo="e1">
+      <thead><tr><th>Valor de n</th><th>Contador final</th></tr></thead>
+      <tbody>
+        <tr><td class="etq">n = 5</td><td><input class="resp" inputmode="numeric" data-ans="5" aria-label="Contador con n igual a 5"></td></tr>
+        <tr><td class="etq">n = 10</td><td><input class="resp" inputmode="numeric" data-ans="10" aria-label="Contador con n igual a 10"></td></tr>
+        <tr><td class="etq">n = 20</td><td><input class="resp" inputmode="numeric" data-ans="20" aria-label="Contador con n igual a 20"></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="pregunta" data-grupo="e1">Conclusión: el contador es
+      <select class="resp" data-ans="igual" aria-label="Relación del contador con n">
+        <option value="">Elige…</option>
+        <option value="uno">siempre 1</option>
+        <option value="igual">igual a n</option>
+        <option value="cuadrado">igual a n × n</option>
+      </select>
+      , así que el tiempo es de orden
+      <select class="resp" data-ans="n" aria-label="Orden de crecimiento">
+        <option value="">Elige…</option>
+        <option value="1">O(1)</option>
+        <option value="n">O(n)</option>
+        <option value="n2">O(n²)</option>
+      </select>
+    </div>
+
+    <div class="comprobar-fila">
+      <button class="btn sec comprobar" type="button" data-grupo="e1">Comprobar</button>
+      <span class="veredicto" data-grupo="e1"></span>
+    </div>
+    <div class="explica callout note" data-grupo="e1"><p>Un ciclo que se repite <em>n</em> veces hace <em>n</em> pasos: si n se duplica, los pasos se duplican. Eso es <strong>crecimiento lineal, O(n)</strong>.</p></div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- EJ 2 -->
+  <section class="section">
+    <span class="ejercicio-num">Ejercicio 2</span>
+    <h2 class="section-title">Un ciclo dentro de otro</h2>
+    <p>Ahora hay un ciclo <strong>dentro</strong> de otro. <strong>Predice:</strong> con n = 5, ¿seguirá marcando 5? Ejecuta y descúbrelo.</p>
+
+    <div class="code-panel">
+      <div class="code-head">ContadorCuadratico <span class="badge">2 ciclos anidados</span></div>
+      <pre>Proceso ContadorCuadratico
+    Definir n, i, j, contador Como Entero;
+    Escribir "¿Cuántos elementos tiene tu lista?";
+    Leer n;
+    contador <- 0;
+    Para i <- 1 Hasta n Hacer
+        Para j <- 1 Hasta n Hacer
+            contador <- contador + 1;
+        FinPara
+    FinPara
+    Escribir "Operaciones realizadas: ", contador;
+FinProceso</pre>
+    </div>
+
+    <div class="code-scroll">
+    <table class="registro" data-grupo="e2">
+      <thead><tr><th>Valor de n</th><th>Contador final</th></tr></thead>
+      <tbody>
+        <tr><td class="etq">n = 5</td><td><input class="resp" inputmode="numeric" data-ans="25" aria-label="Contador con n igual a 5"></td></tr>
+        <tr><td class="etq">n = 10</td><td><input class="resp" inputmode="numeric" data-ans="100" aria-label="Contador con n igual a 10"></td></tr>
+        <tr><td class="etq">n = 20</td><td><input class="resp" inputmode="numeric" data-ans="400" aria-label="Contador con n igual a 20"></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="pregunta" data-grupo="e2">Al pasar de n = 10 a n = 20 (el doble), el contador se
+      <select class="resp" data-ans="cuadruplica" aria-label="Qué pasa con el contador">
+        <option value="">Elige…</option>
+        <option value="duplica">duplica</option>
+        <option value="cuadruplica">cuadruplica</option>
+        <option value="igual">queda igual</option>
+      </select>
+      , así que el tiempo es de orden
+      <select class="resp" data-ans="n2" aria-label="Orden de crecimiento">
+        <option value="">Elige…</option>
+        <option value="1">O(1)</option>
+        <option value="n">O(n)</option>
+        <option value="n2">O(n²)</option>
+      </select>
+    </div>
+
+    <div class="comprobar-fila">
+      <button class="btn sec comprobar" type="button" data-grupo="e2">Comprobar</button>
+      <span class="veredicto" data-grupo="e2"></span>
+    </div>
+    <div class="explica callout note" data-grupo="e2"><p>Por cada vuelta del ciclo de afuera, el de adentro da <em>n</em> vueltas: en total <em>n × n</em> pasos. Eso es <strong>crecimiento cuadrático, O(n²)</strong>.</p></div>
+
+    <div class="mixtle-tip">
+      <img src="imagen2.png" alt="Mixtle">
+      <div>
+        <span class="mixtle-name">Consejo de Mixtle</span>
+        <p>Truco rápido: si al <strong>duplicar n</strong> el contador se <strong>duplica</strong>, es O(n); si se <strong>cuadruplica</strong>, es O(n²). No necesitas leer el código: ¡basta con medir!</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- EJ 3 -->
+  <section class="section">
+    <span class="section-label">Predice y comprueba</span>
+    <span class="ejercicio-num">Ejercicio 3</span>
+    <h2 class="section-title">Dos ciclos, uno tras otro</h2>
+    <p>Esta vez los ciclos <strong>no están anidados</strong>: van uno después del otro. Antes de ejecutar, elige tu predicción para n = 10.</p>
+
+    <div class="code-panel">
+      <div class="code-head">DosCiclosSeguidos <span class="badge">2 ciclos seguidos</span></div>
+      <pre>Proceso DosCiclosSeguidos
+    Definir n, i, contador Como Entero;
+    Escribir "¿Cuántos elementos tiene tu lista?";
+    Leer n;
+    contador <- 0;
+    Para i <- 1 Hasta n Hacer
+        contador <- contador + 1;
+    FinPara
+    Para i <- 1 Hasta n Hacer
+        contador <- contador + 1;
+    FinPara
+    Escribir "Operaciones realizadas: ", contador;
+FinProceso</pre>
+    </div>
+
+    <div class="pregunta" data-grupo="e3">Mi predicción para n = 10:
+      <select class="resp" data-ans="20" aria-label="Predicción">
+        <option value="">Elige…</option>
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="100">100</option>
+      </select>
+    </div>
+    <div class="pregunta" data-grupo="e3">Resultado real al ejecutar con n = 10:
+      <input class="resp" inputmode="numeric" data-ans="20" aria-label="Resultado real">
+    </div>
+    <div class="pregunta" data-grupo="e3">Entonces el tiempo es de orden
+      <select class="resp" data-ans="n" aria-label="Orden de crecimiento">
+        <option value="">Elige…</option>
+        <option value="1">O(1)</option>
+        <option value="n">O(n)</option>
+        <option value="n2">O(n²)</option>
+      </select>
+    </div>
+
+    <div class="comprobar-fila">
+      <button class="btn sec comprobar" type="button" data-grupo="e3">Comprobar</button>
+      <span class="veredicto" data-grupo="e3"></span>
+    </div>
+    <div class="explica callout note" data-grupo="e3"><p>Los ciclos <strong>seguidos se suman</strong> (n + n = 2n) y los <strong>anidados se multiplican</strong> (n × n). Como 2n sigue creciendo en línea recta, el orden es <strong>O(n)</strong>: el 2 se descarta.</p></div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- EJ 4 -->
+  <section class="section">
+    <span class="section-label">Ahora, la memoria</span>
+    <span class="ejercicio-num">Ejercicio 4</span>
+    <h2 class="section-title">¿Cuántas casillas usa cada programa?</h2>
+    <p>Los dos programas suman 5 números. Uno los suma sobre la marcha; el otro primero los <strong>guarda todos</strong> en una lista. Para contar casillas recuerda: <strong>cada variable = 1 casilla</strong> y <strong>una lista de 5 = 5 casillas</strong>.</p>
+
+    <div class="code-compare">
+      <div class="code-panel">
+        <div class="code-head">Programa A: SumaSinGuardar</div>
+        <pre>Proceso SumaSinGuardar
+    Definir i Como Entero;
+    Definir numero, suma Como Real;
+    suma <- 0;
+    Para i <- 1 Hasta 5 Hacer
+        Escribir "Escribe un número:";
+        Leer numero;
+        suma <- suma + numero;
+    FinPara
+    Escribir "La suma es: ", suma;
+FinProceso</pre>
+      </div>
+      <div class="code-panel">
+        <div class="code-head">Programa B: SumaGuardando</div>
+        <pre>Proceso SumaGuardando
+    Dimension datos[5];
+    Definir i Como Entero;
+    Definir suma Como Real;
+    suma <- 0;
+    Para i <- 1 Hasta 5 Hacer
+        Escribir "Escribe un número:";
+        Leer datos[i];
+    FinPara
+    Para i <- 1 Hasta 5 Hacer
+        suma <- suma + datos[i];
+    FinPara
+    Escribir "La suma es: ", suma;
+FinProceso</pre>
+      </div>
+    </div>
+
+    <p>Ejecuta los dos y comprueba que dan la misma suma. Luego completa el conteo de casillas. (Pista: en el programa A las casillas son <code>i</code>, <code>numero</code> y <code>suma</code>; en el B son <code>i</code>, <code>suma</code> y las de la lista <code>datos</code>.)</p>
+
+    <div class="code-scroll">
+    <table class="registro" data-grupo="e4">
+      <thead><tr><th>Cantidad de números</th><th>Casillas del programa A</th><th>Casillas del programa B</th></tr></thead>
+      <tbody>
+        <tr><td class="etq">5 números</td><td><input class="resp" inputmode="numeric" data-ans="3" aria-label="A con 5"></td><td><input class="resp" inputmode="numeric" data-ans="7" aria-label="B con 5"></td></tr>
+        <tr><td class="etq">8 números</td><td><input class="resp" inputmode="numeric" data-ans="3" aria-label="A con 8"></td><td><input class="resp" inputmode="numeric" data-ans="10" aria-label="B con 8"></td></tr>
+        <tr><td class="etq">1000 números</td><td><input class="resp" inputmode="numeric" data-ans="3" aria-label="A con 1000"></td><td><input class="resp" inputmode="numeric" data-ans="1002" aria-label="B con 1000"></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="pregunta" data-grupo="e4">Memoria del programa A:
+      <select class="resp" data-ans="1" aria-label="Memoria de A">
+        <option value="">Elige…</option><option value="1">O(1)</option><option value="n">O(n)</option><option value="n2">O(n²)</option>
+      </select>
+      &nbsp; Memoria del programa B:
+      <select class="resp" data-ans="n" aria-label="Memoria de B">
+        <option value="">Elige…</option><option value="1">O(1)</option><option value="n">O(n)</option><option value="n2">O(n²)</option>
+      </select>
+    </div>
+
+    <div class="comprobar-fila">
+      <button class="btn sec comprobar" type="button" data-grupo="e4">Comprobar</button>
+      <span class="veredicto" data-grupo="e4"></span>
+    </div>
+    <div class="explica callout note" data-grupo="e4"><p>El programa A siempre usa <strong>3 casillas</strong>, sin importar cuántos números sume: memoria <strong>O(1)</strong>. El B guarda cada número, así que su memoria <strong>crece con n</strong>: <strong>O(n)</strong>. Los dos tardan lo mismo (O(n)), pero no gastan la misma memoria.</p></div>
+
+    <div class="mixtle-tip">
+      <img src="imagen2.png" alt="Mixtle">
+      <div>
+        <span class="mixtle-name">Consejo de Mixtle</span>
+        <p>Para analizar la memoria, pregúntate: <strong>"¿estoy guardando algo que crece con n?"</strong> Si solo hay variables sueltas, la memoria es O(1). Si guardas una lista de n datos, es O(n).</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- EJ 5 RETO -->
+  <section class="section">
+    <span class="section-label">Reto final</span>
+    <span class="ejercicio-num">Ejercicio 5</span>
+    <h2 class="section-title">Modifica el programa tú mismo</h2>
+    <p>Vuelve al programa <strong>ContadorCuadratico</strong> del ejercicio 2 y cambia <strong>solo el ciclo de adentro</strong>, para que en lugar de ir hasta <em>n</em> vaya hasta 3:</p>
+
+    <div class="code-panel">
+      <div class="code-head">Cambio que debes hacer</div>
+      <pre>Para i <- 1 Hasta n Hacer
+    Para j <- 1 Hasta 3 Hacer       // antes decía: Hasta n
+        contador <- contador + 1;
+    FinPara
+FinPara</pre>
+    </div>
+
+    <p><strong>Predice</strong> con n = 10 y luego ejecuta para comprobar.</p>
+
+    <div class="pregunta" data-grupo="e5">Contador final con n = 10:
+      <input class="resp" inputmode="numeric" data-ans="30" aria-label="Contador final">
+    </div>
+    <div class="pregunta" data-grupo="e5">Ahora el tiempo es de orden
+      <select class="resp" data-ans="n" aria-label="Orden de crecimiento">
+        <option value="">Elige…</option><option value="1">O(1)</option><option value="n">O(n)</option><option value="n2">O(n²)</option>
+      </select>
+    </div>
+
+    <div class="comprobar-fila">
+      <button class="btn sec comprobar" type="button" data-grupo="e5">Comprobar</button>
+      <span class="veredicto" data-grupo="e5"></span>
+    </div>
+    <div class="explica callout note" data-grupo="e5"><p>El ciclo de adentro ahora da siempre 3 vueltas, así que el total es <strong>3 × n</strong>. Como el 3 se descarta, el orden es <strong>O(n)</strong>. Cambiar un solo número del código cambió la familia del algoritmo.</p></div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- RESUMEN -->
+  <section class="section">
+    <span class="section-label">Resumen de la práctica</span>
+    <h2 class="section-title">Lo que descubriste hoy</h2>
+
+    <div class="code-scroll">
+    <table>
+      <thead><tr><th>Programa</th><th>Contador con n = 10</th><th>Tiempo</th><th>Memoria</th></tr></thead>
+      <tbody>
+        <tr><td>ContadorLineal</td><td class="big">10</td><td class="big">O(n)</td><td class="big">O(1)</td></tr>
+        <tr><td>ContadorCuadratico</td><td class="big">100</td><td class="big">O(n²)</td><td class="big">O(1)</td></tr>
+        <tr><td>DosCiclosSeguidos</td><td class="big">20</td><td class="big">O(n)</td><td class="big">O(1)</td></tr>
+        <tr><td>Cuadrático con ciclo interno de 3 vueltas</td><td class="big">30</td><td class="big">O(n)</td><td class="big">O(1)</td></tr>
+        <tr><td>SumaSinGuardar</td><td>n pasos</td><td class="big">O(n)</td><td class="big">O(1)</td></tr>
+        <tr><td>SumaGuardando</td><td>2n pasos</td><td class="big">O(n)</td><td class="big">O(n)</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="concept-box">
+      <span class="concept-title">Reglas que te llevas</span>
+      <p style="margin:0 0 .4rem"><strong>Tiempo:</strong> ciclos seguidos se suman; ciclos anidados se multiplican; los números que acompañan se descartan.</p>
+      <p style="margin:0"><strong>Memoria:</strong> variables sueltas son O(1); una lista de n datos es O(n).</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <span class="section-label">Pon a prueba lo aprendido</span>
+    <h2 class="section-title">Preguntas rápidas</h2>
+
+    <details class="reto">
+      <summary>1. Un programa hace 5n + 2 pasos. ¿Cuál es su orden de tiempo?</summary>
+      <div class="resp-txt">O(n). El 5 y el 2 se descartan y queda solo n.</div>
+    </details>
+    <details class="reto">
+      <summary>2. Un programa copia una lista de n nombres a otra lista nueva. ¿Cuánta memoria extra usa?</summary>
+      <div class="resp-txt">O(n), porque crea n casillas nuevas.</div>
+    </details>
+    <details class="reto">
+      <summary>3. ¿Un programa rápido siempre usa poca memoria?</summary>
+      <div class="resp-txt">No. A veces se guardan datos extra para ahorrar pasos, como memorizar las tablas de multiplicar. Rapidez y memoria hay que equilibrarlas.</div>
+    </details>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- CONCLUSIÓN -->
+  <section class="section">
+    <span class="section-label">Cierre de la sesión</span>
+    <h2 class="section-title">Conclusión</h2>
+    <p>Hoy comprobaste con tus propias ejecuciones que los programas gastan dos recursos: tiempo y memoria. Con un contador viste que un ciclo da n pasos (O(n)), que un ciclo dentro de otro da n × n (O(n²)) y que dos ciclos seguidos suman y siguen siendo O(n). Con las casillas viste que guardar una lista de n datos hace crecer la memoria, mientras que las variables sueltas no. En la Sesión 4 estudiaremos el Tema 1.4: casos mejor, promedio y peor, para responder otra pregunta: ¿un mismo programa siempre tarda lo mismo?</p>
+  </section>
+
+  <section class="section">
+    <span class="section-label">Consulta</span>
+    <h2 class="section-title">Referencias bibliográficas</h2>
+    <ul style="font-size:.92rem; color: var(--ink-secondary);">
+      <li>Ramírez, J. L. (2023). Análisis asintótico y eficiencia de algoritmos en la computación moderna. <em>Revista de Sistemas y Computación</em> (México), 12(1), 45-58.</li>
+      <li>García, A. (2022). <em>Introducción a la algoritmia y lógica de programación: Una base sólida para sistemas</em>. Universidad Nacional Autónoma de México (UNAM).</li>
+      <li>Sánchez, R. (2024). <em>Modelado probabilístico para el análisis del caso promedio en algoritmos de búsqueda</em>. Editorial Tecnológica de Monterrey (México).</li>
+      <li>Torres, M. y Morales, S. (2021). <em>Optimización de recursos: Medición de la complejidad en algoritmos distribuidos</em>. Universidad de los Andes (Colombia).</li>
+      <li>PSeInt Web. (s. f.). <em>Editor en línea de pseudocódigo PSeInt</em>. https://www.pseint-web.app/</li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <span><strong>Análisis y Diseño de Algoritmos</strong> — Unidad 1, Sesión 3</span>
+  <span>Mtro. José Armando Vera Rodríguez · IEDEP · 11 de octubre de 2026</span>
+</footer>
+
+<script>
+(function () {
+  /* Botones "Copiar código" */
+  function copiarTexto(txt, btn) {
+    function listo() { btn.textContent = '¡Copiado!'; setTimeout(function () { btn.textContent = 'Copiar código'; }, 1800); }
+    function respaldo() {
+      var ta = document.createElement('textarea');
+      ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); listo(); } catch (e) { btn.textContent = 'Selecciona y copia a mano'; }
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(listo, respaldo);
+    } else respaldo();
+  }
+  document.querySelectorAll('.code-panel').forEach(function (panel) {
+    var pre = panel.querySelector('pre'), head = panel.querySelector('.code-head');
+    if (!pre || !head || panel.querySelector('.copiar')) return;
+    if (head.textContent.indexOf('Cambio que debes') > -1) return;   // fragmento, no programa completo
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'copiar'; b.textContent = 'Copiar código';
+    b.addEventListener('click', function () { copiarTexto(pre.textContent, b); });
+    head.appendChild(b);
+  });
+
+  /* Comprobar respuestas por ejercicio */
+  document.querySelectorAll('button.comprobar').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var g = btn.getAttribute('data-grupo');
+      var campos = document.querySelectorAll('[data-grupo="' + g + '"] [data-ans], [data-grupo="' + g + '"][data-ans]');
+      var total = 0, bien = 0, vacios = 0;
+      campos.forEach(function (c) {
+        total++;
+        var v = (c.value || '').trim();
+        c.classList.remove('ok', 'bad');
+        if (!v) { vacios++; c.classList.add('bad'); return; }
+        if (v === c.getAttribute('data-ans')) { bien++; c.classList.add('ok'); } else c.classList.add('bad');
+      });
+      var ver = document.querySelector('.veredicto[data-grupo="' + g + '"]');
+      var exp = document.querySelector('.explica[data-grupo="' + g + '"]');
+      if (bien === total) {
+        ver.className = 'veredicto ok'; ver.textContent = '¡Todo correcto!';
+        exp.classList.add('ver');
+      } else if (vacios > 0) {
+        ver.className = 'veredicto bad'; ver.textContent = 'Te faltan ' + vacios + ' respuesta(s) por completar.';
+      } else {
+        ver.className = 'veredicto bad'; ver.textContent = 'Llevas ' + bien + ' de ' + total + ' bien. Revisa los campos en rojo y vuelve a ejecutar.';
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>
