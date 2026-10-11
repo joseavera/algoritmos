@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Práctica previa — Primeros pasos en PSeInt Web</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+  body { background: var(--white); }
+  .site-header { flex-wrap: wrap; }
+  html { scroll-behavior: smooth; }
+
+  .mixtle-tip { display: flex; gap: 1.25rem; align-items: flex-start; background: var(--guinda-light); border: 1px solid #D8A8BA; border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin: 1.8rem 0; }
+  .mixtle-tip img { width: 84px; height: auto; flex-shrink: 0; border-radius: var(--radius-md); }
+  .mixtle-tip .mixtle-name { font-family: var(--font-ui); font-size: .78rem; text-transform: uppercase; letter-spacing: .12em; color: var(--guinda); font-weight: 700; display: block; margin-bottom: .4rem; }
+  .mixtle-tip p { font-size: .97rem; margin-bottom: 0; }
+
+  .big { font-family: var(--font-mono); font-weight: 600; color: var(--guinda-dark); }
+  code { font-family: var(--font-mono); font-size: .88em; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .1rem .4rem; color: var(--guinda-dark); }
+
+  .btn { display: inline-block; cursor: pointer; text-decoration: none; font-family: var(--font-ui); font-weight: 600; font-size: .92rem; padding: .65rem 1.3rem; border-radius: var(--radius-md); border: 1.5px solid var(--guinda); background: var(--guinda); color: var(--white); }
+  .btn:hover { background: var(--guinda-dark); }
+  .btn.sec { background: var(--white); color: var(--guinda); }
+  .btn.sec:hover { background: var(--guinda-light); }
+
+  /* Ruta de avance */
+  .ruta { list-style: none; padding: 0; margin: 1rem 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: .5rem 1rem; }
+  .ruta li a { display: flex; align-items: center; gap: .7rem; text-decoration: none; color: var(--ink); font-family: var(--font-ui); font-size: .92rem; padding: .55rem .8rem; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--white); }
+  .ruta li a:hover { border-color: var(--guinda); }
+  .ruta .marca { flex-shrink: 0; width: 1.5rem; height: 1.5rem; border-radius: 50%; border: 2px solid var(--border-strong); display: flex; align-items: center; justify-content: center; font-size: .8rem; color: transparent; font-weight: 700; }
+  .ruta li.hecho .marca { background: #2E7D32; border-color: #2E7D32; color: var(--white); }
+  .ruta li.hecho a { background: #EEF7EE; border-color: #2E7D32; }
+  .ruta-total { font-family: var(--font-ui); font-size: .85rem; color: var(--ink-secondary); }
+
+  .ejercicio-num { display: inline-block; font-family: var(--font-ui); font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; background: var(--guinda); color: var(--white); padding: .2rem .7rem; border-radius: 99px; margin-bottom: .5rem; }
+
+  /* Paneles de código */
+  .code-panel { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; margin: 1.1rem 0; }
+  .code-panel .code-head { background: var(--guinda); color: var(--white); padding: .5rem 1rem; font-family: var(--font-ui); font-size: .82rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; gap: .6rem; flex-wrap: wrap; }
+  .code-panel .code-head .badge { font-family: var(--font-mono); font-size: .72rem; background: rgba(255,255,255,.18); padding: .1rem .5rem; border-radius: 999px; }
+  .code-panel pre { margin: 0; padding: 1rem 1.2rem; background: var(--white); font-family: var(--font-mono); font-size: .86rem; line-height: 1.75; color: var(--ink); overflow-x: auto; white-space: pre; }
+  .salida { background: #1A1215; color: #EFE6E9; font-family: var(--font-mono); font-size: .82rem; padding: .8rem 1.2rem; line-height: 1.7; white-space: pre-wrap; }
+  .salida .titulo { display: block; font-family: var(--font-ui); font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: #C9A3B8; margin-bottom: .2rem; }
+
+  /* Mapa de teclado */
+  .code-scroll { overflow-x: auto; }
+  .tecla { display: inline-block; font-family: var(--font-mono); font-size: .82rem; border: 1px solid var(--border-strong); border-bottom-width: 3px; border-radius: var(--radius-sm); padding: .05rem .45rem; background: var(--white); color: var(--ink); }
+  .simbolo { font-family: var(--font-mono); font-size: 1.2rem; font-weight: 600; color: var(--guinda); white-space: nowrap; }
+
+  /* Práctica de teclado */
+  .tipeo { display: grid; grid-template-columns: 1fr; gap: .8rem; margin: 1rem 0; }
+  .tipeo-fila { display: grid; grid-template-columns: 11rem 1fr auto; gap: .8rem; align-items: center; padding: .7rem 1rem; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--white); }
+  .tipeo-fila .objetivo { font-family: var(--font-mono); font-size: 1.1rem; font-weight: 600; color: var(--guinda-dark); white-space: nowrap; }
+  .tipeo-fila .pista { display: block; font-family: var(--font-ui); font-size: .75rem; color: var(--ink-muted); font-weight: 400; margin-top: .15rem; white-space: normal; }
+  .tipeo-fila input { width: 100%; font-family: var(--font-mono); font-size: 1rem; padding: .5rem .7rem; border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--white); }
+  .tipeo-fila input:focus { outline: 2px solid var(--guinda); border-color: var(--guinda); }
+  .tipeo-fila.ok { background: #EEF7EE; border-color: #2E7D32; }
+  .tipeo-fila.ok input { border-color: #2E7D32; }
+  .tipeo-fila .estado { font-family: var(--font-ui); font-size: 1.2rem; font-weight: 700; color: #2E7D32; width: 1.5rem; text-align: center; }
+
+  /* Respuestas */
+  .registro td, .registro th { vertical-align: middle; }
+  .registro td.etq { font-family: var(--font-mono); font-weight: 500; }
+  input.resp, select.resp { font-family: var(--font-mono); font-size: .92rem; padding: .35rem .5rem; border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--white); color: var(--ink); max-width: 100%; }
+  input.resp { width: 6rem; }
+  select.resp { font-family: var(--font-ui); cursor: pointer; }
+  input.resp:focus, select.resp:focus { outline: 2px solid var(--guinda); border-color: var(--guinda); }
+  .resp.ok  { border-color: #2E7D32; background: #EEF7EE; }
+  .resp.bad { border-color: #B3261E; background: #FCEDEC; }
+  .pregunta { margin: .9rem 0; display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; font-size: .98rem; }
+  .comprobar-fila { margin-top: 1rem; display: flex; gap: .8rem; align-items: center; flex-wrap: wrap; }
+  .veredicto { font-family: var(--font-ui); font-size: .9rem; font-weight: 600; }
+  .veredicto.ok { color: #2E7D32; }
+  .veredicto.bad { color: #B3261E; }
+  .explica { display: none; margin-top: .9rem; }
+  .explica.ver { display: block; }
+
+  details.reto { background: var(--white); border: 1px solid var(--border); border-left: 4px solid var(--guinda); border-radius: var(--radius-md); padding: .8rem 1.1rem; margin: .8rem 0; }
+  details.reto summary { cursor: pointer; font-weight: 600; font-size: 1rem; }
+  details.reto .resp-txt { margin-top: .6rem; padding-top: .6rem; border-top: 1px dashed var(--border); font-size: .97rem; }
+  details.reto pre { margin: .6rem 0 0; padding: .8rem 1rem; background: var(--surface); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: .82rem; line-height: 1.7; overflow-x: auto; }
+
+  @media (max-width: 720px) {
+    .ruta { grid-template-columns: 1fr; }
+    .tipeo-fila { grid-template-columns: 1fr; }
+    .mixtle-tip { flex-direction: column; align-items: center; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo-wrap">
+    <img src="imagen1.png" alt="Mixtle, mascota del curso">
+  </div>
+  <div class="header-text">
+    <span class="inst-name">Instituto de Educación Digital del Estado de Puebla</span>
+    <span class="doc-title">Licenciatura en Sistemas Computacionales · Análisis y Diseño de Algoritmos</span>
+  </div>
+</header>
+
+<section class="class-hero">
+  <div class="page-wrapper" style="padding:0;">
+    <span class="class-label">Unidad 1 · Fundamentos del Análisis Algorítmico · Práctica previa a la Sesión 3</span>
+    <h1>Primeros pasos en PSeInt Web</h1>
+    <span class="class-subtitle">Siete ejercicios muy básicos para activar tu lógica, perder el miedo al teclado y llegar listo a la clase de hoy.</span>
+
+    <div class="meta-row">
+      <div class="meta-item">Programa educativo<span>Lic. en Sistemas Computacionales</span></div>
+      <div class="meta-item">Asignatura<span>Análisis y Diseño de Algoritmos</span></div>
+      <div class="meta-item">Unidad<span>1. Fundamentos del Análisis Algorítmico</span></div>
+      <div class="meta-item">Tema<span>Preparación para el 1.3 Complejidad temporal y espacial</span></div>
+      <div class="meta-item">Fecha<span>11 de octubre de 2026</span></div>
+    </div>
+  </div>
+</section>
+
+<main class="page-wrapper">
+
+  <!-- COMPETENCIAS -->
+  <section class="section">
+    <span class="section-label">Al finalizar esta práctica, el estudiante podrá</span>
+    <h2 class="section-title">Competencias a desarrollar</h2>
+
+    <div class="competency-card">
+      <span class="comp-num">01</span>
+      <span class="comp-text"><strong>Escribir</strong> con el teclado los símbolos que usa PSeInt (<code>&lt;-</code>, <code>"</code>, <code>;</code>, <code>( )</code>, operadores y comparaciones) sin buscarlos tecla por tecla.</span>
+    </div>
+    <div class="competency-card">
+      <span class="comp-num">02</span>
+      <span class="comp-text"><strong>Escribir y ejecutar</strong> programas cortos en PSeInt Web que muestran mensajes, guardan datos, calculan, deciden y repiten.</span>
+    </div>
+    <div class="competency-card">
+      <span class="comp-num">03</span>
+      <span class="comp-text"><strong>Predecir</strong> lo que hará un programa antes de ejecutarlo y comprobar si tu razonamiento fue correcto.</span>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- RUTA -->
+  <section class="section">
+    <span class="section-label">Tu ruta</span>
+    <h2 class="section-title">Qué vas a hacer</h2>
+    <p>Avanza en orden. Cada ejercicio se marca con una palomita verde cuando contestas correctamente.</p>
+
+    <ol class="ruta" id="ruta">
+      <li data-g="k"><a href="#k"><span class="marca">✓</span>Calentamiento de teclado</a></li>
+      <li data-g="e1"><a href="#e1"><span class="marca">✓</span>1 · Mi primer programa</a></li>
+      <li data-g="e2"><a href="#e2"><span class="marca">✓</span>2 · Variables y la flecha</a></li>
+      <li data-g="e3"><a href="#e3"><span class="marca">✓</span>3 · Preguntar y saludar</a></li>
+      <li data-g="e4"><a href="#e4"><span class="marca">✓</span>4 · Operaciones</a></li>
+      <li data-g="e5"><a href="#e5"><span class="marca">✓</span>5 · Tomar decisiones</a></li>
+      <li data-g="e6"><a href="#e6"><span class="marca">✓</span>6 · Repetir con un ciclo</a></li>
+      <li data-g="e7"><a href="#e7"><span class="marca">✓</span>7 · Reto: suma acumulada</a></li>
+    </ol>
+    <div class="ruta-total" id="ruta-total">Completados: 0 de 8</div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- PREPARACIÓN -->
+  <section class="section">
+    <span class="section-label">Antes de empezar</span>
+    <h2 class="section-title">Cómo trabajar</h2>
+
+    <ol class="step-list">
+      <li><span class="step-n">1</span><span class="step-content">Abre <strong>PSeInt Web</strong> en una pestaña nueva y deja esta página abierta en otra.</span></li>
+      <li><span class="step-n">2</span><span class="step-content">Borra el código de ejemplo que aparezca en el editor.</span></li>
+      <li><span class="step-n">3</span><span class="step-content"><strong>Escribe el programa con tu teclado.</strong> No lo copies: tus dedos aprenden los símbolos cuando los escriben.</span></li>
+      <li><span class="step-n">4</span><span class="step-content">Presiona el botón para <strong>ejecutar</strong> (el ícono de reproducir) y observa la consola.</span></li>
+      <li><span class="step-n">5</span><span class="step-content">Si pide un dato, escríbelo en la consola y presiona Enter. Luego anota aquí lo que obtuviste y presiona <strong>Comprobar</strong>.</span></li>
+    </ol>
+
+    <p style="margin-top:1.2rem"><a class="btn" href="https://www.pseint-web.app/" target="_blank" rel="noopener">Abrir PSeInt Web</a></p>
+
+    <div class="concept-box">
+      <span class="concept-title">La forma de todo programa</span>
+      <p style="margin:0">Todo programa en PSeInt empieza con <span class="big">Proceso</span> y un nombre, y termina con <span class="big">FinProceso</span>. Entre esas dos palabras va lo que quieres que haga, <strong>una instrucción por línea</strong>, y casi todas terminan con <span class="big">;</span></p>
+    </div>
+
+    <div class="callout note">
+      <p><strong>Si te equivocas, no pasa nada.</strong> PSeInt te avisa dónde está el error. Lee el mensaje, revisa esa línea y corrige. Equivocarse y corregir es parte de programar.</p>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- CALENTAMIENTO DE TECLADO -->
+  <section class="section" id="k">
+    <span class="section-label">Antes del primer programa</span>
+    <span class="ejercicio-num">Calentamiento</span>
+    <h2 class="section-title">Encuentra los símbolos en tu teclado</h2>
+    <p>Lo que más cuesta al empezar no es la lógica, sino <strong>ubicar los símbolos</strong>. Aquí tienes los que usarás hoy y dónde encontrarlos.</p>
+
+    <div class="code-scroll">
+    <table>
+      <thead><tr><th>Símbolo</th><th>Nombre</th><th>Para qué sirve</th><th>Cómo escribirlo</th></tr></thead>
+      <tbody>
+        <tr><td class="simbolo">&lt;-</td><td>flecha</td><td>guardar un valor en una variable</td><td>tecla <span class="tecla">&lt;</span> (a la izquierda de la Z) y luego la tecla <span class="tecla">-</span></td></tr>
+        <tr><td class="simbolo">" "</td><td>comillas</td><td>encerrar un mensaje de texto</td><td><span class="tecla">Shift</span> + <span class="tecla">2</span></td></tr>
+        <tr><td class="simbolo">;</td><td>punto y coma</td><td>cerrar una instrucción</td><td><span class="tecla">Shift</span> + <span class="tecla">,</span> (coma)</td></tr>
+        <tr><td class="simbolo">( )</td><td>paréntesis</td><td>agrupar una operación</td><td><span class="tecla">Shift</span> + <span class="tecla">8</span> y <span class="tecla">Shift</span> + <span class="tecla">9</span></td></tr>
+        <tr><td class="simbolo">+ -</td><td>suma y resta</td><td>operaciones</td><td>tecla <span class="tecla">+</span> y tecla <span class="tecla">-</span></td></tr>
+        <tr><td class="simbolo">*</td><td>asterisco</td><td>multiplicar</td><td><span class="tecla">Shift</span> + tecla <span class="tecla">+</span></td></tr>
+        <tr><td class="simbolo">/</td><td>diagonal</td><td>dividir</td><td><span class="tecla">Shift</span> + <span class="tecla">7</span></td></tr>
+        <tr><td class="simbolo">=</td><td>igual</td><td>comparar si dos valores son iguales</td><td><span class="tecla">Shift</span> + <span class="tecla">0</span></td></tr>
+        <tr><td class="simbolo">&gt;</td><td>mayor que</td><td>comparar</td><td><span class="tecla">Shift</span> + <span class="tecla">&lt;</span></td></tr>
+        <tr><td class="simbolo">&gt;= &lt;= &lt;&gt;</td><td>mayor o igual, menor o igual, diferente</td><td>comparar</td><td>escribe el símbolo y, junto a él, <span class="tecla">=</span> o <span class="tecla">&gt;</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="callout note">
+      <p>Estas combinaciones corresponden al <strong>teclado en español</strong> (España o Latinoamérica). Si usas un teclado en inglés o en el celular, los símbolos están en otras teclas: pide ayuda a tu docente. Los signos <code>¿</code> y <code>¡</code> y los acentos cambian de lugar según el teclado: búscalos dibujados en las teclas. Si no los encuentras, el programa funciona igual sin ellos.</p>
+    </div>
+
+    <h3 style="font-family:var(--font-ui);font-size:1.05rem;color:var(--guinda-dark);margin:1.6rem 0 .2rem">Ahora tú: escribe cada línea exactamente como aparece</h3>
+    <p style="margin-top:.2rem">Cuando coincida, la fila se pondrá verde.</p>
+
+    <div class="tipeo" id="tipeo">
+      <div class="tipeo-fila" data-objetivo="&lt;-">
+        <div class="objetivo">&lt;-<span class="pista">la flecha</span></div>
+        <input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Escribe: flecha">
+        <div class="estado"></div>
+      </div>
+      <div class="tipeo-fila" data-objetivo="&quot;Hola&quot;">
+        <div class="objetivo">"Hola"<span class="pista">texto entre comillas</span></div>
+        <input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Escribe: Hola entre comillas">
+        <div class="estado"></div>
+      </div>
+      <div class="tipeo-fila" data-objetivo=";">
+        <div class="objetivo">;<span class="pista">punto y coma</span></div>
+        <input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Escribe: punto y coma">
+        <div class="estado"></div>
+      </div>
+      <div class="tipeo-fila" data-objetivo="(2 + 3) * 4">
+        <div class="objetivo">(2 + 3) * 4<span class="pista">paréntesis y asterisco</span></div>
+        <input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Escribe: dos más tres entre paréntesis por cuatro">
+        <div class="estado"></div>
+      </div>
+      <div class="tipeo-fila" data-objetivo="10 / 2">
+        <div class="objetivo">10 / 2<span class="pista">diagonal para dividir</span></div>
+        <input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Escribe: diez entre dos">
+        <div class="estado"></div>
+      </div>
+      <div class="tipeo-fila" data-objetivo=">=">
+        <div class="objetivo">&gt;=<span class="pista">mayor o igual</span></div>
+        <input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Escribe: mayor o igual">
+        <div class="estado"></div>
+      </div>
+      <div class="tipeo-fila" data-objetivo="<>">
+        <div class="objetivo">&lt;&gt;<span class="pista">diferente de</span></div>
+        <input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Escribe: diferente de">
+        <div class="estado"></div>
+      </div>
+      <div class="tipeo-fila" data-objetivo="edad <- 18;">
+        <div class="objetivo">edad &lt;- 18;<span class="pista">una asignación completa</span></div>
+        <input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Escribe: edad flecha 18 punto y coma">
+        <div class="estado"></div>
+      </div>
+      <div class="tipeo-fila" data-objetivo="Escribir &quot;Hola&quot;;">
+        <div class="objetivo">Escribir "Hola";<span class="pista">una instrucción completa</span></div>
+        <input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Escribe: Escribir Hola entre comillas con punto y coma">
+        <div class="estado"></div>
+      </div>
+    </div>
+    <div class="ruta-total" id="tipeo-total">Líneas correctas: 0 de 9</div>
+
+    <div class="mixtle-tip">
+      <img src="imagen2.png" alt="Mixtle">
+      <div>
+        <span class="mixtle-name">Consejo de Mixtle</span>
+        <p>Repite cada línea hasta que la escribas sin mirar el teclado. Con 5 minutos de práctica ganas velocidad para todo el curso. ¡Los símbolos se aprenden con los dedos!</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- EJ 1 -->
+  <section class="section" id="e1">
+    <span class="ejercicio-num">Ejercicio 1</span>
+    <h2 class="section-title">Mi primer programa</h2>
+    <p><strong>Qué aprenderás:</strong> la estructura <span class="big">Proceso … FinProceso</span>, la instrucción <span class="big">Escribir</span>, las comillas y el punto y coma.</p>
+
+    <div class="code-panel">
+      <div class="code-head">Saludo <span class="badge">Escríbelo tú</span></div>
+      <pre>Proceso Saludo
+    Escribir "Hola, soy estudiante de Sistemas";
+FinProceso</pre>
+      <div class="salida"><span class="titulo">Lo que debe aparecer en la consola</span>Hola, soy estudiante de Sistemas</div>
+    </div>
+
+    <p><strong>Pruébalo:</strong> cambia el mensaje para que diga tu nombre y vuelve a ejecutar. Luego responde:</p>
+
+    <div class="pregunta" data-grupo="e1">¿Qué símbolo termina cada instrucción?
+      <select class="resp" data-ans="pc" aria-label="Símbolo que termina la instrucción">
+        <option value="">Elige…</option><option value="pt">. (punto)</option><option value="pc">; (punto y coma)</option><option value="dp">: (dos puntos)</option>
+      </select>
+    </div>
+    <div class="pregunta" data-grupo="e1">El programa empieza con <code>Proceso</code> y termina con
+      <select class="resp" data-ans="fin" aria-label="Palabra de cierre">
+        <option value="">Elige…</option><option value="fin">FinProceso</option><option value="cer">Cerrar</option><option value="stop">Alto</option>
+      </select>
+    </div>
+    <div class="pregunta" data-grupo="e1">¿Qué encierra el texto que se muestra en pantalla?
+      <select class="resp" data-ans="com" aria-label="Qué encierra el texto">
+        <option value="">Elige…</option><option value="par">paréntesis ( )</option><option value="com">comillas " "</option><option value="cor">llaves { }</option>
+      </select>
+    </div>
+
+    <div class="comprobar-fila">
+      <button class="btn sec comprobar" type="button" data-grupo="e1">Comprobar</button>
+      <span class="veredicto" data-grupo="e1"></span>
+    </div>
+    <div class="explica callout note" data-grupo="e1"><p><strong>Escribir</strong> muestra un mensaje en la consola. El texto va entre <strong>comillas</strong> y la instrucción termina con <strong>punto y coma</strong>.</p></div>
+
+    <details class="reto">
+      <summary>Errores comunes en este ejercicio</summary>
+      <div class="resp-txt">Olvidar cerrar las comillas, olvidar el <code>;</code> al final de la línea o escribir <code>FinProces</code> en lugar de <code>FinProceso</code>. PSeInt marca la línea donde encontró el problema.</div>
+    </details>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- EJ 2 -->
+  <section class="section" id="e2">
+    <span class="ejercicio-num">Ejercicio 2</span>
+    <h2 class="section-title">Variables y la flecha</h2>
+    <p><strong>Qué aprenderás:</strong> guardar un dato en una <strong>variable</strong> con la flecha <span class="big">&lt;-</span>.</p>
+
+    <div class="mixtle-tip">
+      <img src="imagen2.png" alt="Mixtle">
+      <div>
+        <span class="mixtle-name">Analogía</span>
+        <p>Una variable es una <strong>cajita con etiqueta</strong>. La etiqueta es el nombre (<code>edad</code>) y dentro guardas un valor. La flecha <code>&lt;-</code> significa "mete el valor de la derecha en la caja de la izquierda".</p>
+      </div>
+    </div>
+
+    <div class="code-panel">
+      <div class="code-head">MiEdad <span class="badge">Escríbelo tú</span></div>
+      <pre>Proceso MiEdad
+    Definir edad Como Entero;
+    edad <- 18;
+    Escribir "Tengo ", edad, " años";
+    edad <- edad + 1;
+    Escribir "El próximo año tendré ", edad, " años";
+FinProceso</pre>
+      <div class="salida"><span class="titulo">Lo que debe aparecer en la consola</span>Tengo 18 años
+El próximo año tendré 19 años</div>
+    </div>
+
+    <p><strong>Pruébalo:</strong> cambia el 18 por tu edad y ejecuta de nuevo.</p>
+
+    <div class="pregunta" data-grupo="e2">Después de <code>edad &lt;- edad + 1;</code> la variable <code>edad</code> vale:
+      <input class="resp" inputmode="numeric" data-ans="19" aria-label="Valor final de edad">
+    </div>
+    <div class="pregunta" data-grupo="e2">La flecha <code>&lt;-</code> sirve para:
+      <select class="resp" data-ans="guardar" aria-label="Función de la flecha">
+        <option value="">Elige…</option><option value="guardar">guardar un valor en una variable</option><option value="comparar">comparar dos valores</option><option value="sumar">sumar dos números</option>
+      </select>
+    </div>
+
+    <div class="comprobar-fila">
+      <button class="btn sec comprobar" type="button" data-grupo="e2">Comprobar</button>
+      <span class="veredicto" data-grupo="e2"></span>
+    </div>
+    <div class="explica callout note" data-grupo="e2"><p>Primero la caja <code>edad</code> guarda 18. Luego <code>edad + 1</code> se calcula (19) y se <strong>vuelve a guardar</strong> en la misma caja. Una variable puede cambiar de valor; por eso se llama variable.</p></div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- EJ 3 -->
+  <section class="section" id="e3">
+    <span class="ejercicio-num">Ejercicio 3</span>
+    <h2 class="section-title">Preguntar y saludar</h2>
+    <p><strong>Qué aprenderás:</strong> pedir un dato al usuario con <span class="big">Leer</span> y usarlo en un mensaje.</p>
+
+    <div class="code-panel">
+      <div class="code-head">Presentacion <span class="badge">Escríbelo tú</span></div>
+      <pre>Proceso Presentacion
+    Definir nombre Como Caracter;
+    Escribir "¿Cómo te llamas?";
+    Leer nombre;
+    Escribir "Mucho gusto, ", nombre;
+FinProceso</pre>
+      <div class="salida"><span class="titulo">Lo que debe aparecer en la consola (con el nombre Ana)</span>¿Cómo te llamas?
+Ana
+Mucho gusto, Ana</div>
+    </div>
+
+    <p><strong>Pruébalo:</strong> ejecútalo y, cuando se detenga esperando, escribe tu nombre en la consola y presiona Enter.</p>
+
+    <div class="pregunta" data-grupo="e3"><code>Escribir</code> sirve para
+      <select class="resp" data-ans="mostrar" aria-label="Función de Escribir">
+        <option value="">Elige…</option><option value="mostrar">mostrar un mensaje en pantalla</option><option value="pedir">pedir un dato al usuario</option><option value="guardar">terminar el programa</option>
+      </select>
+    </div>
+    <div class="pregunta" data-grupo="e3"><code>Leer</code> sirve para
+      <select class="resp" data-ans="pedir" aria-label="Función de Leer">
+        <option value="">Elige…</option><option value="mostrar">mostrar un mensaje en pantalla</option><option value="pedir">pedir un dato al usuario</option><option value="guardar">terminar el programa</option>
+      </select>
+    </div>
+    <div class="pregunta" data-grupo="e3">El dato que escribe el usuario se guarda en la variable:
+      <select class="resp" data-ans="nombre" aria-label="Variable donde se guarda el dato">
+        <option value="">Elige…</option><option value="nombre">nombre</option><option value="Leer">Leer</option><option value="Mucho">Mucho</option>
+      </select>
+    </div>
+
+    <div class="comprobar-fila">
+      <button class="btn sec comprobar" type="button" data-grupo="e3">Comprobar</button>
+      <span class="veredicto" data-grupo="e3"></span>
+    </div>
+    <div class="explica callout note" data-grupo="e3"><p>Piensa en <strong>Escribir</strong> como "el programa habla" y en <strong>Leer</strong> como "el programa escucha". Lo que escuche se guarda en la variable que pongas después de <code>Leer</code>.</p></div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- EJ 4 -->
+  <section class="section" id="e4">
+    <span class="ejercicio-num">Ejercicio 4</span>
+    <h2 class="section-title">Operaciones</h2>
+    <p><strong>Qué aprenderás:</strong> usar <code>+</code> <code>-</code> <code>*</code> <code>/</code> y entender para qué sirven los paréntesis.</p>
+
+    <div class="code-panel">
+      <div class="code-head">Operaciones <span class="badge">Escríbelo tú</span></div>
+      <pre>Proceso Operaciones
+    Definir a, b Como Real;
+    Escribir "Escribe el primer número:";
+    Leer a;
+    Escribir "Escribe el segundo número:";
+    Leer b;
+    Escribir "Suma: ", a + b;
+    Escribir "Resta: ", a - b;
+    Escribir "Multiplicación: ", a * b;
+    Escribir "División: ", a / b;
+FinProceso</pre>
+    </div>
+
+    <p><strong>Pruébalo</strong> con a = 12 y b = 4. Escribe lo que muestra la consola:</p>
+
+    <div class="code-scroll">
+    <table class="registro" data-grupo="e4">
+      <thead><tr><th>Operación</th><th>Resultado</th></tr></thead>
+      <tbody>
+        <tr><td class="etq">Suma</td><td><input class="resp" inputmode="numeric" data-ans="16" aria-label="Suma"></td></tr>
+        <tr><td class="etq">Resta</td><td><input class="resp" inputmode="numeric" data-ans="8" aria-label="Resta"></td></tr>
+        <tr><td class="etq">Multiplicación</td><td><input class="resp" inputmode="numeric" data-ans="48" aria-label="Multiplicación"></td></tr>
+        <tr><td class="etq">División</td><td><input class="resp" inputmode="numeric" data-ans="3" aria-label="División"></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <p><strong>Sin ejecutar</strong>, usa tu lógica. ¿Cuánto da cada operación? (Pista: primero se resuelve lo que está dentro de los paréntesis y la multiplicación va antes que la suma.)</p>
+    <div class="pregunta" data-grupo="e4"><code>2 + 3 * 4</code> =
+      <input class="resp" inputmode="numeric" data-ans="14" aria-label="Resultado de dos más tres por cuatro">
+    </div>
+    <div class="pregunta" data-grupo="e4"><code>(2 + 3) * 4</code> =
+      <input class="resp" inputmode="numeric" data-ans="20" aria-label="Resultado de dos más tres entre paréntesis por cuatro">
+    </div>
+
+    <div class="comprobar-fila">
+      <button class="btn sec comprobar" type="button" data-grupo="e4">Comprobar</button>
+      <span class="veredicto" data-grupo="e4"></span>
+    </div>
+    <div class="explica callout note" data-grupo="e4"><p>La multiplicación y la división se hacen <strong>antes</strong> que la suma y la resta. Los <strong>paréntesis</strong> cambian el orden: lo de adentro se resuelve primero. Por eso <code>2 + 3 * 4</code> da 14 y <code>(2 + 3) * 4</code> da 20.</p></div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- EJ 5 -->
+  <section class="section" id="e5">
+    <span class="ejercicio-num">Ejercicio 5</span>
+    <h2 class="section-title">Tomar decisiones</h2>
+    <p><strong>Qué aprenderás:</strong> hacer que el programa elija entre dos caminos con <span class="big">Si … Entonces … SiNo … FinSi</span>.</p>
+
+    <div class="code-panel">
+      <div class="code-head">MayorDeEdad <span class="badge">Escríbelo tú</span></div>
+      <pre>Proceso MayorDeEdad
+    Definir edad Como Entero;
+    Escribir "¿Cuántos años tienes?";
+    Leer edad;
+    Si edad >= 18 Entonces
+        Escribir "Eres mayor de edad";
+    SiNo
+        Escribir "Eres menor de edad";
+    FinSi
+FinProceso</pre>
+    </div>
+
+    <p><strong>Predice</strong> y luego ejecuta con cada edad. ¿Qué mensaje aparece?</p>
+
+    <div class="code-scroll">
+    <table class="registro" data-grupo="e5">
+      <thead><tr><th>Edad que escribes</th><th>Mensaje</th></tr></thead>
+      <tbody>
+        <tr><td class="etq">17</td><td><select class="resp" data-ans="menor" aria-label="Mensaje con 17"><option value="">Elige…</option><option value="mayor">Eres mayor de edad</option><option value="menor">Eres menor de edad</option></select></td></tr>
+        <tr><td class="etq">18</td><td><select class="resp" data-ans="mayor" aria-label="Mensaje con 18"><option value="">Elige…</option><option value="mayor">Eres mayor de edad</option><option value="menor">Eres menor de edad</option></select></td></tr>
+        <tr><td class="etq">25</td><td><select class="resp" data-ans="mayor" aria-label="Mensaje con 25"><option value="">Elige…</option><option value="mayor">Eres mayor de edad</option><option value="menor">Eres menor de edad</option></select></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <p><strong>Experimenta:</strong> cambia <code>&gt;=</code> por <code>&gt;</code> y ejecuta de nuevo con 18.</p>
+    <div class="pregunta" data-grupo="e5">Con <code>&gt;</code> y edad 18, el mensaje es:
+      <select class="resp" data-ans="menor" aria-label="Mensaje con mayor que y 18">
+        <option value="">Elige…</option><option value="mayor">Eres mayor de edad</option><option value="menor">Eres menor de edad</option>
+      </select>
+    </div>
+
+    <div class="comprobar-fila">
+      <button class="btn sec comprobar" type="button" data-grupo="e5">Comprobar</button>
+      <span class="veredicto" data-grupo="e5"></span>
+    </div>
+    <div class="explica callout note" data-grupo="e5"><p><code>&gt;=</code> significa "mayor <strong>o igual</strong>", así que 18 sí cuenta como mayor de edad. Con <code>&gt;</code> solo cuentan los que son <strong>estrictamente mayores</strong> que 18. Un solo símbolo cambia el resultado: por eso hay que escribirlos con cuidado.</p></div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- EJ 6 -->
+  <section class="section" id="e6">
+    <span class="ejercicio-num">Ejercicio 6</span>
+    <h2 class="section-title">Repetir con un ciclo</h2>
+    <p><strong>Qué aprenderás:</strong> repetir instrucciones con <span class="big">Para … Hasta … Hacer … FinPara</span>. Este es el primer paso para contar pasos, que es lo que haremos en la clase.</p>
+
+    <div class="code-panel">
+      <div class="code-head">TablaDel3 <span class="badge">Escríbelo tú</span></div>
+      <pre>Proceso TablaDel3
+    Definir i Como Entero;
+    Para i <- 1 Hasta 10 Hacer
+        Escribir "3 x ", i, " = ", 3 * i;
+    FinPara
+FinProceso</pre>
+      <div class="salida"><span class="titulo">Lo que debe aparecer en la consola (primeras líneas)</span>3 x 1 = 3
+3 x 2 = 6
+3 x 3 = 9
+...</div>
+    </div>
+
+    <p><strong>Ejecútalo</strong> y responde:</p>
+    <div class="pregunta" data-grupo="e6">La última línea que se muestra es <code>3 x 10 =</code>
+      <input class="resp" inputmode="numeric" data-ans="30" aria-label="Resultado de tres por diez">
+    </div>
+    <div class="pregunta" data-grupo="e6">¿Cuántas veces se ejecutó el <code>Escribir</code> de adentro del ciclo?
+      <input class="resp" inputmode="numeric" data-ans="10" aria-label="Número de repeticiones">
+    </div>
+    <div class="pregunta" data-grupo="e6">Si cambias <code>Hasta 10</code> por <code>Hasta 25</code>, el <code>Escribir</code> se ejecutará:
+      <input class="resp" inputmode="numeric" data-ans="25" aria-label="Número de repeticiones con 25">
+      veces
+    </div>
+
+    <div class="comprobar-fila">
+      <button class="btn sec comprobar" type="button" data-grupo="e6">Comprobar</button>
+      <span class="veredicto" data-grupo="e6"></span>
+    </div>
+    <div class="explica callout note" data-grupo="e6"><p>La variable <code>i</code> va tomando los valores 1, 2, 3… hasta llegar al límite, y en cada vuelta se repite lo que está entre <code>Hacer</code> y <code>FinPara</code>. Si el límite es <em>n</em>, el trabajo se repite <em>n</em> veces. Esa idea es la base de la clase de hoy.</p></div>
+
+    <div class="mixtle-tip">
+      <img src="imagen2.png" alt="Mixtle">
+      <div>
+        <span class="mixtle-name">Consejo de Mixtle</span>
+        <p>Cada <code>Para</code> necesita su <code>FinPara</code>, y cada <code>Si</code> su <code>FinSi</code>. Si algo no corre, revisa que cada palabra de apertura tenga su cierre.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- EJ 7 -->
+  <section class="section" id="e7">
+    <span class="ejercicio-num">Ejercicio 7 · Reto</span>
+    <h2 class="section-title">Suma acumulada</h2>
+    <p><strong>Tu misión:</strong> escribe tú mismo un programa que pida un número <em>n</em> y muestre la suma <code>1 + 2 + 3 + … + n</code>. Intenta primero sin ayuda; si te atoras, abre las pistas.</p>
+
+    <details class="reto">
+      <summary>Pista 1: qué variables necesitas</summary>
+      <div class="resp-txt">Necesitas tres variables enteras: <code>n</code> (hasta dónde sumar), <code>i</code> (el contador del ciclo) y <code>suma</code> (donde vas acumulando). Antes del ciclo, la suma debe empezar en cero: <code>suma &lt;- 0;</code></div>
+    </details>
+    <details class="reto">
+      <summary>Pista 2: qué va dentro del ciclo</summary>
+      <div class="resp-txt">Un ciclo <code>Para i &lt;- 1 Hasta n Hacer</code> y, en cada vuelta, sumar <code>i</code> a lo que ya llevas: <code>suma &lt;- suma + i;</code></div>
+    </details>
+
+    <p>Antes de ejecutar, completa a mano esta <strong>tabla de seguimiento</strong> para n = 4. Anota cuánto vale <code>suma</code> al terminar cada vuelta:</p>
+
+    <div class="code-scroll">
+    <table class="registro" data-grupo="e7">
+      <thead><tr><th>Vuelta (valor de i)</th><th>Valor de suma al terminar</th></tr></thead>
+      <tbody>
+        <tr><td class="etq">i = 1</td><td><input class="resp" inputmode="numeric" data-ans="1" aria-label="Suma con i igual a 1"></td></tr>
+        <tr><td class="etq">i = 2</td><td><input class="resp" inputmode="numeric" data-ans="3" aria-label="Suma con i igual a 2"></td></tr>
+        <tr><td class="etq">i = 3</td><td><input class="resp" inputmode="numeric" data-ans="6" aria-label="Suma con i igual a 3"></td></tr>
+        <tr><td class="etq">i = 4</td><td><input class="resp" inputmode="numeric" data-ans="10" aria-label="Suma con i igual a 4"></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <p>Ahora ejecuta tu programa con n = 10 y escribe el resultado:</p>
+    <div class="pregunta" data-grupo="e7">Suma de 1 a 10:
+      <input class="resp" inputmode="numeric" data-ans="55" aria-label="Suma de uno a diez">
+    </div>
+
+    <div class="comprobar-fila">
+      <button class="btn sec comprobar" type="button" data-grupo="e7">Comprobar</button>
+      <span class="veredicto" data-grupo="e7"></span>
+    </div>
+    <div class="explica callout note" data-grupo="e7"><p>La variable <code>suma</code> es un <strong>acumulador</strong>: en cada vuelta guarda lo que tenía más el nuevo valor de <code>i</code> (1, 3, 6, 10…). Llevar una tabla de seguimiento, como la que acabas de llenar, se llama <strong>prueba de escritorio</strong> y es la mejor forma de revisar la lógica antes de ejecutar.</p></div>
+
+    <details class="reto">
+      <summary>Ver una solución posible (solo después de intentarlo)</summary>
+      <div class="resp-txt">
+<pre>Proceso SumaAcumulada
+    Definir n, i, suma Como Entero;
+    Escribir "¿Hasta qué número quieres sumar?";
+    Leer n;
+    suma <- 0;
+    Para i <- 1 Hasta n Hacer
+        suma <- suma + i;
+    FinPara
+    Escribir "La suma es: ", suma;
+FinProceso</pre>
+      </div>
+    </details>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- ERRORES -->
+  <section class="section">
+    <span class="section-label">Para tener a la mano</span>
+    <h2 class="section-title">Cómo corregir los errores más comunes</h2>
+
+    <div class="code-scroll">
+    <table>
+      <thead><tr><th>Lo que pasó</th><th>Qué revisar</th></tr></thead>
+      <tbody>
+        <tr><td>PSeInt marca error en una línea</td><td>Falta el <code>;</code> al final o hay un símbolo mal escrito.</td></tr>
+        <tr><td>El mensaje sale cortado o da error de texto</td><td>Falta cerrar las comillas: debe haber una <code>"</code> al inicio y otra al final.</td></tr>
+        <tr><td>El programa no termina de leerse</td><td>Falta una palabra de cierre: <code>FinProceso</code>, <code>FinPara</code> o <code>FinSi</code>.</td></tr>
+        <tr><td>El resultado no es el esperado</td><td>Revisa el símbolo: <code>&lt;-</code> guarda, <code>=</code> compara, <code>&gt;</code> y <code>&gt;=</code> no son lo mismo.</td></tr>
+        <tr><td>La variable no existe</td><td>Revisa que el nombre esté escrito igual en todas partes, sin espacios ni acentos (por ejemplo <code>calificacion</code>).</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- CONCLUSIÓN -->
+  <section class="section">
+    <span class="section-label">Cierre de la práctica</span>
+    <h2 class="section-title">Conclusión</h2>
+    <p>En esta práctica escribiste tus primeros programas en PSeInt Web y repasaste lo esencial: mostrar mensajes con <strong>Escribir</strong>, guardar datos con la flecha <strong>&lt;-</strong>, pedirlos con <strong>Leer</strong>, calcular con operadores, decidir con <strong>Si</strong> y repetir con <strong>Para</strong>. También practicaste ubicar en el teclado los símbolos que más vas a usar. En la clase de hoy aprovecharemos justo lo último: con un ciclo y un contador podremos <strong>medir cuántos pasos da un programa</strong>, que es la base de la complejidad temporal y espacial.</p>
+  </section>
+
+  <section class="section">
+    <span class="section-label">Consulta</span>
+    <h2 class="section-title">Referencias bibliográficas</h2>
+    <ul style="font-size:.92rem; color: var(--ink-secondary);">
+      <li>García, A. (2022). <em>Introducción a la algoritmia y lógica de programación: Una base sólida para sistemas</em>. Universidad Nacional Autónoma de México (UNAM).</li>
+      <li>Novara, P. (s. f.). <em>PSeInt: Intérprete de pseudocódigo</em>. https://pseint.sourceforge.net/</li>
+      <li>PSeInt Web. (s. f.). <em>Editor en línea de pseudocódigo PSeInt</em>. https://www.pseint-web.app/</li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <span><strong>Análisis y Diseño de Algoritmos</strong> — Unidad 1 · Práctica previa a la Sesión 3</span>
+  <span>Mtro. José Armando Vera Rodríguez · IEDEP · 11 de octubre de 2026</span>
+</footer>
+
+<script>
+(function () {
+  var TOTAL_RUTA = 8;
+  var hechos = {};
+
+  function marcarRuta(g) {
+    hechos[g] = true;
+    var li = document.querySelector('#ruta li[data-g="' + g + '"]');
+    if (li) li.classList.add('hecho');
+    var n = Object.keys(hechos).length;
+    document.getElementById('ruta-total').textContent = 'Completados: ' + n + ' de ' + TOTAL_RUTA +
+      (n === TOTAL_RUTA ? '. ¡Excelente, estás listo para la clase!' : '');
+  }
+
+  /* Calentamiento de teclado */
+  var filas = document.querySelectorAll('#tipeo .tipeo-fila');
+  function actualizarTipeo() {
+    var ok = 0;
+    filas.forEach(function (f) { if (f.classList.contains('ok')) ok++; });
+    document.getElementById('tipeo-total').textContent = 'Líneas correctas: ' + ok + ' de ' + filas.length;
+    if (ok === filas.length) marcarRuta('k');
+  }
+  filas.forEach(function (f) {
+    var objetivo = f.getAttribute('data-objetivo');
+    var inp = f.querySelector('input');
+    var est = f.querySelector('.estado');
+    inp.addEventListener('input', function () {
+      var bien = inp.value.trim() === objetivo;
+      f.classList.toggle('ok', bien);
+      est.textContent = bien ? '✓' : '';
+      actualizarTipeo();
+    });
+  });
+
+  /* Comprobar respuestas por ejercicio */
+  document.querySelectorAll('button.comprobar').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var g = btn.getAttribute('data-grupo');
+      var campos = document.querySelectorAll('[data-grupo="' + g + '"] [data-ans], [data-grupo="' + g + '"][data-ans]');
+      var total = 0, bien = 0, vacios = 0;
+      campos.forEach(function (c) {
+        total++;
+        var v = (c.value || '').trim();
+        c.classList.remove('ok', 'bad');
+        if (!v) { vacios++; c.classList.add('bad'); return; }
+        if (v === c.getAttribute('data-ans')) { bien++; c.classList.add('ok'); } else c.classList.add('bad');
+      });
+      var ver = document.querySelector('.veredicto[data-grupo="' + g + '"]');
+      var exp = document.querySelector('.explica[data-grupo="' + g + '"]');
+      if (bien === total) {
+        ver.className = 'veredicto ok'; ver.textContent = '¡Todo correcto!';
+        exp.classList.add('ver');
+        marcarRuta(g);
+      } else if (vacios > 0) {
+        ver.className = 'veredicto bad'; ver.textContent = 'Te faltan ' + vacios + ' respuesta(s) por completar.';
+      } else {
+        ver.className = 'veredicto bad'; ver.textContent = 'Llevas ' + bien + ' de ' + total + ' bien. Revisa los campos en rojo y vuelve a ejecutar.';
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>
