@@ -1,0 +1,13 @@
+Proceso DosCiclosSeguidos
+    Definir n, i, contador Como Entero;
+    Escribir "¿Cuántos elementos tiene tu lista?";
+    Leer n;
+    contador <- 0;
+    Para i <- 1 Hasta n Hacer
+        contador <- contador + 1;
+    FinPara
+    Para i <- 1 Hasta n Hacer
+        contador <- contador + 1;
+    FinPara
+    Escribir "Operaciones realizadas: ", contador;
+FinProceso
