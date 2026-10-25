@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sesión 4 — Casos mejor, promedio y peor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+  body { background: var(--white); }
+  .site-header { flex-wrap: wrap; }
+
+  .mixtle-tip { display: flex; gap: 1.25rem; align-items: flex-start; background: var(--guinda-light); border: 1px solid #D8A8BA; border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin: 1.8rem 0; }
+  .mixtle-tip img { width: 84px; height: auto; flex-shrink: 0; border-radius: var(--radius-md); }
+  .mixtle-tip .mixtle-name { font-family: var(--font-ui); font-size: .78rem; text-transform: uppercase; letter-spacing: .12em; color: var(--guinda); font-weight: 700; display: block; margin-bottom: .4rem; }
+  .mixtle-tip p { font-size: .97rem; margin-bottom: 0; }
+
+  .big { font-family: var(--font-mono); font-weight: 600; color: var(--guinda-dark); white-space: nowrap; }
+  code { font-family: var(--font-mono); font-size: .88em; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .1rem .4rem; color: var(--guinda-dark); }
+
+  .btn { display: inline-block; cursor: pointer; text-decoration: none; font-family: var(--font-ui); font-weight: 600; font-size: .92rem; padding: .65rem 1.3rem; border-radius: var(--radius-md); border: 1.5px solid var(--guinda); background: var(--guinda); color: var(--white); }
+  .btn:hover { background: var(--guinda-dark); }
+  .btn.sec { background: var(--white); color: var(--guinda); }
+  .btn.sec:hover { background: var(--guinda-light); }
+  .btn[disabled] { opacity: .5; cursor: not-allowed; }
+
+  .ejercicio-num { display: inline-block; font-family: var(--font-ui); font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; background: var(--guinda); color: var(--white); padding: .2rem .7rem; border-radius: 99px; margin-bottom: .5rem; }
+
+  /* Tres casos */
+  .tres { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.2rem 0; }
+  .caso { background: var(--white); border: 1px solid var(--border); border-top: 5px solid var(--guinda); border-radius: var(--radius-lg); padding: 1.1rem 1.2rem; }
+  .caso.mejor { border-top-color: #C9A3B8; }
+  .caso.prom  { border-top-color: #A8689A; }
+  .caso.peor  { border-top-color: #490b58; }
+  .caso .quien { font-family: var(--font-ui); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-muted); display: block; }
+  .caso .titulo { font-family: var(--font-display); font-size: 1.55rem; font-weight: 700; color: var(--guinda); display: block; margin: .15rem 0 .4rem; }
+  .caso p { font-size: .94rem; margin: .3rem 0 0; }
+  .caso .pasos { font-family: var(--font-mono); font-weight: 600; color: var(--guinda-dark); }
+
+  /* Simulador */
+  .sim { background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-lg); padding: 1.3rem 1.5rem; margin: 1.2rem 0; }
+  .sim-controles { display: flex; gap: .8rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; font-family: var(--font-ui); font-size: .92rem; }
+  .sim-controles label { font-weight: 600; color: var(--guinda); }
+  .sim select { font-family: var(--font-mono); font-size: .95rem; padding: .4rem .6rem; border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--white); }
+  .fila { display: grid; grid-template-columns: repeat(10, 1fr); gap: .45rem; margin: .8rem 0; }
+  .carta { position: relative; text-align: center; padding: .85rem .2rem .55rem; background: var(--white); border: 2px solid var(--border-strong); border-radius: var(--radius-md); font-family: var(--font-mono); font-size: 1.15rem; font-weight: 600; color: var(--ink); transition: background .2s, border-color .2s, transform .2s; }
+  .carta .pos { display: block; font-family: var(--font-ui); font-size: .68rem; color: var(--ink-muted); font-weight: 500; margin-top: .25rem; }
+  .carta.actual { border-color: var(--guinda); background: var(--guinda-light); transform: translateY(-5px); }
+  .carta.visto { background: #EFEAEC; color: var(--ink-muted); border-color: var(--border); }
+  .carta.hallado { background: #2E7D32; border-color: #2E7D32; color: var(--white); transform: translateY(-5px); }
+  .carta.hallado .pos { color: #D5EBD6; }
+  .contador { font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; color: var(--guinda-dark); line-height: 1; }
+  .contador small { font-family: var(--font-ui); font-size: .8rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-muted); margin-left: .5rem; }
+  .sim-mensaje { margin-top: .8rem; font-family: var(--font-ui); font-size: .95rem; font-weight: 600; min-height: 1.5em; }
+  .sim-mensaje.mejor { color: #2E7D32; }
+  .sim-mensaje.peor { color: #B3261E; }
+  .sim-mensaje.medio { color: var(--guinda-dark); }
+  .historial { list-style: none; padding: 0; margin: .8rem 0 0; font-family: var(--font-ui); font-size: .85rem; display: flex; flex-wrap: wrap; gap: .4rem; }
+  .historial li { padding: .25rem .65rem; border-radius: 99px; background: var(--white); border: 1px solid var(--border-strong); }
+  .historial li.mejor { border-color: #2E7D32; color: #2E7D32; }
+  .historial li.peor { border-color: #B3261E; color: #B3261E; }
+
+  /* Gráfica */
+  .grafica { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.2rem 1.4rem 1.4rem; margin: 1.2rem 0; background: var(--white); }
+  .grafica h4 { font-family: var(--font-ui); font-size: .85rem; letter-spacing: .06em; text-transform: uppercase; color: var(--guinda); margin: 0 0 .8rem; }
+  .barra-fila { display: grid; grid-template-columns: 7.5rem 1fr 2.2rem; gap: .7rem; align-items: center; margin: .3rem 0; font-family: var(--font-ui); font-size: .82rem; }
+  .barra-fila .nombre { color: var(--ink-secondary); }
+  .barra-fila .valor { font-family: var(--font-mono); font-weight: 600; color: var(--guinda-dark); text-align: right; }
+  .pista { position: relative; height: 16px; background: var(--guinda-light); border-radius: 99px; overflow: visible; }
+  .pista i { display: block; height: 100%; background: var(--guinda); border-radius: 99px; }
+  .pista .media { position: absolute; top: -4px; bottom: -4px; width: 0; border-left: 2px dashed var(--guinda-rule); }
+  .leyenda-media { font-family: var(--font-ui); font-size: .8rem; color: var(--ink-secondary); margin-top: .8rem; }
+  .leyenda-media b { color: var(--guinda-rule); }
+
+  /* Calculadora */
+  .calc { background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-lg); padding: 1.3rem 1.5rem; margin: 1.2rem 0; }
+  .calc label { font-family: var(--font-ui); font-weight: 600; color: var(--guinda); font-size: .9rem; display: block; margin-bottom: .4rem; }
+  .calc input[type="range"] { width: 100%; accent-color: #490b58; }
+  .calc .n-val { font-family: var(--font-display); font-size: 2.2rem; font-weight: 700; color: var(--guinda-dark); }
+  .calc td.num { font-family: var(--font-mono); text-align: right; white-space: nowrap; }
+
+  /* Paneles de código */
+  .code-panel { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; margin: 1.1rem 0; }
+  .code-panel .code-head { background: var(--guinda); color: var(--white); padding: .5rem 1rem; font-family: var(--font-ui); font-size: .82rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; gap: .6rem; flex-wrap: wrap; }
+  .code-panel .code-head .badge { font-family: var(--font-mono); font-size: .72rem; background: rgba(255,255,255,.18); padding: .1rem .5rem; border-radius: 999px; }
+  .copiar { cursor: pointer; font-family: var(--font-ui); font-size: .75rem; font-weight: 600; color: var(--guinda); background: var(--white); border: none; border-radius: var(--radius-sm); padding: .3rem .7rem; }
+  .copiar:hover { background: var(--guinda-light); }
+  .code-panel pre { margin: 0; padding: 1rem 1.2rem; background: var(--white); font-family: var(--font-mono); font-size: .82rem; line-height: 1.7; color: var(--ink); overflow-x: auto; white-space: pre; }
+  .code-scroll { overflow-x: auto; }
+
+  /* Respuestas */
+  .registro td, .registro th { vertical-align: middle; }
+  .registro td.etq { font-family: var(--font-mono); font-weight: 500; }
+  input.resp, select.resp { font-family: var(--font-mono); font-size: .92rem; padding: .35rem .5rem; border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--white); color: var(--ink); max-width: 100%; }
+  input.resp { width: 6rem; }
+  select.resp { font-family: var(--font-ui); cursor: pointer; }
+  input.resp:focus, select.resp:focus { outline: 2px solid var(--guinda); border-color: var(--guinda); }
+  .resp.ok  { border-color: #2E7D32; background: #EEF7EE; }
+  .resp.bad { border-color: #B3261E; background: #FCEDEC; }
+  .pregunta { margin: .9rem 0; display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; font-size: .98rem; }
+  .comprobar-fila { margin-top: 1rem; display: flex; gap: .8rem; align-items: center; flex-wrap: wrap; }
+  .veredicto { font-family: var(--font-ui); font-size: .9rem; font-weight: 600; }
+  .veredicto.ok { color: #2E7D32; }
+  .veredicto.bad { color: #B3261E; }
+  .explica { display: none; margin-top: .9rem; }
+  .explica.ver { display: block; }
+
+  details.reto { background: var(--white); border: 1px solid var(--border); border-left: 4px solid var(--guinda); border-radius: var(--radius-md); padding: .8rem 1.1rem; margin: .8rem 0; }
+  details.reto summary { cursor: pointer; font-weight: 600; font-size: 1rem; }
+  details.reto .resp-txt { margin-top: .6rem; padding-top: .6rem; border-top: 1px dashed var(--border); font-size: .97rem; }
+
+  @media (max-width: 720px) {
+    .tres { grid-template-columns: 1fr; }
+    .fila { grid-template-columns: repeat(5, 1fr); }
+    .mixtle-tip { flex-direction: column; align-items: center; text-align: center; }
+    .barra-fila { grid-template-columns: 5.5rem 1fr 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo-wrap">
+    <img src="imagen1.png" alt="Mixtle, mascota del curso">
+  </div>
+  <div class="header-text">
+    <span class="inst-name">Instituto de Educación Digital del Estado de Puebla</span>
+    <span class="doc-title">Licenciatura en Sistemas Computacionales · Análisis y Diseño de Algoritmos</span>
+  </div>
+</header>
+
+<section class="class-hero">
+  <div class="page-wrapper" style="padding:0;">
+    <span class="class-label">Unidad 1 · Fundamentos del Análisis Algorítmico · Sesión 4</span>
+    <h1>Casos mejor, promedio y peor</h1>
+    <span class="class-subtitle">Un mismo programa no siempre tarda lo mismo: depende de dónde esté lo que buscas.</span>
+
+    <div class="meta-row">
+      <div class="meta-item">Programa educativo<span>Lic. en Sistemas Computacionales</span></div>
+      <div class="meta-item">Asignatura<span>Análisis y Diseño de Algoritmos</span></div>
+      <div class="meta-item">Unidad<span>1. Fundamentos del Análisis Algorítmico</span></div>
+      <div class="meta-item">Tema<span>1.4 Casos mejor, promedio y peor</span></div>
+      <div class="meta-item">Fecha<span>25 de octubre de 2026</span></div>
+    </div>
+  </div>
+</section>
+
+<main class="page-wrapper">
+
+  <!-- COMPETENCIAS -->
+  <section class="section">
+    <span class="section-label">Al finalizar esta sesión, el estudiante podrá</span>
+    <h2 class="section-title">Competencias a desarrollar</h2>
+
+    <div class="competency-card">
+      <span class="comp-num">01</span>
+      <span class="comp-text"><strong>Explicar</strong> qué son el mejor caso, el peor caso y el caso promedio de un algoritmo, con ejemplos de la vida diaria.</span>
+    </div>
+    <div class="competency-card">
+      <span class="comp-num">02</span>
+      <span class="comp-text"><strong>Medir</strong> en PSeInt Web cuántos pasos da una búsqueda en cada caso.</span>
+    </div>
+    <div class="competency-card">
+      <span class="comp-num">03</span>
+      <span class="comp-text"><strong>Relacionar</strong> cada caso con su notación: Big-Ω para el mejor y Big-O para el peor.</span>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 1. REPASO -->
+  <section class="section">
+    <span class="section-label">Activa lo que ya sabes</span>
+    <h2 class="section-title">Repaso en un minuto</h2>
+    <p>En la sesión pasada medimos pasos con un <strong>contador</strong>. Contesta de memoria:</p>
+
+    <div class="pregunta" data-grupo="r1">Un ciclo <code>Para</code> que se repite <em>n</em> veces hace
+      <select class="resp" data-ans="n" aria-label="Pasos de un ciclo">
+        <option value="">Elige…</option><option value="1">1 paso</option><option value="n">n pasos</option><option value="n2">n × n pasos</option>
+      </select>
+      y su orden es
+      <select class="resp" data-ans="on" aria-label="Orden de un ciclo">
+        <option value="">Elige…</option><option value="o1">O(1)</option><option value="on">O(n)</option><option value="on2">O(n²)</option>
+      </select>
+    </div>
+    <div class="comprobar-fila">
+      <button class="btn sec comprobar" type="button" data-grupo="r1">Comprobar</button>
+      <span class="veredicto" data-grupo="r1"></span>
+    </div>
+    <div class="explica callout note" data-grupo="r1"><p>Correcto: un ciclo de <em>n</em> vueltas da <em>n</em> pasos, es decir, O(n). Hoy vamos a descubrir que, a veces, un ciclo puede terminar <strong>antes</strong> de dar todas sus vueltas.</p></div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 2. ANALOGÍA -->
+  <section class="section">
+    <span class="section-label">Punto de partida</span>
+    <h2 class="section-title">Buscar tu nombre en una lista</h2>
+
+    <p>Imagina que pegaron en la pared la lista de asistencia con 10 nombres y buscas el tuyo, <strong>leyendo uno por uno desde arriba</strong>. ¿Cuánto tardas?</p>
+
+    <ol class="step-list">
+      <li><span class="step-n">1</span><span class="step-content">Si tu nombre es el <strong>primero</strong>, lo encuentras de inmediato.</span></li>
+      <li><span class="step-n">2</span><span class="step-content">Si está <strong>más o menos a la mitad</strong>, lees unos cinco nombres.</span></li>
+      <li><span class="step-n">3</span><span class="step-content">Si está <strong>al final</strong>, o ni siquiera está en la lista, tienes que leer los diez.</span></li>
+    </ol>
+
+    <p>El método es el mismo, pero <strong>el número de pasos cambia según dónde esté lo que buscas</strong>. A eso se le llama analizar los casos de un algoritmo.</p>
+
+    <div class="tres">
+      <div class="caso mejor">
+        <span class="quien">Caso favorable</span>
+        <span class="titulo">Mejor caso</span>
+        <p>Lo que buscas está <strong>al principio</strong>.</p>
+        <p>Con 10 datos: <span class="pasos">1 paso</span></p>
+      </div>
+      <div class="caso prom">
+        <span class="quien">Caso típico</span>
+        <span class="titulo">Caso promedio</span>
+        <p>Lo que buscas está <strong>más o menos a la mitad</strong>.</p>
+        <p>Con 10 datos: <span class="pasos">≈ 5 pasos</span></p>
+      </div>
+      <div class="caso peor">
+        <span class="quien">Caso desfavorable</span>
+        <span class="titulo">Peor caso</span>
+        <p>Está <strong>al final</strong> o <strong>no está</strong>.</p>
+        <p>Con 10 datos: <span class="pasos">10 pasos</span></p>
+      </div>
+    </div>
+
+    <div class="mixtle-tip">
+      <img src="imagen2.png" alt="Mixtle">
+      <div>
+        <span class="mixtle-name">Consejo de Mixtle</span>
+        <p>Cuando alguien dice "este algoritmo tarda n pasos", normalmente se refiere al <strong>peor caso</strong>: es la garantía de que nunca tardará más que eso.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 3. SIMULADOR -->
+  <section class="section">
+    <span class="section-label">Pruébalo tú</span>
+    <h2 class="section-title">Simulador de búsqueda lineal</h2>
+    <p>Elige un número y presiona <strong>Buscar</strong>. El programa revisará las cartas <strong>una por una</strong>, igual que tú con la lista de asistencia. Prueba varios números y fíjate cuántos pasos da cada vez.</p>
+
+    <div class="sim">
+      <div class="sim-controles">
+        <label for="sel-objetivo">Número que busco:</label>
+        <select id="sel-objetivo" aria-label="Número que busco"></select>
+        <button class="btn" id="btn-buscar" type="button">Buscar</button>
+        <button class="btn sec" id="btn-mezclar" type="button">Mezclar lista</button>
+      </div>
+
+      <div class="fila" id="fila-cartas" aria-label="Lista de 10 números"></div>
+
+      <div class="contador"><span id="sim-pasos">0</span><small>pasos</small></div>
+      <div class="sim-mensaje" id="sim-mensaje">Elige un número y presiona Buscar.</div>
+      <ul class="historial" id="historial" aria-label="Historial de búsquedas"></ul>
+    </div>
+
+    <div class="callout note">
+      <p><strong>Reto:</strong> encuentra una búsqueda que termine en <strong>1 paso</strong> (mejor caso), otra que tarde <strong>10 pasos</strong> (peor caso) y una que tarde entre 4 y 7 pasos (caso intermedio). Si el número no está en la lista, ¿cuántos pasos necesita el programa para darse cuenta?</p>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 4. GRÁFICA -->
+  <section class="section">
+    <span class="section-label">Para verlo de un vistazo</span>
+    <h2 class="section-title">¿Cuántos pasos según la posición?</h2>
+    <p>Esta gráfica muestra cuántos pasos necesita la búsqueda lineal en una lista de 10 datos, dependiendo de en qué posición esté lo que buscas.</p>
+
+    <div class="grafica" id="grafica">
+      <h4>Pasos necesarios por posición</h4>
+      <div id="grafica-barras"></div>
+      <div class="leyenda-media"><b>- - -</b> Línea punteada: el promedio de los casos en que el dato sí está. Es <strong>5.5 pasos</strong>, casi la mitad de la lista.</div>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 5. NOTACIÓN -->
+  <section class="section">
+    <span class="section-label">Conectamos con la sesión 2</span>
+    <h2 class="section-title">Cada caso tiene su notación</h2>
+
+    <div class="code-scroll">
+    <table>
+      <thead><tr><th>Caso</th><th>Notación</th><th>Qué significa</th><th>En la búsqueda lineal</th></tr></thead>
+      <tbody>
+        <tr><td>Mejor caso</td><td class="big">Big-Ω</td><td>lo mínimo que puede tardar</td><td class="big">Ω(1)</td></tr>
+        <tr><td>Caso promedio</td><td>(se dice "caso promedio")</td><td>lo que tarda normalmente</td><td class="big">≈ n/2, orden O(n)</td></tr>
+        <tr><td>Peor caso</td><td class="big">Big-O</td><td>lo máximo que puede tardar</td><td class="big">O(n)</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="concept-box">
+      <span class="concept-title">Lo que debes recordar</span>
+      <p style="margin:0">En la búsqueda lineal el mejor caso es <strong>siempre 1 paso</strong>, pero el promedio y el peor caso <strong>crecen con n</strong>. Por eso decimos que la búsqueda lineal es de orden <span class="big">O(n)</span>: lo normal y lo peor dependen del tamaño de la lista.</p>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 6. CALCULADORA -->
+  <section class="section">
+    <span class="section-label">¿Y si la lista es enorme?</span>
+    <h2 class="section-title">Mueve la barra y compara</h2>
+    <p>Cambia el tamaño de la lista y observa cómo crece cada caso.</p>
+
+    <div class="calc">
+      <label for="rango">Tamaño de la lista (n)</label>
+      <div class="n-val" id="n-val">100</div>
+      <input type="range" id="rango" min="1" max="6" step="1" value="2" aria-label="Tamaño de la lista">
+
+      <div class="code-scroll">
+      <table style="margin-top:1rem">
+        <thead><tr><th>Caso</th><th>Pasos</th><th>Cómo crece</th></tr></thead>
+        <tbody id="calc-body"></tbody>
+      </table>
+      </div>
+    </div>
+
+    <p>Observa que el <strong>mejor caso nunca cambia</strong> (siempre 1 paso), mientras que el promedio y el peor se hacen tan grandes como la lista.</p>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 7. PSEINT -->
+  <section class="section">
+    <span class="ejercicio-num">Práctica en PSeInt Web</span>
+    <h2 class="section-title">Mide los tres casos con tu propio programa</h2>
+    <p>Este programa llena una lista con los números 3, 6, 9, 12… hasta 30 y busca el que tú elijas, contando los pasos. <strong>Abre PSeInt Web, pega el código y ejecútalo varias veces.</strong></p>
+
+    <p><a class="btn" href="https://www.pseint-web.app/" target="_blank" rel="noopener">Abrir PSeInt Web</a></p>
+
+    <div class="code-panel">
+      <div class="code-head">BusquedaLineal <span class="badge">con contador de pasos</span></div>
+      <pre>Proceso BusquedaLineal
+    Dimension lista[10];
+    Definir i, buscado, pasos Como Entero;
+    Definir encontrado Como Logico;
+
+    Para i <- 1 Hasta 10 Hacer
+        lista[i] <- i * 3;
+    FinPara
+
+    Escribir "¿Qué número buscas?";
+    Leer buscado;
+
+    encontrado <- Falso;
+    pasos <- 0;
+    i <- 1;
+
+    Mientras i <= 10 Y encontrado = Falso Hacer
+        pasos <- pasos + 1;
+        Si lista[i] = buscado Entonces
+            encontrado <- Verdadero;
+        SiNo
+            i <- i + 1;
+        FinSi
+    FinMientras
+
+    Si encontrado Entonces
+        Escribir "Lo encontré en ", pasos, " pasos";
+    SiNo
+        Escribir "No está en la lista. Pasos: ", pasos;
+    FinSi
+FinProceso</pre>
+    </div>
+
+    <div class="callout note">
+      <p><strong>Cómo leerlo:</strong> el ciclo <code>Mientras</code> sigue revisando posiciones <strong>mientras no se acaben (i ≤ 10) y todavía no lo hayas encontrado</strong>. En cuanto lo encuentra, <code>encontrado</code> cambia a <code>Verdadero</code> y el ciclo se detiene. Por eso no siempre da los 10 pasos.</p>
+    </div>
+
+    <p><strong>Predice</strong> cuántos pasos dará con cada número y luego ejecuta para comprobar:</p>
+
+    <div class="code-scroll">
+    <table class="registro" data-grupo="p1">
+      <thead><tr><th>Número que buscas</th><th>¿Dónde está?</th><th>Pasos</th></tr></thead>
+      <tbody>
+        <tr><td class="etq">3</td><td>al principio</td><td><input class="resp" inputmode="numeric" data-ans="1" aria-label="Pasos buscando 3"></td></tr>
+        <tr><td class="etq">15</td><td>a la mitad</td><td><input class="resp" inputmode="numeric" data-ans="5" aria-label="Pasos buscando 15"></td></tr>
+        <tr><td class="etq">30</td><td>al final</td><td><input class="resp" inputmode="numeric" data-ans="10" aria-label="Pasos buscando 30"></td></tr>
+        <tr><td class="etq">7</td><td>no está</td><td><input class="resp" inputmode="numeric" data-ans="10" aria-label="Pasos buscando 7"></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="comprobar-fila">
+      <button class="btn sec comprobar" type="button" data-grupo="p1">Comprobar</button>
+      <span class="veredicto" data-grupo="p1"></span>
+    </div>
+    <div class="explica callout note" data-grupo="p1"><p>El 3 está en la posición 1, el 15 en la posición 5 y el 30 en la 10. El 7 no existe, así que el programa revisa las 10 posiciones antes de rendirse. Por eso <strong>"no está" también es peor caso</strong>.</p></div>
+  </section>
+
+  <section class="section">
+    <span class="ejercicio-num">Ahora, ¿qué pasa con una lista más grande?</span>
+    <p style="margin-top:.6rem">Imagina el mismo programa, pero con una lista de <strong>100</strong> números (el ciclo iría de 1 a 100). Sin ejecutar, usa tu lógica:</p>
+
+    <div class="pregunta" data-grupo="p2">Mejor caso (está en la primera posición):
+      <input class="resp" inputmode="numeric" data-ans="1" aria-label="Mejor caso con 100">
+      paso(s)
+    </div>
+    <div class="pregunta" data-grupo="p2">Peor caso (está al final o no está):
+      <input class="resp" inputmode="numeric" data-ans="100" aria-label="Peor caso con 100">
+      pasos
+    </div>
+    <div class="pregunta" data-grupo="p2">Caso promedio (más o menos a la mitad):
+      <input class="resp" inputmode="numeric" data-ans="50" aria-label="Caso promedio con 100">
+      pasos aproximadamente
+    </div>
+    <div class="pregunta" data-grupo="p2">El orden del peor caso es
+      <select class="resp" data-ans="on" aria-label="Orden del peor caso">
+        <option value="">Elige…</option><option value="o1">O(1)</option><option value="on">O(n)</option><option value="on2">O(n²)</option>
+      </select>
+    </div>
+
+    <div class="comprobar-fila">
+      <button class="btn sec comprobar" type="button" data-grupo="p2">Comprobar</button>
+      <span class="veredicto" data-grupo="p2"></span>
+    </div>
+    <div class="explica callout note" data-grupo="p2"><p>El mejor caso sigue siendo <strong>1 paso</strong>. El peor caso es <strong>n = 100 pasos</strong>, y el promedio ronda <strong>n/2 = 50</strong>. Al crecer la lista, el peor caso crece en línea recta: <strong>O(n)</strong>.</p></div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 8. VIDA REAL -->
+  <section class="section">
+    <span class="section-label">Aplícalo</span>
+    <h2 class="section-title">¿Qué caso es?</h2>
+    <p>Una persona busca su nombre en una lista de 10 asistentes, leyendo desde arriba. Clasifica cada situación:</p>
+
+    <div class="code-scroll">
+    <table class="registro" data-grupo="v1">
+      <thead><tr><th>Situación</th><th>Caso</th></tr></thead>
+      <tbody>
+        <tr><td>Su nombre es el primero de la lista.</td>
+          <td><select class="resp" data-ans="mejor" aria-label="Caso 1"><option value="">Elige…</option><option value="mejor">Mejor caso</option><option value="prom">Caso promedio</option><option value="peor">Peor caso</option></select></td></tr>
+        <tr><td>Su nombre es el décimo, el último.</td>
+          <td><select class="resp" data-ans="peor" aria-label="Caso 2"><option value="">Elige…</option><option value="mejor">Mejor caso</option><option value="prom">Caso promedio</option><option value="peor">Peor caso</option></select></td></tr>
+        <tr><td>Su nombre no aparece en la lista.</td>
+          <td><select class="resp" data-ans="peor" aria-label="Caso 3"><option value="">Elige…</option><option value="mejor">Mejor caso</option><option value="prom">Caso promedio</option><option value="peor">Peor caso</option></select></td></tr>
+        <tr><td>Su nombre es el quinto o el sexto.</td>
+          <td><select class="resp" data-ans="prom" aria-label="Caso 4"><option value="">Elige…</option><option value="mejor">Mejor caso</option><option value="prom">Caso promedio</option><option value="peor">Peor caso</option></select></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="comprobar-fila">
+      <button class="btn sec comprobar" type="button" data-grupo="v1">Comprobar</button>
+      <span class="veredicto" data-grupo="v1"></span>
+    </div>
+    <div class="explica callout note" data-grupo="v1"><p>Primero de la lista: <strong>mejor caso</strong>. Último, o que no esté: <strong>peor caso</strong>, porque hay que revisar todos. En medio: <strong>caso promedio</strong>.</p></div>
+  </section>
+
+  <section class="section">
+    <span class="section-label">Pon a prueba lo aprendido</span>
+    <h2 class="section-title">Preguntas rápidas</h2>
+
+    <details class="reto">
+      <summary>1. ¿Por qué decimos que "no está en la lista" es el peor caso?</summary>
+      <div class="resp-txt">Porque el programa tiene que revisar todos los elementos para estar seguro de que no está. Revisa n elementos, igual que cuando lo que buscas está en la última posición.</div>
+    </details>
+    <details class="reto">
+      <summary>2. Si la lista tiene 1,000 elementos, ¿cuántos pasos da la búsqueda lineal en el peor caso? ¿Y en el mejor?</summary>
+      <div class="resp-txt">En el peor caso, 1,000 pasos. En el mejor caso, 1 paso.</div>
+    </details>
+    <details class="reto">
+      <summary>3. ¿Cuál notación describe el mejor caso y cuál el peor caso?</summary>
+      <div class="resp-txt">El mejor caso se describe con Big-Ω (cota inferior, lo mínimo). El peor caso se describe con Big-O (cota superior, lo máximo).</div>
+    </details>
+    <details class="reto">
+      <summary>4. ¿Un algoritmo puede tener el mismo orden en el mejor y en el peor caso?</summary>
+      <div class="resp-txt">Sí. Por ejemplo, un programa que siempre recorre toda la lista, sin importar lo que encuentre, tarda n pasos en todos los casos. La búsqueda lineal no es así: en el mejor caso se detiene en el primer intento.</div>
+    </details>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- CONCLUSIÓN -->
+  <section class="section">
+    <span class="section-label">Cierre de la sesión</span>
+    <h2 class="section-title">Conclusión</h2>
+    <p>Un mismo algoritmo puede tardar distinto según los datos que reciba. En la búsqueda lineal, el <strong>mejor caso</strong> es encontrar lo buscado en la primera posición (1 paso, Big-Ω), el <strong>peor caso</strong> es encontrarlo al final o no encontrarlo (n pasos, Big-O) y el <strong>caso promedio</strong> ronda la mitad de la lista (cerca de n/2 pasos). Como el promedio y el peor caso crecen junto con n, la búsqueda lineal es de orden O(n). Con este tema se completan los contenidos de la Unidad 1: ya sabes qué es un algoritmo, cómo se expresa su eficiencia, cuánto tiempo y memoria gasta, y cómo cambia su comportamiento según los datos.</p>
+  </section>
+
+  <section class="section">
+    <span class="section-label">Consulta</span>
+    <h2 class="section-title">Referencias bibliográficas</h2>
+    <ul style="font-size:.92rem; color: var(--ink-secondary);">
+      <li>Sánchez, R. (2024). <em>Modelado probabilístico para el análisis del caso promedio en algoritmos de búsqueda</em>. Editorial Tecnológica de Monterrey (México).</li>
+      <li>Ramírez, J. L. (2023). Análisis asintótico y eficiencia de algoritmos en la computación moderna. <em>Revista de Sistemas y Computación</em> (México), 12(1), 45-58.</li>
+      <li>García, A. (2022). <em>Introducción a la algoritmia y lógica de programación: Una base sólida para sistemas</em>. Universidad Nacional Autónoma de México (UNAM).</li>
+      <li>Torres, M. y Morales, S. (2021). <em>Optimización de recursos: Medición de la complejidad en algoritmos distribuidos</em>. Universidad de los Andes (Colombia).</li>
+      <li>PSeInt Web. (s. f.). <em>Editor en línea de pseudocódigo PSeInt</em>. https://www.pseint-web.app/</li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <span><strong>Análisis y Diseño de Algoritmos</strong> — Unidad 1, Sesión 4</span>
+  <span>Mtro. José Armando Vera Rodríguez · IEDEP · 25 de octubre de 2026</span>
+</footer>
+
+<script>
+(function () {
+  /* ── Simulador de búsqueda lineal ─────────────────────────── */
+  var valores = [12, 7, 25, 3, 18, 9, 30, 15, 21, 6];
+  var NO_ESTA = 99;
+  var fila = document.getElementById('fila-cartas');
+  var sel = document.getElementById('sel-objetivo');
+  var btnBuscar = document.getElementById('btn-buscar');
+  var btnMezclar = document.getElementById('btn-mezclar');
+  var pasosEl = document.getElementById('sim-pasos');
+  var msg = document.getElementById('sim-mensaje');
+  var hist = document.getElementById('historial');
+  var timer = null;
+
+  function dibujarCartas() {
+    fila.innerHTML = '';
+    valores.forEach(function (v, i) {
+      var c = document.createElement('div');
+      c.className = 'carta';
+      c.innerHTML = v + '<span class="pos">posición ' + (i + 1) + '</span>';
+      fila.appendChild(c);
+    });
+  }
+  function llenarSelect() {
+    var actual = sel.value;
+    sel.innerHTML = '';
+    valores.slice().sort(function (a, b) { return a - b; }).forEach(function (v) {
+      var o = document.createElement('option'); o.value = v; o.textContent = v; sel.appendChild(o);
+    });
+    var no = document.createElement('option'); no.value = NO_ESTA; no.textContent = NO_ESTA + ' (no está en la lista)'; sel.appendChild(no);
+    if (actual) sel.value = actual;
+  }
+  function reiniciar() {
+    clearInterval(timer);
+    dibujarCartas();
+    pasosEl.textContent = '0';
+    msg.className = 'sim-mensaje'; msg.textContent = 'Elige un número y presiona Buscar.';
+    btnBuscar.disabled = false; btnMezclar.disabled = false;
+  }
+  function mezclar() {
+    for (var i = valores.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1)); var t = valores[i]; valores[i] = valores[j]; valores[j] = t;
+    }
+    llenarSelect(); reiniciar();
+  }
+  function agregarHistorial(objetivo, pasos, tipo) {
+    var li = document.createElement('li');
+    li.className = tipo === 'mejor' ? 'mejor' : (tipo === 'peor' ? 'peor' : '');
+    li.textContent = (objetivo === NO_ESTA ? 'No está' : 'Busqué ' + objetivo) + ': ' + pasos + (pasos === 1 ? ' paso' : ' pasos');
+    hist.insertBefore(li, hist.firstChild);
+    while (hist.children.length > 8) hist.removeChild(hist.lastChild);
+  }
+  function buscar() {
+    reiniciar();
+    var objetivo = parseInt(sel.value, 10);
+    var cartas = fila.querySelectorAll('.carta');
+    var i = 0, pasos = 0;
+    btnBuscar.disabled = true; btnMezclar.disabled = true;
+    msg.className = 'sim-mensaje medio'; msg.textContent = 'Buscando…';
+    timer = setInterval(function () {
+      if (i > 0) { cartas[i - 1].classList.remove('actual'); cartas[i - 1].classList.add('visto'); }
+      if (i >= valores.length) {
+        clearInterval(timer);
+        msg.className = 'sim-mensaje peor';
+        msg.textContent = 'No estaba en la lista. Hubo que revisar los ' + pasos + ' elementos: ¡peor caso!';
+        agregarHistorial(objetivo, pasos, 'peor');
+        btnBuscar.disabled = false; btnMezclar.disabled = false;
+        return;
+      }
+      pasos++;
+      pasosEl.textContent = pasos;
+      cartas[i].classList.add('actual');
+      if (valores[i] === objetivo) {
+        clearInterval(timer);
+        cartas[i].classList.remove('actual'); cartas[i].classList.add('hallado');
+        var tipo, texto;
+        if (pasos === 1) { tipo = 'mejor'; texto = '¡Lo encontraste en el primer intento! Es el mejor caso: 1 paso.'; }
+        else if (pasos === valores.length) { tipo = 'peor'; texto = 'Estaba en la última posición: ' + pasos + ' pasos. ¡Peor caso!'; }
+        else { tipo = 'medio'; texto = 'Lo encontraste en ' + pasos + ' pasos. Es un caso intermedio.'; }
+        msg.className = 'sim-mensaje ' + tipo; msg.textContent = texto;
+        agregarHistorial(objetivo, pasos, tipo);
+        btnBuscar.disabled = false; btnMezclar.disabled = false;
+        return;
+      }
+      i++;
+    }, 550);
+  }
+  btnBuscar.addEventListener('click', buscar);
+  btnMezclar.addEventListener('click', mezclar);
+  llenarSelect(); dibujarCartas();
+
+  /* ── Gráfica de pasos por posición ────────────────────────── */
+  (function () {
+    var n = 10, cont = document.getElementById('grafica-barras');
+    var html = '', prom = (n + 1) / 2;
+    for (var k = 1; k <= n; k++) {
+      var etq = k === 1 ? 'Posición 1 (mejor)' : (k === n ? 'Posición ' + n + ' (peor)' : 'Posición ' + k);
+      html += '<div class="barra-fila"><span class="nombre">' + etq + '</span>' +
+              '<div class="pista"><i style="width:' + (k / n * 100) + '%"></i>' +
+              '<span class="media" style="left:' + (prom / n * 100) + '%"></span></div>' +
+              '<span class="valor">' + k + '</span></div>';
+    }
+    html += '<div class="barra-fila"><span class="nombre">No está (peor)</span>' +
+            '<div class="pista"><i style="width:100%"></i><span class="media" style="left:' + (prom / n * 100) + '%"></span></div>' +
+            '<span class="valor">' + n + '</span></div>';
+    cont.innerHTML = html;
+  })();
+
+  /* ── Calculadora ──────────────────────────────────────────── */
+  var potencias = [10, 100, 1000, 10000, 100000, 1000000];
+  function f(x) { return x.toLocaleString('es-MX'); }
+  function pintarCalc() {
+    var n = potencias[document.getElementById('rango').value - 1];
+    document.getElementById('n-val').textContent = f(n);
+    var filas = [
+      ['Mejor caso (está primero)', 1, 'no cambia nunca'],
+      ['Caso promedio (a la mitad)', n / 2, 'crece junto con n'],
+      ['Peor caso (al final o no está)', n, 'crece junto con n']
+    ];
+    var html = '';
+    filas.forEach(function (r) {
+      html += '<tr><td>' + r[0] + '</td><td class="num">' + f(r[1]) + '</td><td>' + r[2] + '</td></tr>';
+    });
+    document.getElementById('calc-body').innerHTML = html;
+  }
+  document.getElementById('rango').addEventListener('input', pintarCalc);
+  pintarCalc();
+
+  /* ── Botones "Copiar código" ──────────────────────────────── */
+  function copiarTexto(txt, btn) {
+    function listo() { btn.textContent = '¡Copiado!'; setTimeout(function () { btn.textContent = 'Copiar código'; }, 1800); }
+    function respaldo() {
+      var ta = document.createElement('textarea');
+      ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); listo(); } catch (e) { btn.textContent = 'Selecciona y copia a mano'; }
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(listo, respaldo);
+    else respaldo();
+  }
+  document.querySelectorAll('.code-panel').forEach(function (panel) {
+    var pre = panel.querySelector('pre'), head = panel.querySelector('.code-head');
+    if (!pre || !head) return;
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'copiar'; b.textContent = 'Copiar código';
+    b.addEventListener('click', function () { copiarTexto(pre.textContent, b); });
+    head.appendChild(b);
+  });
+
+  /* ── Comprobar respuestas ─────────────────────────────────── */
+  document.querySelectorAll('button.comprobar').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var g = btn.getAttribute('data-grupo');
+      var campos = document.querySelectorAll('[data-grupo="' + g + '"] [data-ans], [data-grupo="' + g + '"][data-ans]');
+      var total = 0, bien = 0, vacios = 0;
+      campos.forEach(function (c) {
+        total++;
+        var v = (c.value || '').trim();
+        c.classList.remove('ok', 'bad');
+        if (!v) { vacios++; c.classList.add('bad'); return; }
+        if (v === c.getAttribute('data-ans')) { bien++; c.classList.add('ok'); } else c.classList.add('bad');
+      });
+      var ver = document.querySelector('.veredicto[data-grupo="' + g + '"]');
+      var exp = document.querySelector('.explica[data-grupo="' + g + '"]');
+      if (bien === total) {
+        ver.className = 'veredicto ok'; ver.textContent = '¡Todo correcto!';
+        exp.classList.add('ver');
+      } else if (vacios > 0) {
+        ver.className = 'veredicto bad'; ver.textContent = 'Te faltan ' + vacios + ' respuesta(s) por completar.';
+      } else {
+        ver.className = 'veredicto bad'; ver.textContent = 'Llevas ' + bien + ' de ' + total + ' bien. Revisa los campos en rojo e inténtalo de nuevo.';
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>
