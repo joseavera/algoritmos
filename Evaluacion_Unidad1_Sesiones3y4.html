@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evaluación · Unidad 1 · Sesiones 3 y 4</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+
+<style>
+  html, body, body * {
+    -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
+    -webkit-touch-callout: none;
+  }
+  input[type="text"], textarea { -webkit-user-select: text; user-select: text; }
+
+  .site-header { flex-wrap: wrap; }
+  [hidden] { display: none !important; }
+
+  #marca-agua { position: fixed; inset: 0; z-index: 40; pointer-events: none; background-repeat: repeat; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  /* Barra superior */
+  .exam-bar { position: sticky; top: 0; z-index: 60; background: var(--white); border-bottom: 2px solid var(--guinda); box-shadow: var(--shadow-md); }
+  .exam-bar-inner { max-width: 960px; margin: 0 auto; padding: .6rem 1.25rem; display: grid; grid-template-columns: 1fr auto auto; gap: 1.1rem; align-items: center; font-family: var(--font-ui); font-size: .85rem; color: var(--ink-secondary); }
+  .exam-bar .who { font-weight: 600; color: var(--guinda); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .exam-bar .prog { grid-column: 1 / -1; }
+  .prog-track { height: 6px; background: var(--guinda-light); border-radius: 99px; overflow: hidden; }
+  .prog-fill { height: 100%; width: 0; background: var(--guinda); transition: width .25s; }
+  .timer { font-family: var(--font-mono); font-weight: 500; font-size: 1.1rem; color: var(--guinda-dark); min-width: 3.2rem; text-align: right; }
+  .timer.urgente { color: #B3261E; }
+  .alertas { font-weight: 600; color: #B3261E; }
+
+  /* Inicio */
+  .start-card { max-width: 660px; }
+  .field { margin: 1.1rem 0; }
+  .field label { display: block; font-family: var(--font-ui); font-size: .8rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--guinda); margin-bottom: .4rem; }
+  .field input { width: 100%; padding: .75rem .9rem; font-size: 1.05rem; font-family: var(--font-ui); border: 1.5px solid var(--border-strong); border-radius: var(--radius-md); background: var(--white); color: var(--ink); }
+  .field input:focus, .field textarea:focus { outline: 2px solid var(--guinda); border-color: var(--guinda); }
+  .field textarea { width: 100%; min-height: 6rem; padding: .7rem .9rem; font-family: var(--font-mono); font-size: .85rem; border: 1.5px solid var(--border-strong); border-radius: var(--radius-md); }
+  .msg-error { color: #B3261E; font-family: var(--font-ui); font-size: .88rem; margin-top: .4rem; min-height: 1.2em; }
+  .info-list { list-style: none; padding: 0; margin: .8rem 0 0; font-family: var(--font-ui); font-size: .95rem; }
+  .info-list li { padding: .4rem 0 .4rem 1.4rem; position: relative; border-bottom: 1px dashed var(--border); }
+  .info-list li::before { content: "▸"; position: absolute; left: 0; color: var(--guinda-rule); }
+
+  .audio-test { border: 1.5px dashed var(--guinda-rule); border-radius: var(--radius-lg); padding: 1rem 1.2rem; margin: 1.2rem 0; background: var(--off-white); }
+  .audio-test h3 { font-family: var(--font-ui); font-size: .95rem; margin: 0 0 .4rem; color: var(--guinda); }
+  .audio-test p { font-size: .93rem; margin: .3rem 0 .7rem; }
+  .audio-test .estado-ok { color: #2E7D32; font-family: var(--font-ui); font-weight: 600; font-size: .92rem; }
+
+  .btn { display: inline-block; cursor: pointer; font-family: var(--font-ui); font-weight: 600; font-size: .98rem; padding: .75rem 1.5rem; border-radius: var(--radius-md); border: 1.5px solid var(--guinda); background: var(--guinda); color: var(--white); transition: background .15s; }
+  .btn:hover { background: var(--guinda-dark); }
+  .btn.sec { background: var(--white); color: var(--guinda); }
+  .btn.sec:hover { background: var(--guinda-light); }
+  .btn[disabled] { opacity: .45; cursor: not-allowed; }
+  .btn-fila { display: flex; gap: .7rem; flex-wrap: wrap; margin-top: .6rem; }
+
+  /* Pregunta */
+  .pregunta-card { max-width: 760px; margin: 0 auto; }
+  .q-num { font-family: var(--font-ui); font-size: .8rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--guinda); }
+  .audio-panel { display: flex; align-items: center; gap: 1.2rem; background: var(--guinda-light); border: 1px solid #D8A8BA; border-radius: var(--radius-lg); padding: 1.1rem 1.3rem; margin: .8rem 0 1.2rem; flex-wrap: wrap; }
+  .ondas { display: flex; align-items: center; gap: 4px; height: 38px; }
+  .ondas i { display: block; width: 5px; height: 10px; border-radius: 3px; background: var(--guinda-rule); }
+  .ondas.hablando i { animation: onda .8s ease-in-out infinite; background: var(--guinda); }
+  .ondas.hablando i:nth-child(2) { animation-delay: .1s; }
+  .ondas.hablando i:nth-child(3) { animation-delay: .2s; }
+  .ondas.hablando i:nth-child(4) { animation-delay: .3s; }
+  .ondas.hablando i:nth-child(5) { animation-delay: .4s; }
+  .ondas.hablando i:nth-child(6) { animation-delay: .5s; }
+  @keyframes onda { 0%, 100% { height: 8px; } 50% { height: 34px; } }
+  .escuchas { font-family: var(--font-ui); font-size: .85rem; color: var(--ink-secondary); }
+  .q-texto { font-size: 1.12rem; line-height: 1.8; background: var(--white); border: 1px solid var(--border); border-left: 4px solid var(--guinda); border-radius: var(--radius-md); padding: 1rem 1.2rem; margin: .8rem 0 1.2rem; }
+  .instruccion { font-family: var(--font-ui); font-size: .9rem; color: var(--ink-secondary); margin-bottom: .6rem; }
+  .opciones { display: grid; gap: .65rem; }
+  .opcion { display: flex; align-items: center; gap: .8rem; padding: .85rem 1.1rem; border: 1.5px solid var(--border-strong); border-radius: var(--radius-md); background: var(--white); cursor: pointer; font-size: 1.05rem; transition: border-color .15s, background .15s; }
+  .opcion:hover { border-color: var(--guinda); }
+  .opcion input { accent-color: #490b58; width: 1.15rem; height: 1.15rem; flex-shrink: 0; }
+  .opcion.sel { border-color: var(--guinda); background: var(--guinda-light); font-weight: 600; }
+  .q-barra { height: 8px; background: var(--guinda-light); border-radius: 99px; overflow: hidden; margin-top: 1.4rem; }
+  .q-barra i { display: block; height: 100%; width: 100%; background: var(--guinda); transition: width .25s linear; }
+  .q-barra i.urgente { background: #B3261E; }
+
+  /* Cortina y modales */
+  .cortina { position: fixed; inset: 0; z-index: 100; background: rgba(40,10,50,.99); display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+  .cortina-box { background: var(--white); border-radius: var(--radius-lg); padding: 1.8rem 2rem; max-width: 480px; text-align: center; border-top: 5px solid var(--guinda); }
+  .cortina-box img { width: 90px; margin-bottom: .6rem; }
+  .cortina-box h2 { font-family: var(--font-display); color: var(--guinda); margin: 0 0 .6rem; font-size: 1.7rem; }
+  .cortina-box p { font-size: 1rem; margin-bottom: 1.1rem; }
+
+  /* Resultado */
+  .result-card { text-align: center; border: 2px solid var(--guinda); border-radius: var(--radius-lg); padding: 1.8rem 1.5rem; background: var(--white); margin-bottom: 1.2rem; }
+  .result-card .datos { font-family: var(--font-ui); font-size: .85rem; color: var(--ink-secondary); margin-top: .2rem; }
+  .result-card .alumno { font-family: var(--font-display); font-size: 2rem; color: var(--guinda); font-weight: 700; }
+  .result-card .nota { font-family: var(--font-display); font-size: 4.6rem; line-height: 1.05; color: var(--guinda-dark); font-weight: 700; margin: .4rem 0 0; }
+  .result-card .nota small { font-size: 1.6rem; color: var(--ink-muted); }
+  .result-card .aciertos { font-family: var(--font-ui); color: var(--ink-secondary); margin-top: .3rem; }
+  .infr-card { border: 2px solid var(--border-strong); border-radius: var(--radius-lg); padding: 1.2rem 1.4rem; margin-bottom: 1.2rem; background: var(--white); display: grid; grid-template-columns: auto 1fr; gap: 1.3rem; align-items: center; }
+  .infr-card.alerta { border-color: #B3261E; background: #FCEDEC; }
+  .infr-card.limpio { border-color: #2E7D32; background: #EEF7EE; }
+  .infr-card .num { font-family: var(--font-display); font-size: 3.6rem; font-weight: 700; line-height: 1; color: var(--guinda-dark); min-width: 4rem; text-align: center; }
+  .infr-card.alerta .num { color: #B3261E; }
+  .infr-card.limpio .num { color: #2E7D32; }
+  .infr-card .tit { font-family: var(--font-ui); font-size: .78rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-secondary); }
+  .infr-card .det { font-family: var(--font-ui); font-size: .92rem; margin-top: .25rem; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .8rem; margin: 1rem 0 1.4rem; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: .8rem; font-family: var(--font-ui); }
+  .stat span { display: block; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-muted); margin-bottom: .25rem; }
+  .stat b { font-size: 1.05rem; color: var(--guinda-dark); word-break: break-word; }
+  .sec-row { display: flex; justify-content: space-between; font-family: var(--font-ui); padding: .5rem 0; border-bottom: 1px dashed var(--border); font-size: .95rem; }
+  .codigo-box { font-family: var(--font-mono); font-size: .72rem; word-break: break-all; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .6rem .8rem; color: var(--ink-secondary); }
+
+  .mixtle-tip { display: flex; gap: 1.25rem; align-items: flex-start; background: var(--guinda-light); border: 1px solid #D8A8BA; border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin: 1.5rem 0; }
+  .mixtle-tip img { width: 84px; height: auto; flex-shrink: 0; border-radius: var(--radius-md); }
+  .mixtle-tip .mixtle-name { font-family: var(--font-ui); font-size: .78rem; text-transform: uppercase; letter-spacing: .12em; color: var(--guinda); font-weight: 700; display: block; margin-bottom: .4rem; }
+  .mixtle-tip p { font-size: .97rem; margin-bottom: 0; }
+
+  @media (max-width: 720px) {
+    .exam-bar-inner { grid-template-columns: 1fr auto; }
+    .mixtle-tip { flex-direction: column; align-items: center; text-align: center; }
+    .result-card .nota { font-size: 3.6rem; }
+    .infr-card { grid-template-columns: 1fr; text-align: center; }
+  }
+  body.examen-activo .class-hero { display: none; }
+  @media print {
+    .no-print, .exam-bar, .cortina { display: none !important; }
+    body.examen-activo .exam-wrap { display: none !important; }
+    .result-card, .infr-card, .stat { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<noscript><p style="padding:2rem;font-family:sans-serif">Esta evaluación necesita JavaScript activado en el navegador.</p></noscript>
+
+<div id="marca-agua" hidden></div>
+
+<header class="site-header">
+  <div class="logo-wrap">
+    <img src="imagen1.png" alt="Mixtle, mascota del curso">
+  </div>
+  <div class="header-text">
+    <span class="inst-name">Instituto de Educación Digital del Estado de Puebla</span>
+    <span class="doc-title">Licenciatura en Sistemas Computacionales · Análisis y Diseño de Algoritmos</span>
+  </div>
+</header>
+
+<div class="exam-bar no-print" id="barra" hidden>
+  <div class="exam-bar-inner">
+    <div class="who" id="barra-nombre"></div>
+    <div class="timer" id="barra-tiempo">1:00</div>
+    <div class="alertas" id="barra-alertas" hidden></div>
+    <div class="prog">
+      <span id="barra-texto">Pregunta 1 de 12</span>
+      <div class="prog-track"><div class="prog-fill" id="barra-fill"></div></div>
+    </div>
+  </div>
+</div>
+
+<section class="class-hero">
+  <div class="page-wrapper" style="padding:0;">
+    <span class="class-label">Unidad 1 · Fundamentos del Análisis Algorítmico · Evaluación</span>
+    <h1>Evaluación de las sesiones 3 y 4</h1>
+    <span class="class-subtitle">Complejidad temporal y espacial, y casos mejor, promedio y peor.</span>
+
+    <div class="meta-row">
+      <div class="meta-item">Programa educativo<span>Lic. en Sistemas Computacionales</span></div>
+      <div class="meta-item">Asignatura<span>Análisis y Diseño de Algoritmos</span></div>
+      <div class="meta-item">Unidad<span>1. Fundamentos del Análisis Algorítmico</span></div>
+      <div class="meta-item">Temas<span>1.3 Complejidad temporal y espacial · 1.4 Casos mejor, promedio y peor</span></div>
+      <div class="meta-item">Fecha de aplicación<span id="meta-fecha"></span></div>
+    </div>
+  </div>
+</section>
+
+<main class="page-wrapper">
+
+  <!-- INICIO -->
+  <section id="pantalla-inicio" class="section">
+    <span class="section-label">Antes de comenzar</span>
+    <h2 class="section-title">Bienvenida y datos del estudiante</h2>
+
+    <div class="card start-card">
+      <div class="mixtle-tip" style="margin-top:0">
+        <img src="imagen2.png" alt="Mixtle">
+        <div>
+          <span class="mixtle-name">Mensaje de Mixtle</span>
+          <p>¡Hola! Esta evaluación repasa lo que vimos en las últimas dos clases. Las preguntas se escuchan y las opciones aparecen en pantalla. Escucha con calma, piensa y elige. ¡Mucho éxito!</p>
+        </div>
+      </div>
+
+      <ul class="info-list">
+        <li>Son <strong>12 preguntas</strong>. Cada una se <strong>escucha</strong>; las opciones de respuesta aparecen en pantalla.</li>
+        <li>Tienes <strong>60 segundos</strong> por pregunta y puedes escucharla hasta <strong>3 veces</strong>.</li>
+        <li>No se puede regresar a una pregunta anterior.</li>
+        <li>Solo tienes <strong>una oportunidad</strong>. Necesitas audífonos o bocina y un lugar tranquilo.</li>
+      </ul>
+
+      <div class="field">
+        <label for="in-nombre">Nombre completo</label>
+        <input type="text" id="in-nombre" maxlength="60" autocomplete="off" placeholder="Nombre y apellidos">
+      </div>
+      <div class="field">
+        <label for="in-grupo">Matrícula o grupo</label>
+        <input type="text" id="in-grupo" maxlength="30" autocomplete="off" placeholder="Ejemplo: grupo 1A o tu matrícula">
+      </div>
+      <div class="field" id="campo-codigo" hidden>
+        <label for="in-codigo">Código de acceso</label>
+        <input type="text" id="in-codigo" maxlength="20" autocomplete="off" placeholder="Te lo proporciona tu docente">
+      </div>
+
+      <div class="audio-test">
+        <h3>Prueba de audio</h3>
+        <p>Sube el volumen, conecta tus audífonos y presiona el botón. Debes escuchar una voz hablando en español.</p>
+        <div class="btn-fila">
+          <button class="btn sec" id="btn-probar" type="button">Probar audio</button>
+          <button class="btn sec" id="btn-si-escuche" type="button" hidden>Sí, la escuché</button>
+          <button class="btn sec" id="btn-no-escuche" type="button" hidden>No escuché nada</button>
+        </div>
+        <p id="audio-ayuda" style="display:none;margin-top:.8rem">
+          Revisa que el volumen no esté en silencio, que no estés usando otro audio y prueba con otro navegador (se recomienda Chrome o Edge). Luego presiona de nuevo "Probar audio".
+        </p>
+        <div class="btn-fila" id="fila-texto" hidden>
+          <button class="btn sec" id="btn-modo-texto" type="button">Continuar sin audio (quedará registrado)</button>
+        </div>
+        <div class="estado-ok" id="audio-estado" hidden></div>
+      </div>
+
+      <div class="msg-error" id="msg-inicio"></div>
+      <button class="btn" id="btn-comenzar" type="button" disabled>Comenzar evaluación</button>
+    </div>
+  </section>
+
+  <!-- EXAMEN -->
+  <div id="pantalla-examen" class="exam-wrap" hidden>
+    <div class="pregunta-card" id="pregunta-card"></div>
+  </div>
+
+  <!-- RESULTADO -->
+  <section id="pantalla-resultado" hidden>
+    <div class="result-card">
+      <div style="font-family:var(--font-ui);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-muted)">Resultado de</div>
+      <div class="alumno" id="res-nombre"></div>
+      <div class="datos" id="res-grupo"></div>
+      <div class="nota"><span id="res-nota">0</span> <small>/ 10</small></div>
+      <div class="aciertos" id="res-aciertos"></div>
+    </div>
+
+    <div class="infr-card" id="res-infr-card">
+      <div class="num" id="res-infr">0</div>
+      <div>
+        <div class="tit">Infracciones registradas</div>
+        <div class="det" id="res-infr-det"></div>
+      </div>
+    </div>
+    <p id="res-motivo" style="font-family:var(--font-ui);font-size:.9rem;color:#B3261E" hidden></p>
+
+    <div class="stats">
+      <div class="stat"><span>Intento</span><b>1 de 1</b></div>
+      <div class="stat"><span>Tiempo empleado</span><b id="res-tiempo">0:00</b></div>
+      <div class="stat"><span>Modo</span><b id="res-modo">Audio</b></div>
+      <div class="stat"><span>Fecha y hora</span><b id="res-fecha"></b></div>
+      <div class="stat"><span>Folio de verificación</span><b id="res-folio" style="font-family:var(--font-mono)"></b></div>
+    </div>
+
+    <div class="mixtle-tip">
+      <img src="imagen2.png" alt="Mixtle">
+      <div>
+        <span class="mixtle-name">Mensaje de Mixtle</span>
+        <p id="res-mixtle"></p>
+      </div>
+    </div>
+
+    <h2 class="section-title" style="font-size:1.5rem">Resultado por tema</h2>
+    <div id="res-secciones"></div>
+
+    <h2 class="section-title" style="font-size:1.3rem;margin-top:2rem">Código de verificación</h2>
+    <div class="codigo-box" id="res-codigo"></div>
+
+    <div style="text-align:center;margin:2rem 0 1rem" class="no-print">
+      <button class="btn" id="btn-copiar-res" type="button">Copiar mi resultado</button>
+      <button class="btn sec" id="btn-imprimir" type="button">Guardar o imprimir en PDF</button>
+      <div id="copiado-msg" style="font-family:var(--font-ui);font-size:.88rem;color:#2E7D32;margin-top:.6rem" hidden>Resultado copiado. Pégalo en el mensaje que enviarás a tu docente.</div>
+    </div>
+  </section>
+
+  <!-- VERIFICADOR DOCENTE -->
+  <section id="pantalla-docente" class="section" hidden>
+    <span class="section-label">Uso exclusivo del docente</span>
+    <h2 class="section-title">Verificador de resultados</h2>
+    <p>Pega el código de verificación que envió el estudiante para comprobar que sus datos no fueron alterados.</p>
+    <div class="field">
+      <label for="in-verif">Código de verificación</label>
+      <textarea id="in-verif" spellcheck="false"></textarea>
+    </div>
+    <div class="btn-fila">
+      <button class="btn" id="btn-verificar" type="button">Verificar</button>
+      <button class="btn sec" id="btn-borrar-estado" type="button">Borrar el estado de este equipo</button>
+    </div>
+    <div id="verif-salida" style="margin-top:1.2rem;font-family:var(--font-ui);font-size:.95rem"></div>
+  </section>
+
+</main>
+
+<div class="cortina" id="cortina" hidden>
+  <div class="cortina-box">
+    <img src="imagen2.png" alt="Mixtle">
+    <h2 id="cortina-titulo">Infracción registrada</h2>
+    <p id="cortina-texto"></p>
+    <button class="btn" id="btn-cortina" type="button">Continuar con la evaluación</button>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <span><strong>Análisis y Diseño de Algoritmos</strong> — Unidad 1 · Evaluación de sesiones 3 y 4</span>
+  <span>Mtro. José Armando Vera Rodríguez · IEDEP · <span id="pie-fecha"></span></span>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ═══════════ CONFIGURACIÓN (solo para el docente) ═══════════ */
+  var TIEMPO_PREGUNTA = 60;      // segundos por pregunta
+  var ESCUCHAS_MAX    = 3;       // veces que se puede escuchar cada pregunta
+  var MAX_INFRACCION  = 5;       // al llegar a este total, la evaluación se cierra sola
+  var CODIGO_ACCESO   = '';      // ej. 'ADA2026'; vacío = sin código de acceso
+  var CODIGO_DOCENTE  = 'ADA-DOCENTE-2026'; // abrir con ?verificar=CODIGO para el verificador, o ?reiniciar=CODIGO para borrar el estado de este equipo
+  var PERMITIR_TEXTO_SI_FALLA_AUDIO = true; // si el audio no funciona, se permite modo texto (queda registrado)
+  var SAL   = 'iedep-ada-u1-s3s4-2026';
+  var CLAVE = 'iedep_eval_ada_u1_s3s4_2026';
+
+  /* ═══════════ BANCO DE PREGUNTAS ═══════════
+     "op": la PRIMERA opción es la correcta; el orden se mezcla por alumno.
+     "voz": lo que se escucha (y lo que se muestra solo en modo texto). */
+  var QS = [
+    { id: 'q1', tema: 'S3',
+      voz: 'Un programa tiene un ciclo dentro de otro. Cada ciclo se repite n veces, y n vale 10. ¿Cuántas veces se ejecuta la instrucción que está dentro del ciclo interior?',
+      op: ['100', '10', '20', '1000'] },
+    { id: 'q2', tema: 'S3',
+      voz: 'Un programa tiene dos ciclos, uno después del otro, sin estar anidados. Cada uno se repite n veces, y n vale 10. ¿Cuántos pasos da en total?',
+      op: ['20', '10', '100', '200'] },
+    { id: 'q3', tema: 'S3',
+      voz: 'El ciclo exterior de un programa se repite n veces, pero el ciclo interior siempre da exactamente 3 vueltas. ¿Cuál es el orden de tiempo del programa?',
+      op: ['O(n)', 'O(1)', 'O(n²)', 'O(3)'] },
+    { id: 'q4', tema: 'S3',
+      voz: 'Un programa hace tres n más cinco pasos. ¿Cuál es su orden de crecimiento?',
+      op: ['O(n)', 'O(1)', 'O(n²)', 'O(3n + 5)'] },
+    { id: 'q5', tema: 'S3',
+      voz: 'Mides un programa. Con n igual a 10 hace 100 pasos, y con n igual a 20 hace 400 pasos. ¿Qué orden tiene el programa?',
+      op: ['O(n²)', 'O(n)', 'O(1)', 'No se puede saber'] },
+    { id: 'q6', tema: 'S3',
+      voz: 'Un programa usa siempre tres variables sueltas, sin importar cuántos datos reciba. ¿Cuál es su complejidad espacial?',
+      op: ['O(1)', 'O(n)', 'O(n²)', 'O(3)'] },
+    { id: 'q7', tema: 'S3',
+      voz: 'Un programa recibe n nombres y los copia en una lista nueva del mismo tamaño. ¿Cuánta memoria extra necesita?',
+      op: ['O(n)', 'O(1)', 'O(n²)', 'Ninguna'] },
+    { id: 'q8', tema: 'S3',
+      voz: 'Verdadero o falso. Un programa rápido siempre usa poca memoria.',
+      op: ['Falso', 'Verdadero'] },
+    { id: 'q9', tema: 'S4',
+      voz: 'Buscas un número con búsqueda lineal en una lista de 100 elementos, y el número no está en la lista. ¿Cuántos pasos da el programa?',
+      op: ['100', '1', '50', '99'] },
+    { id: 'q10', tema: 'S4',
+      voz: 'Buscas un nombre con búsqueda lineal y lo encuentras más o menos a la mitad de la lista. ¿Qué caso es?',
+      op: ['Caso promedio', 'Mejor caso', 'Peor caso'] },
+    { id: 'q11', tema: 'S4',
+      voz: 'Si duplicas el tamaño de la lista, ¿qué le pasa al peor caso de la búsqueda lineal?',
+      op: ['Se duplica', 'Se queda igual', 'Se cuadruplica', 'Se reduce a la mitad'] },
+    { id: 'q12', tema: 'S4',
+      voz: '¿Qué notación se usa para describir el mejor caso, es decir, lo mínimo que puede tardar un algoritmo?',
+      op: ['Big-Ω (omega)', 'Big-O', 'Big-Θ (theta)'] }
+  ];
+  var TEMAS = { S3: 'Sesión 3 · Complejidad temporal y espacial', S4: 'Sesión 4 · Casos mejor, promedio y peor' };
+
+  /* ═══════════ UTILIDADES ═══════════ */
+  var $ = function (id) { return document.getElementById(id); };
+  function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function mezclar(arr, rnd) { var r = arr.slice(); for (var i = r.length - 1; i > 0; i--) { var j = Math.floor(rnd() * (i + 1)); var t = r[i]; r[i] = r[j]; r[j] = t; } return r; }
+  function cyrb53(str) { var h1 = 0xdeadbeef, h2 = 0x41c6ce57; for (var i = 0; i < str.length; i++) { var ch = str.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); } h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909); h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909); return 4294967296 * (2097151 & h2) + (h1 >>> 0); }
+  function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt !== undefined) e.textContent = txt; return e; }
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function mmss(ms) { var s = Math.max(0, Math.round(ms / 1000)); return Math.floor(s / 60) + ':' + pad2(s % 60); }
+  function escXml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function fechaLarga(d) { return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' }); }
+  function fechaHora(d) { return d.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()); }
+
+  $('meta-fecha').textContent = fechaLarga(new Date());
+  $('pie-fecha').textContent = fechaLarga(new Date());
+
+  /* ═══════════ ESTADO PERSISTENTE ═══════════ */
+  var estado = null;
+  function leerAlmacen(a) { try { var s = a.getItem(CLAVE); return s ? JSON.parse(s) : null; } catch (e) { return null; } }
+  function cargar() {
+    var a = null, b = null;
+    try { a = leerAlmacen(window.localStorage); } catch (e) {}
+    try { b = leerAlmacen(window.sessionStorage); } catch (e) {}
+    function peso(x) { return x ? (x.done ? 1000 : 0) + (x.idx || 0) * 10 + (x.recargas || 0) + (x.salidas || 0) + (x.capturas || 0) : -1; }
+    return peso(a) >= peso(b) ? a : b;
+  }
+  function guardar() { var s = JSON.stringify(estado); try { localStorage.setItem(CLAVE, s); } catch (e) {} try { sessionStorage.setItem(CLAVE, s); } catch (e) {} }
+  function borrarEstado() { try { localStorage.removeItem(CLAVE); } catch (e) {} try { sessionStorage.removeItem(CLAVE); } catch (e) {} }
+
+  /* ═══════════ PLAN POR ALUMNO (orden aleatorio) ═══════════ */
+  var plan = [];
+  function construirPlan(seed) {
+    var rnd = mulberry32(seed);
+    plan = mezclar(QS, rnd).map(function (q) { return { q: q, ops: mezclar(q.op, rnd) }; });
+  }
+  function totalInfr() { return (estado.salidas || 0) + (estado.capturas || 0) + (estado.recargas || 0); }
+
+  /* ═══════════ AUDIO (síntesis de voz del navegador) ═══════════ */
+  var sintesis = ('speechSynthesis' in window && 'SpeechSynthesisUtterance' in window) ? window.speechSynthesis : null;
+  function elegirVoz() {
+    if (!sintesis) return null;
+    var vs = sintesis.getVoices() || [];
+    var es = vs.filter(function (v) { return /^es/i.test(v.lang); });
+    var pref = es.filter(function (v) { return /MX|419|US/i.test(v.lang); })[0];
+    return pref || es[0] || null;
+  }
+  if (sintesis && sintesis.addEventListener) sintesis.addEventListener('voiceschanged', function () { elegirVoz(); });
+  var ondasEl = null;
+  function hablar(texto) {
+    if (!sintesis) return false;
+    try {
+      sintesis.cancel();
+      var u = new SpeechSynthesisUtterance(texto);
+      var v = elegirVoz();
+      u.lang = v ? v.lang : 'es-MX';
+      if (v) u.voice = v;
+      u.rate = 0.92; u.pitch = 1; u.volume = 1;
+      u.onstart = function () { if (ondasEl) ondasEl.classList.add('hablando'); };
+      u.onend = u.onerror = function () { if (ondasEl) ondasEl.classList.remove('hablando'); };
+      sintesis.speak(u);
+      return true;
+    } catch (e) { return false; }
+  }
+  function callar() { try { if (sintesis) sintesis.cancel(); } catch (e) {} if (ondasEl) ondasEl.classList.remove('hablando'); }
+
+  /* ═══════════ MARCA DE AGUA ═══════════ */
+  function marcaAgua(nombre, intensidad) {
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="420" height="260">' +
+      '<text x="210" y="130" text-anchor="middle" dominant-baseline="middle" font-family="Inter, Arial, sans-serif" font-size="26" font-weight="700" ' +
+      'fill="rgba(73,11,88,' + intensidad + ')" transform="rotate(-30 210 130)">' + escXml(nombre) + '</text></svg>';
+    var m = $('marca-agua');
+    m.style.backgroundImage = 'url("data:image/svg+xml;utf8,' + encodeURIComponent(svg) + '")';
+    m.hidden = false;
+  }
+
+  /* ═══════════ PROTECCIONES (silenciosas) ═══════════ */
+  var examenActivo = false, fuera = false, ultimaCaptura = 0;
+
+  function bloquear(e) {
+    if (e.type === 'paste' && e.target && e.target.id === 'in-verif') return;
+    e.preventDefault(); return false;
+  }
+  ['copy', 'cut', 'paste', 'contextmenu', 'dragstart', 'drop'].forEach(function (ev) { document.addEventListener(ev, bloquear, true); });
+  document.addEventListener('selectstart', function (e) {
+    var t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+    e.preventDefault();
+  }, true);
+
+  function capturaDetectada() {
+    var ahora = Date.now();
+    if (ahora - ultimaCaptura < 1500) return;
+    ultimaCaptura = ahora;
+    try { navigator.clipboard.writeText(''); } catch (x) {}
+    registrar('captura');
+  }
+  document.addEventListener('keydown', function (e) {
+    var k = (e.key || '').toLowerCase();
+    var ctrl = e.ctrlKey || e.metaKey;
+    // Intentos de captura de pantalla
+    var captura = k === 'printscreen' ||
+      (e.metaKey && e.shiftKey && (k === 's' || ['Digit3', 'Digit4', 'Digit5', 'Digit6'].indexOf(e.code) > -1)) ||
+      (e.ctrlKey && e.shiftKey && k === 's' && e.altKey);
+    if (captura) { e.preventDefault(); capturaDetectada(); return false; }
+    var prohibido =
+      (ctrl && ['c', 'v', 'x', 'a', 'u', 's'].indexOf(k) > -1 && !(e.target && e.target.id === 'in-verif' && k === 'v')) ||
+      (ctrl && k === 'p' && examenActivo) ||
+      (ctrl && e.shiftKey && ['i', 'j', 'c'].indexOf(k) > -1) ||
+      k === 'f12' || (e.key === 'Insert' && (e.shiftKey || ctrl));
+    if (prohibido) { e.preventDefault(); e.stopPropagation(); return false; }
+  }, true);
+  document.addEventListener('keyup', function (e) {
+    if ((e.key || '').toLowerCase() === 'printscreen') capturaDetectada();
+  }, true);
+
+  function registrar(tipo) {
+    if (!examenActivo || !estado || estado.done) return;
+    var texto, titulo;
+    if (tipo === 'salida') {
+      if (fuera) return;
+      fuera = true; estado.salidas = (estado.salidas || 0) + 1;
+      titulo = 'Salida registrada';
+      texto = 'Se registró que saliste de la ventana de la evaluación.';
+    } else {
+      estado.capturas = (estado.capturas || 0) + 1;
+      titulo = 'Intento de captura registrado';
+      texto = 'Se registró un intento de captura de pantalla.';
+    }
+    callar();
+    guardar(); actualizarAlertas();
+    $('cortina-titulo').textContent = titulo;
+    $('cortina-texto').textContent = texto + ' Infracciones acumuladas: ' + totalInfr() + '.';
+    $('cortina').hidden = false;
+    if (totalInfr() >= MAX_INFRACCION) finalizar('infracciones');
+  }
+  document.addEventListener('visibilitychange', function () { if (document.hidden) registrar('salida'); else fuera = false; });
+  window.addEventListener('blur', function () { setTimeout(function () { if (!document.hasFocus()) registrar('salida'); }, 200); });
+  window.addEventListener('focus', function () { fuera = false; });
+
+  function actualizarAlertas() {
+    var a = $('barra-alertas');
+    var n = estado ? totalInfr() : 0;
+    if (n > 0) { a.hidden = false; a.textContent = 'Infracciones: ' + n; } else a.hidden = true;
+  }
+
+  /* ═══════════ PANTALLAS ═══════════ */
+  function mostrar(p) {
+    ['pantalla-inicio', 'pantalla-examen', 'pantalla-resultado', 'pantalla-docente'].forEach(function (id) { $(id).hidden = (id !== p); });
+    $('barra').hidden = (p !== 'pantalla-examen');
+    examenActivo = (p === 'pantalla-examen');
+    document.body.classList.toggle('examen-activo', examenActivo);
+    window.scrollTo(0, 0);
+  }
+
+  /* ═══════════ INICIO: prueba de audio ═══════════ */
+  var audioOk = false, modoTexto = false;
+  function habilitarComenzar() { $('btn-comenzar').disabled = !(audioOk || modoTexto); }
+  function iniciarPantallaInicio() {
+    if (CODIGO_ACCESO) $('campo-codigo').hidden = false;
+    if (!sintesis) {
+      $('btn-probar').disabled = true;
+      $('audio-ayuda').style.display = 'block';
+      $('audio-ayuda').textContent = 'Este navegador no puede reproducir voz. Prueba con Chrome o Edge.';
+      if (PERMITIR_TEXTO_SI_FALLA_AUDIO) $('fila-texto').hidden = false;
+    }
+    $('btn-probar').addEventListener('click', function () {
+      $('audio-ayuda').style.display = 'none';
+      var ok = hablar('Prueba de audio. Si escuchas esta voz, presiona el botón: Sí, la escuché.');
+      if (!ok) { $('audio-ayuda').style.display = 'block'; if (PERMITIR_TEXTO_SI_FALLA_AUDIO) $('fila-texto').hidden = false; return; }
+      $('btn-si-escuche').hidden = false; $('btn-no-escuche').hidden = false;
+    });
+    $('btn-si-escuche').addEventListener('click', function () {
+      audioOk = true; modoTexto = false; callar();
+      $('audio-estado').hidden = false; $('audio-estado').textContent = 'Audio verificado. Ya puedes comenzar.';
+      $('fila-texto').hidden = true; $('audio-ayuda').style.display = 'none';
+      habilitarComenzar();
+    });
+    $('btn-no-escuche').addEventListener('click', function () {
+      audioOk = false; callar();
+      $('audio-ayuda').style.display = 'block';
+      if (PERMITIR_TEXTO_SI_FALLA_AUDIO) $('fila-texto').hidden = false;
+      habilitarComenzar();
+    });
+    $('btn-modo-texto').addEventListener('click', function () {
+      modoTexto = true; audioOk = false;
+      $('audio-estado').hidden = false; $('audio-estado').textContent = 'Se usará el modo texto. Esta situación quedará registrada en tu resultado.';
+      habilitarComenzar();
+    });
+  }
+
+  function normalizar(s) { return s.replace(/\s+/g, ' ').trim(); }
+
+  function comenzar() {
+    var nombre = normalizar($('in-nombre').value), grupo = normalizar($('in-grupo').value);
+    var msg = $('msg-inicio'); msg.textContent = '';
+    if (nombre.length < 6 || nombre.indexOf(' ') < 0) { msg.textContent = 'Escribe tu nombre completo (nombre y apellidos) para continuar.'; return; }
+    if (grupo.length < 2) { msg.textContent = 'Escribe tu matrícula o tu grupo para continuar.'; return; }
+    if (CODIGO_ACCESO && $('in-codigo').value.trim() !== CODIGO_ACCESO) { msg.textContent = 'El código de acceso no es correcto. Pídelo a tu docente.'; return; }
+    if (!(audioOk || modoTexto)) { msg.textContent = 'Realiza primero la prueba de audio.'; return; }
+    estado = {
+      nombre: nombre, grupo: grupo, modo: audioOk ? 'audio' : 'texto',
+      seed: Math.floor(Math.random() * 2147483647) + 1,
+      inicio: Date.now(), idx: 0, qInicio: Date.now(),
+      escuchas: {}, respuestas: {},
+      salidas: 0, capturas: 0, recargas: 0,
+      started: true, done: false
+    };
+    guardar();
+    construirPlan(estado.seed);
+    entrarAlExamen();
+  }
+
+  /* ═══════════ EXAMEN ═══════════ */
+  var reloj = null, avanzando = false;
+
+  function entrarAlExamen() {
+    marcaAgua(estado.nombre, 0.05);
+    $('barra-nombre').textContent = estado.nombre;
+    actualizarAlertas();
+    mostrar('pantalla-examen');
+    pintarPregunta();
+    iniciarReloj();
+    window.scrollTo(0, 0);
+  }
+
+  function pintarPregunta() {
+    var p = plan[estado.idx], q = p.q;
+    var card = $('pregunta-card'); card.innerHTML = '';
+    $('barra-texto').textContent = 'Pregunta ' + (estado.idx + 1) + ' de ' + plan.length;
+    $('barra-fill').style.width = (estado.idx / plan.length * 100) + '%';
+
+    card.appendChild(el('span', 'q-num', 'Pregunta ' + (estado.idx + 1) + ' de ' + plan.length));
+
+    if (estado.modo === 'audio') {
+      var panel = el('div', 'audio-panel');
+      var ondas = el('div', 'ondas'); for (var i = 0; i < 6; i++) ondas.appendChild(el('i'));
+      ondasEl = ondas;
+      var info = el('div');
+      var btn = el('button', 'btn', 'Escuchar la pregunta'); btn.type = 'button'; btn.id = 'btn-escuchar';
+      var esc = el('div', 'escuchas'); esc.id = 'escuchas-txt';
+      info.appendChild(btn); info.appendChild(esc);
+      panel.appendChild(ondas); panel.appendChild(info);
+      card.appendChild(panel);
+      btn.addEventListener('click', escuchar);
+      actualizarEscuchas();
+    } else {
+      ondasEl = null;
+      card.appendChild(el('div', 'q-texto', q.voz));
+    }
+
+    card.appendChild(el('div', 'instruccion', 'Elige una respuesta:'));
+    var cont = el('div', 'opciones'); cont.setAttribute('role', 'radiogroup');
+    p.ops.forEach(function (t) {
+      var lab = el('label', 'opcion');
+      var inp = document.createElement('input'); inp.type = 'radio'; inp.name = 'resp'; inp.value = t;
+      var sp = el('span', null, t);
+      lab.appendChild(inp); lab.appendChild(sp);
+      if (estado.respuestas[q.id] === t) { inp.checked = true; lab.classList.add('sel'); }
+      inp.addEventListener('change', function () {
+        estado.respuestas[q.id] = t; guardar();
+        cont.querySelectorAll('.opcion').forEach(function (o) { o.classList.remove('sel'); });
+        lab.classList.add('sel');
+      });
+      cont.appendChild(lab);
+    });
+    card.appendChild(cont);
+
+    var fila = el('div', 'btn-fila no-print'); fila.style.marginTop = '1.4rem';
+    var sig = el('button', 'btn', estado.idx === plan.length - 1 ? 'Terminar evaluación' : 'Confirmar y continuar');
+    sig.type = 'button'; sig.addEventListener('click', function () { siguiente(false); });
+    fila.appendChild(sig); card.appendChild(fila);
+
+    var barra = el('div', 'q-barra'); var fill = el('i'); fill.id = 'q-barra-fill'; barra.appendChild(fill); card.appendChild(barra);
+
+    // reproducción automática de la primera escucha
+    if (estado.modo === 'audio' && !(estado.escuchas[q.id] > 0)) escuchar();
+  }
+
+  function actualizarEscuchas() {
+    var q = plan[estado.idx].q;
+    var usadas = estado.escuchas[q.id] || 0, quedan = Math.max(0, ESCUCHAS_MAX - usadas);
+    var t = $('escuchas-txt'), b = $('btn-escuchar');
+    if (!t || !b) return;
+    t.textContent = 'Escuchas disponibles: ' + quedan + ' de ' + ESCUCHAS_MAX;
+    b.disabled = quedan === 0;
+    b.textContent = usadas === 0 ? 'Escuchar la pregunta' : 'Escuchar de nuevo';
+  }
+  function escuchar() {
+    var q = plan[estado.idx].q;
+    var usadas = estado.escuchas[q.id] || 0;
+    if (usadas >= ESCUCHAS_MAX) return;
+    estado.escuchas[q.id] = usadas + 1; guardar();
+    actualizarEscuchas();
+    hablar(q.voz);
+  }
+
+  function siguiente() {
+    if (avanzando || estado.done) return;
+    avanzando = true;
+    callar();
+    estado.idx++;
+    estado.qInicio = Date.now();
+    guardar();
+    if (estado.idx >= plan.length) { avanzando = false; finalizar('fin'); return; }
+    pintarPregunta();
+    window.scrollTo(0, 0);
+    avanzando = false;
+  }
+
+  function iniciarReloj() {
+    clearInterval(reloj);
+    function tick() {
+      if (estado.done) return;
+      var resta = estado.qInicio + TIEMPO_PREGUNTA * 1000 - Date.now();
+      $('barra-tiempo').textContent = mmss(resta);
+      $('barra-tiempo').classList.toggle('urgente', resta < 15000);
+      var f = $('q-barra-fill');
+      if (f) { f.style.width = Math.max(0, resta / (TIEMPO_PREGUNTA * 1000) * 100) + '%'; f.classList.toggle('urgente', resta < 15000); }
+      if (resta <= 0) siguiente();
+    }
+    tick();
+    reloj = setInterval(tick, 250);
+  }
+
+  /* ═══════════ CALIFICACIÓN Y RESULTADO ═══════════ */
+  function evaluar() {
+    var ok = 0, porTema = { S3: { b: 0, t: 0 }, S4: { b: 0, t: 0 } };
+    plan.forEach(function (p) {
+      porTema[p.q.tema].t++;
+      if (estado.respuestas[p.q.id] === p.q.op[0]) { ok++; porTema[p.q.tema].b++; }
+    });
+    return { ok: ok, total: plan.length, porTema: porTema };
+  }
+  function folioDe(d) {
+    var h = cyrb53([d.n, d.g, d.a, d.t, d.s, d.c, d.r, d.i, SAL].join('|')).toString(36).toUpperCase().padStart(8, '0').slice(-8);
+    return h.slice(0, 4) + '-' + h.slice(4);
+  }
+  function datosVerif(r) {
+    return { n: estado.nombre, g: estado.grupo, a: r.ok, t: r.total, s: estado.salidas || 0, c: estado.capturas || 0, r: estado.recargas || 0, i: estado.inicio, f: estado.fin, m: estado.modo };
+  }
+  function codigoDe(d) {
+    var copia = {}; for (var k in d) copia[k] = d[k];
+    copia.x = folioDe(d);
+    return 'IEDEP1-' + btoa(unescape(encodeURIComponent(JSON.stringify(copia))));
+  }
+
+  function finalizar(motivo) {
+    if (!estado || estado.done) return;
+    clearInterval(reloj); callar();
+    estado.done = true; estado.fin = Date.now(); estado.motivo = motivo || 'fin';
+    var r = evaluar();
+    estado.nota = Math.round(r.ok / r.total * 100) / 10;
+    var d = datosVerif(r);
+    estado.folio = folioDe(d); estado.codigo = codigoDe(d);
+    guardar();
+    $('cortina').hidden = true;
+    mostrarResultado(r);
+  }
+
+  function textoResultado() {
+    var r = evaluar(), t = totalInfr();
+    return [
+      'EVALUACIÓN UNIDAD 1 (SESIONES 3 Y 4) · ANÁLISIS Y DISEÑO DE ALGORITMOS',
+      'Nombre: ' + estado.nombre,
+      'Matrícula o grupo: ' + estado.grupo,
+      'Calificación: ' + estado.nota.toFixed(1) + ' / 10 (' + r.ok + ' de ' + r.total + ' aciertos)',
+      'Infracciones: ' + t + ' (salidas de la ventana: ' + (estado.salidas || 0) + ', intentos de captura: ' + (estado.capturas || 0) + ', actualizaciones de página: ' + (estado.recargas || 0) + ')',
+      'Modo: ' + (estado.modo === 'audio' ? 'audio' : 'texto (sin audio)'),
+      'Fecha y hora: ' + fechaHora(new Date(estado.fin)),
+      'Folio: ' + estado.folio,
+      'Código: ' + estado.codigo
+    ].join('\n');
+  }
+
+  function mostrarResultado(r) {
+    marcaAgua(estado.nombre, 0.09);
+    mostrar('pantalla-resultado');
+    var nota = r.ok / r.total * 10, t = totalInfr();
+    $('res-nombre').textContent = estado.nombre;
+    $('res-grupo').textContent = 'Matrícula o grupo: ' + estado.grupo;
+    $('res-nota').textContent = (Math.round(nota * 10) / 10).toFixed(1);
+    $('res-aciertos').textContent = r.ok + ' aciertos de ' + r.total + ' preguntas';
+
+    var card = $('res-infr-card');
+    card.className = 'infr-card ' + (t > 0 ? 'alerta' : 'limpio');
+    $('res-infr').textContent = String(t);
+    $('res-infr-det').textContent = t === 0
+      ? 'Sin infracciones registradas durante la evaluación.'
+      : 'Salidas de la ventana: ' + (estado.salidas || 0) + ' · Intentos de captura: ' + (estado.capturas || 0) + ' · Actualizaciones de página: ' + (estado.recargas || 0);
+
+    var mot = $('res-motivo');
+    if (estado.motivo === 'infracciones') { mot.hidden = false; mot.textContent = 'La evaluación se cerró automáticamente por el número de infracciones registradas.'; }
+    else if (estado.motivo === 'tiempo') { mot.hidden = false; mot.textContent = 'La evaluación se cerró automáticamente porque se terminó el tiempo.'; }
+    else mot.hidden = true;
+
+    $('res-tiempo').textContent = mmss((estado.fin || Date.now()) - estado.inicio);
+    $('res-modo').textContent = estado.modo === 'audio' ? 'Audio' : 'Texto (sin audio)';
+    $('res-fecha').textContent = fechaHora(new Date(estado.fin || Date.now()));
+    $('res-folio').textContent = estado.folio;
+    $('res-codigo').textContent = estado.codigo;
+
+    var msj;
+    if (nota >= 9) msj = '¡Excelente trabajo! Dominas cómo medir el tiempo y la memoria de un algoritmo. Sigue practicando en PSeInt Web.';
+    else if (nota >= 7) msj = '¡Muy bien! Tienes una buena base. Repasa los temas donde fallaste y vuelve a practicar en PSeInt Web.';
+    else msj = 'Aún hay temas por reforzar, y eso es parte de aprender. Repasa las sesiones 3 y 4, practica en PSeInt Web y pregunta tus dudas a tu docente.';
+    if (t > 0) msj += ' Tu docente revisará las infracciones registradas.';
+    $('res-mixtle').textContent = msj;
+
+    var cont = $('res-secciones'); cont.innerHTML = '';
+    ['S3', 'S4'].forEach(function (k) {
+      var f = el('div', 'sec-row');
+      f.appendChild(el('span', null, TEMAS[k]));
+      f.appendChild(el('strong', null, r.porTema[k].b + ' de ' + r.porTema[k].t));
+      cont.appendChild(f);
+    });
+  }
+
+  /* ═══════════ DOCENTE ═══════════ */
+  function verificar() {
+    var salida = $('verif-salida'); salida.innerHTML = '';
+    var bruto = $('in-verif').value.replace(/\s+/g, '');
+    var m = bruto.match(/IEDEP1-([A-Za-z0-9+\/=]+)/);
+    try {
+      if (!m) throw new Error('sin código');
+      var d = JSON.parse(decodeURIComponent(escape(atob(m[1]))));
+      var calculado = folioDe(d);
+      var ok = calculado === d.x;
+      var caja = el('div', 'infr-card ' + (ok ? 'limpio' : 'alerta'));
+      var num = el('div', 'num', ok ? 'OK' : 'X'); num.style.fontSize = '2.4rem';
+      var det = el('div');
+      det.appendChild(el('div', 'tit', ok ? 'Datos íntegros' : 'Los datos NO coinciden con el folio'));
+      det.appendChild(el('div', 'det', d.n + ' · ' + d.g));
+      det.appendChild(el('div', 'det', 'Aciertos: ' + d.a + ' de ' + d.t + ' · Calificación: ' + (Math.round(d.a / d.t * 100) / 10).toFixed(1) + ' / 10'));
+      det.appendChild(el('div', 'det', 'Infracciones: ' + (d.s + d.c + d.r) + ' (salidas ' + d.s + ', capturas ' + d.c + ', actualizaciones ' + d.r + ')'));
+      det.appendChild(el('div', 'det', 'Modo: ' + (d.m === 'audio' ? 'audio' : 'texto (sin audio)') + ' · Inicio: ' + fechaHora(new Date(d.i)) + ' · Folio: ' + d.x));
+      caja.appendChild(num); caja.appendChild(det); salida.appendChild(caja);
+    } catch (e) {
+      salida.appendChild(el('p', null, 'No se pudo leer el código. Verifica que esté completo, empezando con IEDEP1-.'));
+    }
+  }
+
+  /* ═══════════ ARRANQUE ═══════════ */
+  function arrancar() {
+    var q = location.search || '';
+    if (q.indexOf('reiniciar=' + CODIGO_DOCENTE) > -1) { borrarEstado(); try { history.replaceState(null, '', location.pathname); } catch (e) {} }
+
+    $('btn-comenzar').addEventListener('click', comenzar);
+    $('btn-cortina').addEventListener('click', function () { $('cortina').hidden = true; fuera = false; });
+    $('btn-imprimir').addEventListener('click', function () { window.print(); });
+    $('btn-copiar-res').addEventListener('click', function () {
+      var txt = textoResultado();
+      function listo() { $('copiado-msg').hidden = false; }
+      function respaldo() {
+        var ta = document.createElement('textarea'); ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); listo(); } catch (e) {} document.body.removeChild(ta);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(listo, respaldo); else respaldo();
+    });
+    $('btn-verificar').addEventListener('click', verificar);
+    $('btn-borrar-estado').addEventListener('click', function () { borrarEstado(); $('verif-salida').textContent = 'Estado borrado en este equipo.'; });
+
+    if (q.indexOf('verificar=' + CODIGO_DOCENTE) > -1) { mostrar('pantalla-docente'); return; }
+
+    estado = cargar();
+    iniciarPantallaInicio();
+
+    if (estado && estado.started) {
+      construirPlan(estado.seed);
+      if (estado.done) { mostrarResultado(evaluar()); return; }
+      // Actualizó la página en pleno examen: es una infracción y el tiempo sigue corriendo.
+      estado.recargas = (estado.recargas || 0) + 1;
+      var T = TIEMPO_PREGUNTA * 1000, ahora = Date.now();
+      while (estado.idx < plan.length && estado.qInicio + T <= ahora) { estado.qInicio += T; estado.idx++; }
+      guardar();
+      if (estado.idx >= plan.length) { examenActivo = true; finalizar('tiempo'); return; }
+      entrarAlExamen();
+      if (totalInfr() >= MAX_INFRACCION) finalizar('infracciones');
+    } else {
+      estado = null;
+      mostrar('pantalla-inicio');
+    }
+  }
+
+  arrancar();
+})();
+</script>
+</body>
+</html>
