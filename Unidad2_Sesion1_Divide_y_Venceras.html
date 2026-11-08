@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unidad 2, Sesión 1 — Divide y vencerás</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+  body { background: var(--white); }
+  .site-header { flex-wrap: wrap; }
+
+  .mixtle-tip { display: flex; gap: 1.25rem; align-items: flex-start; background: var(--guinda-light); border: 1px solid #D8A8BA; border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin: 1.8rem 0; }
+  .mixtle-tip img { width: 84px; height: auto; flex-shrink: 0; border-radius: var(--radius-md); }
+  .mixtle-tip .mixtle-name { font-family: var(--font-ui); font-size: .78rem; text-transform: uppercase; letter-spacing: .12em; color: var(--guinda); font-weight: 700; display: block; margin-bottom: .4rem; }
+  .mixtle-tip p { font-size: .97rem; margin-bottom: 0; }
+
+  .big { font-family: var(--font-mono); font-weight: 600; color: var(--guinda-dark); white-space: nowrap; }
+  code { font-family: var(--font-mono); font-size: .88em; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .1rem .4rem; color: var(--guinda-dark); }
+
+  .btn { display: inline-block; cursor: pointer; text-decoration: none; font-family: var(--font-ui); font-weight: 600; font-size: .92rem; padding: .65rem 1.3rem; border-radius: var(--radius-md); border: 1.5px solid var(--guinda); background: var(--guinda); color: var(--white); }
+  .btn:hover { background: var(--guinda-dark); }
+  .btn.sec { background: var(--white); color: var(--guinda); }
+  .btn.sec:hover { background: var(--guinda-light); }
+  .btn[disabled] { opacity: .5; cursor: not-allowed; }
+
+  .ejercicio-num { display: inline-block; font-family: var(--font-ui); font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; background: var(--guinda); color: var(--white); padding: .2rem .7rem; border-radius: 99px; margin-bottom: .5rem; }
+
+  /* Tres pasos */
+  .tres { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.2rem 0; }
+  .paso { background: var(--white); border: 1px solid var(--border); border-top: 5px solid var(--guinda); border-radius: var(--radius-lg); padding: 1.1rem 1.2rem; }
+  .paso.p1 { border-top-color: #C9A3B8; }
+  .paso.p2 { border-top-color: #A8689A; }
+  .paso.p3 { border-top-color: #490b58; }
+  .paso .quien { font-family: var(--font-ui); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-muted); display: block; }
+  .paso .titulo { font-family: var(--font-display); font-size: 1.55rem; font-weight: 700; color: var(--guinda); display: block; margin: .15rem 0 .4rem; }
+  .paso p { font-size: .94rem; margin: .3rem 0 0; }
+
+  /* Simuladores */
+  .sim { background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-lg); padding: 1.3rem 1.5rem; margin: 1.2rem 0; }
+  .sim-controles { display: flex; gap: .8rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; font-family: var(--font-ui); font-size: .92rem; }
+  .sim-controles label { font-weight: 600; color: var(--guinda); }
+  .sim select, .sim input[type="text"] { font-family: var(--font-mono); font-size: .95rem; padding: .4rem .6rem; border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--white); }
+  .sim input[type="text"] { width: 5.5rem; }
+  .contador { font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; color: var(--guinda-dark); line-height: 1; }
+  .contador small { font-family: var(--font-ui); font-size: .8rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-muted); margin-left: .5rem; }
+  .sim-mensaje { margin-top: .8rem; font-family: var(--font-ui); font-size: .95rem; font-weight: 600; min-height: 3em; color: var(--guinda-dark); }
+  .sim-mensaje.ok { color: #2E7D32; }
+  .sim-mensaje.mal { color: #B3261E; }
+  .historial { list-style: none; padding: 0; margin: .8rem 0 0; font-family: var(--font-ui); font-size: .85rem; display: flex; flex-wrap: wrap; gap: .4rem; }
+  .historial li { padding: .25rem .65rem; border-radius: 99px; background: var(--white); border: 1px solid var(--border-strong); }
+  .historial li.ok { border-color: #2E7D32; color: #2E7D32; }
+
+  .rango-barra { position: relative; height: 16px; background: #EFEAEC; border-radius: 99px; margin: .4rem 0 .2rem; overflow: hidden; }
+  .rango-barra i { position: absolute; top: 0; bottom: 0; background: var(--guinda); border-radius: 99px; transition: left .25s, width .25s; }
+  .rango-leyenda { font-family: var(--font-ui); font-size: .85rem; color: var(--ink-secondary); display: flex; justify-content: space-between; }
+
+  .fila { display: grid; grid-template-columns: repeat(15, 1fr); gap: .35rem; margin: .8rem 0; }
+  .carta { position: relative; text-align: center; padding: .7rem .1rem .45rem; background: var(--white); border: 2px solid var(--border-strong); border-radius: var(--radius-md); font-family: var(--font-mono); font-size: 1rem; font-weight: 600; color: var(--ink); transition: background .2s, border-color .2s, transform .2s; }
+  .carta .pos { display: block; font-family: var(--font-ui); font-size: .64rem; color: var(--ink-muted); font-weight: 500; margin-top: .2rem; }
+  .carta.medio { border-color: var(--guinda); background: var(--guinda-light); transform: translateY(-5px); }
+  .carta.visto { background: #EFEAEC; color: var(--ink-muted); border-color: var(--border); }
+  .carta.hallado { background: #2E7D32; border-color: #2E7D32; color: var(--white); transform: translateY(-5px); }
+  .carta.hallado .pos { color: #D5EBD6; }
+  .vars { font-family: var(--font-mono); font-size: .9rem; color: var(--guinda-dark); margin: .4rem 0; }
+  .vars b { background: var(--white); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: .1rem .5rem; margin-right: .5rem; display: inline-block; }
+
+  /* Árbol dividir / combinar */
+  .arbol { background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-lg); padding: 1.1rem 1.3rem; margin: 1.2rem 0; }
+  .arbol-fila { display: grid; grid-template-columns: 7.5rem 1fr; gap: .7rem; align-items: center; margin: .5rem 0; }
+  .arbol-fila.nueva { animation: aparece .3s ease; }
+  @keyframes aparece { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+  .arbol-fila .fase { font-family: var(--font-ui); font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--guinda); }
+  .arbol-fila.comb .fase { color: #2E7D32; }
+  .grupos { display: flex; gap: .4rem; }
+  .grupo { flex: 1; display: flex; gap: 2px; justify-content: center; padding: .3rem; border: 2px solid var(--border-strong); border-radius: var(--radius-md); background: var(--white); }
+  .arbol-fila.comb .grupo { border-color: #8CC28F; background: #F3FAF3; }
+  .celda { font-family: var(--font-mono); font-weight: 600; font-size: .95rem; min-width: 1.5rem; text-align: center; padding: .25rem .15rem; background: var(--guinda-light); border-radius: 4px; color: var(--guinda-dark); }
+  .celda.final { background: #2E7D32; color: var(--white); }
+  .arbol-msg { font-family: var(--font-ui); font-size: .95rem; font-weight: 600; color: var(--guinda-dark); margin-top: .9rem; min-height: 3.2em; }
+  .arbol-ctrl { display: flex; gap: .7rem; flex-wrap: wrap; align-items: center; margin-top: .6rem; font-family: var(--font-ui); font-size: .85rem; color: var(--ink-secondary); }
+
+  /* Calculadora */
+  .calc { background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-lg); padding: 1.3rem 1.5rem; margin: 1.2rem 0; }
+  .calc label { font-family: var(--font-ui); font-weight: 600; color: var(--guinda); font-size: .9rem; display: block; margin-bottom: .4rem; }
+  .calc input[type="range"] { width: 100%; accent-color: #490b58; }
+  .calc .n-val { font-family: var(--font-display); font-size: 2.2rem; font-weight: 700; color: var(--guinda-dark); }
+  td.num { font-family: var(--font-mono); text-align: right; white-space: nowrap; }
+
+  /* Paneles de código */
+  .code-panel { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; margin: 1.1rem 0; }
+  .code-panel .code-head { background: var(--guinda); color: var(--white); padding: .5rem 1rem; font-family: var(--font-ui); font-size: .82rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; gap: .6rem; flex-wrap: wrap; }
+  .code-panel .code-head .badge { font-family: var(--font-mono); font-size: .72rem; background: rgba(255,255,255,.18); padding: .1rem .5rem; border-radius: 999px; }
+  .copiar { cursor: pointer; font-family: var(--font-ui); font-size: .75rem; font-weight: 600; color: var(--guinda); background: var(--white); border: none; border-radius: var(--radius-sm); padding: .3rem .7rem; }
+  .copiar:hover { background: var(--guinda-light); }
+  .code-panel pre { margin: 0; padding: 1rem 1.2rem; background: var(--white); font-family: var(--font-mono); font-size: .82rem; line-height: 1.7; color: var(--ink); overflow-x: auto; white-space: pre; }
+  .code-scroll { overflow-x: auto; }
+
+  /* Respuestas */
+  .registro td, .registro th { vertical-align: middle; }
+  .registro td.etq { font-family: var(--font-mono); font-weight: 500; }
+  input.resp, select.resp { font-family: var(--font-mono); font-size: .92rem; padding: .35rem .5rem; border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--white); color: var(--ink); max-width: 100%; }
+  input.resp { width: 6rem; }
+  select.resp { font-family: var(--font-ui); cursor: pointer; }
+  input.resp:focus, select.resp:focus { outline: 2px solid var(--guinda); border-color: var(--guinda); }
+  .resp.ok  { border-color: #2E7D32; background: #EEF7EE; }
+  .resp.bad { border-color: #B3261E; background: #FCEDEC; }
+  .pregunta { margin: .9rem 0; display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; font-size: .98rem; }
+  .comprobar-fila { margin-top: 1rem; display: flex; gap: .8rem; align-items: center; flex-wrap: wrap; }
+  .veredicto { font-family: var(--font-ui); font-size: .9rem; font-weight: 600; }
+  .veredicto.ok { color: #2E7D32; }
+  .veredicto.bad { color: #B3261E; }
+  .explica { display: none; margin-top: .9rem; }
+  .explica.ver { display: block; }
+
+  details.reto { background: var(--white); border: 1px solid var(--border); border-left: 4px solid var(--guinda); border-radius: var(--radius-md); padding: .8rem 1.1rem; margin: .8rem 0; }
+  details.reto summary { cursor: pointer; font-weight: 600; font-size: 1rem; }
+  details.reto .resp-txt { margin-top: .6rem; padding-top: .6rem; border-top: 1px dashed var(--border); font-size: .97rem; }
+
+  @media (max-width: 720px) {
+    .tres { grid-template-columns: 1fr; }
+    .fila { grid-template-columns: repeat(5, 1fr); }
+    .mixtle-tip { flex-direction: column; align-items: center; text-align: center; }
+    .arbol { padding: .9rem .8rem; }
+    .arbol-fila { grid-template-columns: 1fr; gap: .2rem; }
+    .grupo { padding: .15rem; border-width: 1px; gap: 1px; }
+    .celda { min-width: 0; padding: .2rem .1rem; font-size: .78rem; }
+    .grupos { gap: .25rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo-wrap">
+    <img src="imagen1.png" alt="Mixtle, mascota del curso">
+  </div>
+  <div class="header-text">
+    <span class="inst-name">Instituto de Educación Digital del Estado de Puebla</span>
+    <span class="doc-title">Licenciatura en Sistemas Computacionales · Análisis y Diseño de Algoritmos</span>
+  </div>
+</header>
+
+<section class="class-hero">
+  <div class="page-wrapper" style="padding:0;">
+    <span class="class-label">Unidad 2 · Estrategias de Diseño de Algoritmos · Sesión 1</span>
+    <h1>Divide y vencerás</h1>
+    <span class="class-subtitle">Un problema grande se resuelve más fácil cuando lo partes en problemas pequeños.</span>
+
+    <div class="meta-row">
+      <div class="meta-item">Programa educativo<span>Lic. en Sistemas Computacionales</span></div>
+      <div class="meta-item">Asignatura<span>Análisis y Diseño de Algoritmos</span></div>
+      <div class="meta-item">Unidad<span>2. Estrategias de Diseño de Algoritmos</span></div>
+      <div class="meta-item">Tema<span>2.1 Divide y vencerás</span></div>
+      <div class="meta-item">Fecha<span>8 de noviembre de 2026</span></div>
+    </div>
+  </div>
+</section>
+
+<main class="page-wrapper">
+
+  <!-- COMPETENCIAS -->
+  <section class="section">
+    <span class="section-label">Al finalizar esta sesión, el estudiante podrá</span>
+    <h2 class="section-title">Competencias a desarrollar</h2>
+
+    <div class="competency-card">
+      <span class="comp-num">01</span>
+      <span class="comp-text"><strong>Explicar</strong> la estrategia divide y vencerás con sus tres pasos: dividir, conquistar y combinar.</span>
+    </div>
+    <div class="competency-card">
+      <span class="comp-num">02</span>
+      <span class="comp-text"><strong>Simular</strong> la búsqueda binaria y compararla con la búsqueda lineal que ya conoces.</span>
+    </div>
+    <div class="competency-card">
+      <span class="comp-num">03</span>
+      <span class="comp-text"><strong>Programar</strong> en PSeInt Web una búsqueda binaria que cuenta sus pasos.</span>
+    </div>
+    <div class="competency-card">
+      <span class="comp-num">04</span>
+      <span class="comp-text"><strong>Reconocer</strong> por qué dividir hace que un algoritmo crezca mucho más despacio: O(log n) y O(n log n).</span>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 1. REPASO -->
+  <section class="section">
+    <span class="section-label">Activa lo que ya sabes</span>
+    <h2 class="section-title">Repaso en un minuto</h2>
+    <p>Con la Unidad 1 ya sabes medir cuánto tarda un algoritmo. Contesta de memoria sobre la <strong>búsqueda lineal</strong> (revisar uno por uno):</p>
+
+    <div class="pregunta" data-grupo="r1">En una lista de 1,000 datos, el peor caso de la búsqueda lineal es de
+      <select class="resp" data-ans="1000" aria-label="Pasos del peor caso">
+        <option value="">Elige…</option><option value="1">1 paso</option><option value="500">500 pasos</option><option value="1000">1,000 pasos</option>
+      </select>
+      y su orden es
+      <select class="resp" data-ans="on" aria-label="Orden de la búsqueda lineal">
+        <option value="">Elige…</option><option value="o1">O(1)</option><option value="on">O(n)</option><option value="on2">O(n²)</option>
+      </select>
+    </div>
+    <div class="comprobar-fila">
+      <button class="btn sec comprobar" type="button" data-grupo="r1">Comprobar</button>
+      <span class="veredicto" data-grupo="r1"></span>
+    </div>
+    <div class="explica callout note" data-grupo="r1"><p>Correcto: 1,000 pasos, es decir, O(n). Hoy vamos a descubrir una estrategia que encuentra el mismo dato en <strong>apenas 10 pasos</strong>.</p></div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 2. JUEGO -->
+  <section class="section">
+    <span class="section-label">Punto de partida</span>
+    <h2 class="section-title">Juego: adivina el número</h2>
+    <p>La computadora pensó un número del <strong>1 al 100</strong>. Escribe tu intento y te dirá si el número secreto es <strong>mayor</strong> o <strong>menor</strong>. Intenta adivinarlo con el menor número de intentos posible.</p>
+
+    <div class="sim">
+      <div class="sim-controles">
+        <label for="in-intento">Tu intento:</label>
+        <input type="text" id="in-intento" inputmode="numeric" maxlength="3" autocomplete="off" aria-label="Tu intento">
+        <button class="btn" id="btn-probar" type="button">Probar</button>
+        <button class="btn sec" id="btn-mitad" type="button">Usar la mitad</button>
+        <button class="btn sec" id="btn-nuevo" type="button">Nuevo juego</button>
+      </div>
+
+      <div class="rango-barra" aria-hidden="true"><i id="rango-fill" style="left:0;width:100%"></i></div>
+      <div class="rango-leyenda"><span>1</span><span id="rango-texto">El número está entre 1 y 100</span><span>100</span></div>
+
+      <div style="margin-top:1rem" class="contador"><span id="juego-intentos">0</span><small>intentos</small></div>
+      <div class="sim-mensaje" id="juego-msg">Escribe un número y presiona Probar.</div>
+      <ul class="historial" id="juego-hist" aria-label="Historial de intentos"></ul>
+    </div>
+
+    <div class="callout note">
+      <p><strong>Reto:</strong> juega dos veces escribiendo números "al azar" y una vez usando siempre el botón <strong>Usar la mitad</strong>. ¿Con cuál estrategia necesitas menos intentos? Con la mitad, <strong>nunca pasas de 7 intentos</strong>, aunque el número secreto sea cualquiera de los 100.</p>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 3. IDEA CENTRAL -->
+  <section class="section">
+    <span class="section-label">La idea central</span>
+    <h2 class="section-title">¿Qué es divide y vencerás?</h2>
+    <p>En el juego, cada intento <strong>descartaba la mitad</strong> de los números posibles. Esa es la esencia de la estrategia: en lugar de atacar el problema completo, lo partes en problemas más pequeños y fáciles. Siempre sigue <strong>tres pasos</strong>:</p>
+
+    <div class="tres">
+      <div class="paso p1">
+        <span class="quien">Paso 1</span>
+        <span class="titulo">Dividir</span>
+        <p>Partir el problema en <strong>partes más pequeñas</strong>, normalmente en dos mitades.</p>
+      </div>
+      <div class="paso p2">
+        <span class="quien">Paso 2</span>
+        <span class="titulo">Conquistar</span>
+        <p><strong>Resolver</strong> cada parte. Si la parte ya es muy pequeña, la respuesta es inmediata.</p>
+      </div>
+      <div class="paso p3">
+        <span class="quien">Paso 3</span>
+        <span class="titulo">Combinar</span>
+        <p><strong>Juntar</strong> las respuestas de las partes para obtener la respuesta del problema completo.</p>
+      </div>
+    </div>
+
+    <div class="concept-box">
+      <span class="concept-title">Ejemplo de la vida diaria</span>
+      <p style="margin:0">Una profesora tiene que revisar 40 exámenes. Los reparte entre 4 ayudantes (<strong>dividir</strong>), cada uno revisa 10 (<strong>conquistar</strong>) y al final la profesora junta las calificaciones en una sola lista (<strong>combinar</strong>). Cuatro personas trabajando con partes pequeñas terminan antes que una sola con el montón completo.</p>
+    </div>
+
+    <div class="mixtle-tip">
+      <img src="imagen2.png" alt="Mixtle">
+      <div>
+        <span class="mixtle-name">Consejo de Mixtle</span>
+        <p>Siempre pregúntate: <strong>¿cuándo dejo de dividir?</strong> Se divide hasta llegar a un problema tan pequeño que ya no hace falta pensar, por ejemplo, una lista con un solo número. A ese punto se le llama <strong>caso base</strong>.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 4. EJEMPLO 1: MAYOR -->
+  <section class="section">
+    <span class="section-label">Ejemplo 1</span>
+    <h2 class="section-title">Encontrar el número mayor</h2>
+    <p>Tenemos 8 números y queremos saber cuál es el mayor. Presiona <strong>Siguiente paso</strong> y observa cómo se divide, se llega al caso base y luego se combinan las respuestas.</p>
+
+    <div class="arbol" id="arbol-max">
+      <div class="arbol-filas"></div>
+      <div class="arbol-msg"></div>
+      <div class="arbol-ctrl">
+        <button class="btn" type="button" data-accion="sig">Siguiente paso</button>
+        <button class="btn sec" type="button" data-accion="reiniciar">Reiniciar</button>
+        <span data-info></span>
+      </div>
+    </div>
+
+    <div class="callout note">
+      <p>Fíjate en el patrón: <strong>dividir</strong> (filas moradas) hasta llegar a 1 número, y luego <strong>combinar</strong> (filas verdes) quedándote con el mayor de cada pareja. Este mismo patrón de dividir y combinar aparecerá en casi todos los algoritmos de esta unidad.</p>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 5. EJEMPLO 2: BÚSQUEDA BINARIA -->
+  <section class="section">
+    <span class="section-label">Ejemplo 2</span>
+    <h2 class="section-title">Búsqueda binaria</h2>
+    <p>Es el juego de adivinar el número, pero aplicado a una <strong>lista ordenada</strong>. En cada paso se mira el elemento de <strong>en medio</strong>:</p>
+
+    <ol class="step-list">
+      <li><span class="step-n">1</span><span class="step-content">Si el de en medio es el que buscas, ¡terminaste!</span></li>
+      <li><span class="step-n">2</span><span class="step-content">Si lo que buscas es <strong>mayor</strong>, descartas la mitad izquierda y sigues con la derecha.</span></li>
+      <li><span class="step-n">3</span><span class="step-content">Si lo que buscas es <strong>menor</strong>, descartas la mitad derecha y sigues con la izquierda.</span></li>
+      <li><span class="step-n">4</span><span class="step-content">Repites con la mitad que quedó, hasta encontrarlo o hasta que ya no quede nada.</span></li>
+    </ol>
+
+    <div class="sim">
+      <div class="sim-controles">
+        <label for="sel-bin">Número que busco:</label>
+        <select id="sel-bin" aria-label="Número que busco"></select>
+        <button class="btn" id="btn-bin-sig" type="button">Siguiente paso</button>
+        <button class="btn sec" id="btn-bin-reiniciar" type="button">Reiniciar</button>
+      </div>
+
+      <div class="fila" id="fila-bin" aria-label="Lista ordenada de 15 números"></div>
+
+      <div class="vars" id="bin-vars"></div>
+      <div class="contador"><span id="bin-pasos">0</span><small>pasos</small></div>
+      <div class="sim-mensaje" id="bin-msg">Elige un número y presiona Siguiente paso.</div>
+    </div>
+
+    <div class="callout note">
+      <p><strong>Reto:</strong> busca el 47, luego el 3 y luego el 80. Después busca el 50, que <strong>no está</strong> en la lista. ¿Cuántos pasos necesita la búsqueda binaria en cada caso? Compáralos con los que habría necesitado la búsqueda lineal (aparece al final de cada búsqueda).</p>
+    </div>
+
+    <div class="concept-box">
+      <span class="concept-title">Condición importante</span>
+      <p style="margin:0">La búsqueda binaria <strong>solo funciona si la lista está ordenada</strong>. Si los números estuvieran revueltos, no podrías saber de qué lado quedó el que buscas al mirar el de en medio.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <span class="section-label">¿Y si la lista es enorme?</span>
+    <h2 class="section-title">Mueve la barra y compara</h2>
+    <p>Cambia el tamaño de la lista y compara los pasos del <strong>peor caso</strong> de cada búsqueda.</p>
+
+    <div class="calc">
+      <label for="rango">Tamaño de la lista (n)</label>
+      <div class="n-val" id="n-val">1,000</div>
+      <input type="range" id="rango" min="1" max="6" step="1" value="4" aria-label="Tamaño de la lista">
+
+      <div class="code-scroll">
+      <table style="margin-top:1rem">
+        <thead><tr><th>Búsqueda</th><th>Pasos (peor caso)</th><th>Orden</th></tr></thead>
+        <tbody id="calc-body"></tbody>
+      </table>
+      </div>
+    </div>
+
+    <div class="concept-box">
+      <span class="concept-title">¿De dónde sale el log n?</span>
+      <p style="margin:0">Los pasos de la búsqueda binaria son <strong>cuántas veces puedes partir la lista a la mitad hasta quedarte con un solo elemento</strong>. Con 1,000 datos: 1000 → 500 → 250 → 125 → 62 → 31 → 15 → 7 → 3 → 1. Eso es alrededor de 10 pasos. A este comportamiento se le llama <span class="big">O(log n)</span> y es de los más rápidos que existen: aunque la lista se multiplique por mil, los pasos solo aumentan unos cuantos.</p>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 6. EJEMPLO 3: ORDENAR -->
+  <section class="section">
+    <span class="section-label">Ejemplo 3</span>
+    <h2 class="section-title">Ordenar dividiendo (ordenamiento por mezcla)</h2>
+    <p>Dividir y vencerás también sirve para <strong>ordenar</strong> una lista. La idea: partes la lista hasta tener números sueltos (una lista de un solo número ya está ordenada) y después <strong>mezclas</strong> las partes poniendo cada número en su lugar. Se llama <em>Merge Sort</em> o ordenamiento por mezcla.</p>
+
+    <div class="arbol" id="arbol-sort">
+      <div class="arbol-filas"></div>
+      <div class="arbol-msg"></div>
+      <div class="arbol-ctrl">
+        <button class="btn" type="button" data-accion="sig">Siguiente paso</button>
+        <button class="btn sec" type="button" data-accion="reiniciar">Reiniciar</button>
+        <span data-info></span>
+      </div>
+    </div>
+
+    <p>¿Vale la pena? Compara cuántos pasos aproximados necesita un método de ordenamiento lento, de orden <span class="big">O(n²)</span>, contra el ordenamiento por mezcla, de orden <span class="big">O(n log n)</span>:</p>
+
+    <div class="code-scroll">
+    <table>
+      <thead><tr><th>Datos a ordenar (n)</th><th>Método lento O(n²)</th><th>Por mezcla O(n log n)</th></tr></thead>
+      <tbody id="tabla-sort"></tbody>
+    </table>
+    </div>
+
+    <p>Para ordenar un millón de datos, el método lento necesita un billón de pasos y el de mezcla unos 20 millones. <strong>Dividir ahorra muchísimo trabajo.</strong></p>
+
+    <div class="mixtle-tip">
+      <img src="imagen2.png" alt="Mixtle">
+      <div>
+        <span class="mixtle-name">Consejo de Mixtle</span>
+        <p>¿Por qué <span class="big">n log n</span>? Dividir 8 números hasta llegar a 1 toma <strong>3 niveles</strong> (8 → 4 → 2 → 1), que es log n. Y en cada nivel hay que mezclar los n números. Son <strong>log n niveles</strong> con <strong>n trabajo</strong> en cada uno: n × log n.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 7. PSEINT -->
+  <section class="section">
+    <span class="ejercicio-num">Práctica en PSeInt Web</span>
+    <h2 class="section-title">Programa tu búsqueda binaria</h2>
+    <p>Este programa llena una lista <strong>ordenada</strong> con los números 3, 6, 9, 12… hasta 30 y busca el que tú elijas, contando los pasos. <strong>Abre PSeInt Web, pega el código y ejecútalo varias veces.</strong></p>
+
+    <p><a class="btn" href="https://www.pseint-web.app/" target="_blank" rel="noopener">Abrir PSeInt Web</a></p>
+
+    <div class="code-panel">
+      <div class="code-head">BusquedaBinaria <span class="badge">con contador de pasos</span></div>
+      <pre>Proceso BusquedaBinaria
+    Dimension lista[10];
+    Definir i, buscado, inicio, fin, medio, pasos Como Entero;
+    Definir encontrado Como Logico;
+
+    Para i &lt;- 1 Hasta 10 Hacer
+        lista[i] &lt;- i * 3;
+    FinPara
+
+    Escribir "¿Qué número buscas?";
+    Leer buscado;
+
+    inicio &lt;- 1;
+    fin &lt;- 10;
+    pasos &lt;- 0;
+    encontrado &lt;- Falso;
+
+    Mientras inicio &lt;= fin Y encontrado = Falso Hacer
+        pasos &lt;- pasos + 1;
+        medio &lt;- trunc((inicio + fin) / 2);
+        Si lista[medio] = buscado Entonces
+            encontrado &lt;- Verdadero;
+        SiNo
+            Si lista[medio] &lt; buscado Entonces
+                inicio &lt;- medio + 1;
+            SiNo
+                fin &lt;- medio - 1;
+            FinSi
+        FinSi
+    FinMientras
+
+    Si encontrado Entonces
+        Escribir "Lo encontré en la posición ", medio, " con ", pasos, " pasos";
+    SiNo
+        Escribir "No está en la lista. Pasos: ", pasos;
+    FinSi
+FinProceso</pre>
+    </div>
+
+    <div class="callout note">
+      <p><strong>Cómo leerlo:</strong> <code>inicio</code> y <code>fin</code> marcan la parte de la lista que todavía está en juego. En cada vuelta se calcula la posición de en medio con <code>trunc((inicio + fin) / 2)</code> (la función <code>trunc</code> quita los decimales). Si lo de en medio es menor que lo buscado, <code>inicio</code> se mueve a la derecha de <code>medio</code>; si es mayor, <code>fin</code> se mueve a la izquierda. Así se descarta la mitad en cada vuelta. Si algún botón o menú de PSeInt Web se ve distinto a lo que tu docente explica, pregunta en clase.</p>
+    </div>
+
+    <p><strong>Predice</strong> cuántos pasos dará con cada número y luego ejecuta para comprobar:</p>
+
+    <div class="code-scroll">
+    <table class="registro" data-grupo="p1">
+      <thead><tr><th>Número que buscas</th><th>¿Dónde está?</th><th>Pasos</th></tr></thead>
+      <tbody>
+        <tr><td class="etq">15</td><td>posición 5, justo en medio</td><td><input class="resp" inputmode="numeric" data-ans="1" aria-label="Pasos buscando 15"></td></tr>
+        <tr><td class="etq">30</td><td>posición 10, al final</td><td><input class="resp" inputmode="numeric" data-ans="4" aria-label="Pasos buscando 30"></td></tr>
+        <tr><td class="etq">3</td><td>posición 1, al principio</td><td><input class="resp" inputmode="numeric" data-ans="3" aria-label="Pasos buscando 3"></td></tr>
+        <tr><td class="etq">7</td><td>no está</td><td><input class="resp" inputmode="numeric" data-ans="3" aria-label="Pasos buscando 7"></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="comprobar-fila">
+      <button class="btn sec comprobar" type="button" data-grupo="p1">Comprobar</button>
+      <span class="veredicto" data-grupo="p1"></span>
+    </div>
+    <div class="explica callout note" data-grupo="p1"><p>El 15 está justo en medio (posición 5), así que se encuentra en el <strong>primer paso</strong>. Para el 30 se revisan las posiciones 5, 8, 9 y 10: <strong>4 pasos</strong> (la búsqueda lineal habría dado 10). Para el 3 se revisan las posiciones 5, 2 y 1: <strong>3 pasos</strong>. El 7 no existe: se revisan las posiciones 5, 2 y 3 y el programa se da cuenta de que ya no queda nada: <strong>3 pasos</strong>.</p></div>
+  </section>
+
+  <section class="section">
+    <span class="ejercicio-num">Ahora, ¿qué pasa con una lista más grande?</span>
+    <p style="margin-top:.6rem">Imagina el mismo programa con una lista de <strong>100</strong> números (el ciclo y <code>fin</code> irían hasta 100). Sin ejecutar, usa tu lógica:</p>
+
+    <div class="pregunta" data-grupo="p2">Con 100 datos, la búsqueda lineal necesita en el peor caso
+      <input class="resp" inputmode="numeric" data-ans="100" aria-label="Peor caso lineal con 100">
+      pasos.
+    </div>
+    <div class="pregunta" data-grupo="p2">Con 100 datos, la búsqueda binaria necesita como máximo
+      <input class="resp" inputmode="numeric" data-ans="7" aria-label="Peor caso binario con 100">
+      pasos.
+    </div>
+    <div class="pregunta" data-grupo="p2">La búsqueda binaria es de orden
+      <select class="resp" data-ans="olog" aria-label="Orden de la búsqueda binaria">
+        <option value="">Elige…</option><option value="on">O(n)</option><option value="olog">O(log n)</option><option value="on2">O(n²)</option>
+      </select>
+    </div>
+
+    <div class="comprobar-fila">
+      <button class="btn sec comprobar" type="button" data-grupo="p2">Comprobar</button>
+      <span class="veredicto" data-grupo="p2"></span>
+    </div>
+    <div class="explica callout note" data-grupo="p2"><p>La lineal necesita <strong>100 pasos</strong> en el peor caso. La binaria parte 100 → 50 → 25 → 12 → 6 → 3 → 1: <strong>7 pasos</strong>. Su orden es <strong>O(log n)</strong>. Tú mismo puedes comprobarlo en PSeInt Web cambiando <code>10</code> por <code>100</code> (en el <code>Dimension</code>, en el <code>Para</code> y en <code>fin</code>) y buscando el 7, que no está.</p></div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 8. APLICA -->
+  <section class="section">
+    <span class="section-label">Aplícalo</span>
+    <h2 class="section-title">¿Qué paso es?</h2>
+    <p>Clasifica cada acción dentro de la estrategia divide y vencerás:</p>
+
+    <div class="code-scroll">
+    <table class="registro" data-grupo="v1">
+      <thead><tr><th>Acción</th><th>Paso</th></tr></thead>
+      <tbody>
+        <tr><td>Partir una lista de 8 números en dos listas de 4.</td>
+          <td><select class="resp" data-ans="dividir" aria-label="Acción 1"><option value="">Elige…</option><option value="dividir">Dividir</option><option value="conquistar">Conquistar</option><option value="combinar">Combinar</option></select></td></tr>
+        <tr><td>Quedarse con el mayor de dos resultados parciales.</td>
+          <td><select class="resp" data-ans="combinar" aria-label="Acción 2"><option value="">Elige…</option><option value="dividir">Dividir</option><option value="conquistar">Conquistar</option><option value="combinar">Combinar</option></select></td></tr>
+        <tr><td>Resolver el problema cuando solo queda un número (caso base).</td>
+          <td><select class="resp" data-ans="conquistar" aria-label="Acción 3"><option value="">Elige…</option><option value="dividir">Dividir</option><option value="conquistar">Conquistar</option><option value="combinar">Combinar</option></select></td></tr>
+        <tr><td>Mezclar dos listas ya ordenadas para formar una sola lista ordenada.</td>
+          <td><select class="resp" data-ans="combinar" aria-label="Acción 4"><option value="">Elige…</option><option value="dividir">Dividir</option><option value="conquistar">Conquistar</option><option value="combinar">Combinar</option></select></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="comprobar-fila">
+      <button class="btn sec comprobar" type="button" data-grupo="v1">Comprobar</button>
+      <span class="veredicto" data-grupo="v1"></span>
+    </div>
+    <div class="explica callout note" data-grupo="v1"><p><strong>Dividir</strong> es partir el problema; <strong>conquistar</strong> es resolver las partes (el caso base es la parte más pequeña); <strong>combinar</strong> es juntar las respuestas, ya sea quedándote con el mayor o mezclando listas ordenadas.</p></div>
+  </section>
+
+  <section class="section">
+    <span class="section-label">Pon a prueba lo aprendido</span>
+    <h2 class="section-title">Preguntas rápidas</h2>
+
+    <details class="reto">
+      <summary>1. En la búsqueda binaria, si lo que buscas es mayor que el elemento de en medio, ¿qué mitad descartas?</summary>
+      <div class="resp-txt">Descartas la mitad izquierda, porque ahí todos los números son menores que el de en medio. Sigues buscando solo en la mitad derecha.</div>
+    </details>
+    <details class="reto">
+      <summary>2. ¿Por qué la búsqueda binaria no funciona con una lista desordenada?</summary>
+      <div class="resp-txt">Porque al mirar el elemento de en medio no sabrías de qué lado está el número buscado. Descartar una mitad solo es seguro cuando la lista está ordenada.</div>
+    </details>
+    <details class="reto">
+      <summary>3. Una lista tiene 1,000,000 de datos ordenados. ¿Cuántos pasos necesita la búsqueda binaria en el peor caso? ¿Y la lineal?</summary>
+      <div class="resp-txt">La binaria necesita alrededor de 20 pasos. La lineal necesita 1,000,000 de pasos en el peor caso.</div>
+    </details>
+    <details class="reto">
+      <summary>4. ¿Qué es el caso base y por qué es necesario?</summary>
+      <div class="resp-txt">Es el problema tan pequeño que se resuelve de inmediato, por ejemplo una lista con un solo número. Es necesario para saber cuándo dejar de dividir; sin él se dividiría sin fin.</div>
+    </details>
+    <details class="reto">
+      <summary>5. ¿Qué es más rápido para ordenar muchos datos, un método de orden n² o uno de orden n log n?</summary>
+      <div class="resp-txt">El de orden n log n. Con 1,000 datos, el de n² necesita alrededor de 1,000,000 de pasos y el de n log n alrededor de 10,000.</div>
+    </details>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- CONCLUSIÓN -->
+  <section class="section">
+    <span class="section-label">Cierre de la sesión</span>
+    <h2 class="section-title">Conclusión</h2>
+    <p>Divide y vencerás es una estrategia de diseño que consiste en <strong>dividir</strong> un problema en partes más pequeñas, <strong>conquistar</strong> (resolver) cada parte y <strong>combinar</strong> las respuestas. La búsqueda binaria descarta la mitad de la lista en cada paso y por eso es de orden O(log n): encuentra un dato entre un millón en unos 20 pasos, mientras que la búsqueda lineal necesitaría un millón. Esa misma idea permite ordenar con el ordenamiento por mezcla, de orden O(n log n), mucho más rápido que los métodos de orden O(n²). En las siguientes sesiones conocerás otras estrategias de diseño para atacar problemas distintos.</p>
+  </section>
+
+  <section class="section">
+    <span class="section-label">Consulta</span>
+    <h2 class="section-title">Referencias bibliográficas</h2>
+    <ul style="font-size:.92rem; color: var(--ink-secondary);">
+      <li>Méndez, F. (2022). <em>Paradigmas de diseño: divide y vencerás</em>. Tecnológico Nacional de México.</li>
+      <li>García, A. (2022). <em>Introducción a la algoritmia y lógica de programación: Una base sólida para sistemas</em>. Universidad Nacional Autónoma de México (UNAM).</li>
+      <li>Ramírez, J. L. (2023). Análisis asintótico y eficiencia de algoritmos en la computación moderna. <em>Revista de Sistemas y Computación</em> (México), 12(1), 45-58.</li>
+      <li>PSeInt Web. (s. f.). <em>Editor en línea de pseudocódigo PSeInt</em>. https://www.pseint-web.app/</li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <span><strong>Análisis y Diseño de Algoritmos</strong> — Unidad 2, Sesión 1</span>
+  <span>Mtro. José Armando Vera Rodríguez · IEDEP · 8 de noviembre de 2026</span>
+</footer>
+
+<script>
+(function () {
+  function f(x) { return x.toLocaleString('es-MX'); }
+
+  /* ── Juego: adivina el número ─────────────────────────────── */
+  var secreto, lo, hi, intentos, terminado;
+  var inInt = document.getElementById('in-intento');
+  var jMsg = document.getElementById('juego-msg');
+  var jHist = document.getElementById('juego-hist');
+  function nuevoJuego() {
+    secreto = Math.floor(Math.random() * 100) + 1;
+    lo = 1; hi = 100; intentos = 0; terminado = false;
+    inInt.value = ''; jHist.innerHTML = '';
+    jMsg.className = 'sim-mensaje'; jMsg.textContent = 'Escribe un número y presiona Probar.';
+    pintarRango();
+  }
+  function pintarRango() {
+    var fill = document.getElementById('rango-fill');
+    fill.style.left = ((lo - 1) / 100 * 100) + '%';
+    fill.style.width = ((hi - lo + 1) / 100 * 100) + '%';
+    document.getElementById('rango-texto').textContent = terminado ? 'Número secreto: ' + secreto : 'El número está entre ' + lo + ' y ' + hi;
+    document.getElementById('juego-intentos').textContent = intentos;
+  }
+  function probar() {
+    if (terminado) { jMsg.className = 'sim-mensaje'; jMsg.textContent = 'Ya adivinaste. Presiona Nuevo juego para jugar otra vez.'; return; }
+    var v = parseInt(inInt.value, 10);
+    if (isNaN(v) || v < 1 || v > 100) { jMsg.className = 'sim-mensaje mal'; jMsg.textContent = 'Escribe un número entero entre 1 y 100.'; return; }
+    if (v < lo || v > hi) { jMsg.className = 'sim-mensaje mal'; jMsg.textContent = 'Ese número ya lo descartaste: el secreto está entre ' + lo + ' y ' + hi + '. No cuenta como intento.'; return; }
+    intentos++;
+    var li = document.createElement('li');
+    if (v === secreto) {
+      terminado = true; li.className = 'ok'; li.textContent = v + ' ✓';
+      jMsg.className = 'sim-mensaje ok';
+      jMsg.textContent = '¡Lo adivinaste en ' + intentos + ' intento(s)! ' + (intentos <= 7 ? 'Estás dentro del máximo de 7 que garantiza dividir a la mitad.' : 'Con la estrategia de la mitad nunca habrías pasado de 7.');
+    } else if (v < secreto) {
+      lo = v + 1; li.textContent = v + ' (muy bajo)';
+      jMsg.className = 'sim-mensaje'; jMsg.textContent = 'El número secreto es MAYOR que ' + v + '. Descartaste todos los números hasta el ' + v + '.';
+    } else {
+      hi = v - 1; li.textContent = v + ' (muy alto)';
+      jMsg.className = 'sim-mensaje'; jMsg.textContent = 'El número secreto es MENOR que ' + v + '. Descartaste todos los números desde el ' + v + '.';
+    }
+    jHist.appendChild(li);
+    inInt.value = '';
+    pintarRango();
+  }
+  document.getElementById('btn-probar').addEventListener('click', probar);
+  document.getElementById('btn-nuevo').addEventListener('click', nuevoJuego);
+  document.getElementById('btn-mitad').addEventListener('click', function () { if (!terminado) inInt.value = Math.floor((lo + hi) / 2); });
+  inInt.addEventListener('keydown', function (e) { if (e.key === 'Enter') probar(); });
+  nuevoJuego();
+
+  /* ── Árbol dividir / combinar (mayor y ordenamiento) ─────── */
+  function crearArbol(id, modo) {
+    var cont = document.getElementById(id);
+    var filasEl = cont.querySelector('.arbol-filas');
+    var msgEl = cont.querySelector('.arbol-msg');
+    var infoEl = cont.querySelector('[data-info]');
+    var btnSig = cont.querySelector('[data-accion="sig"]');
+    var data = [38, 27, 43, 3, 9, 82, 10, 15];
+    var L = data.length;
+    var filas = [];
+    [8, 4, 2, 1].forEach(function (tam) {
+      var g = []; for (var i = 0; i < L; i += tam) g.push(data.slice(i, i + tam));
+      filas.push({ grupos: g, tipo: 'div' });
+    });
+    [2, 4, 8].forEach(function (tam) {
+      var g = [];
+      for (var i = 0; i < L; i += tam) {
+        var s = data.slice(i, i + tam);
+        g.push(modo === 'sort' ? s.slice().sort(function (a, b) { return a - b; }) : [Math.max.apply(null, s)]);
+      }
+      filas.push({ grupos: g, tipo: 'comb' });
+    });
+    var etiquetas = ['Lista completa', 'Dividir', 'Dividir', 'Caso base', 'Combinar', 'Combinar', 'Combinar'];
+    var textos = modo === 'max' ? [
+      'Tenemos 8 números y queremos el mayor. Es mucho para pensarlo de una vez: vamos a dividir.',
+      'Dividir: partimos la lista en dos mitades de 4 números.',
+      'Dividir: partimos cada mitad otra vez. Ahora hay 4 grupos de 2 números.',
+      'Conquistar: cada grupo quedó con 1 solo número. Con un solo número no hay nada que comparar, así que ese número es el mayor de su grupo. Este es el caso base.',
+      'Combinar: de cada pareja nos quedamos con el mayor. De 38 y 27, el 38; de 43 y 3, el 43; de 9 y 82, el 82; de 10 y 15, el 15.',
+      'Combinar: comparamos otra vez por parejas. De 38 y 43, el 43; de 82 y 15, el 82.',
+      'Combinar: entre 43 y 82, el mayor es 82. ¡Ese es el mayor de toda la lista!'
+    ] : [
+      'Queremos ordenar estos 8 números de menor a mayor. Vamos a dividir.',
+      'Dividir: partimos la lista en dos mitades de 4 números. Todavía no se ordena nada.',
+      'Dividir: partimos otra vez. Ahora hay 4 grupos de 2 números.',
+      'Conquistar: cada grupo tiene 1 número. Una lista de un solo número ya está ordenada. Este es el caso base.',
+      'Combinar: mezclamos las parejas poniendo cada número en su lugar: [27, 38], [3, 43], [9, 82] y [10, 15].',
+      'Combinar: mezclamos de nuevo. Quedan dos listas ordenadas: [3, 27, 38, 43] y [9, 10, 15, 82].',
+      'Combinar: mezclamos las dos mitades y la lista completa queda ordenada: 3, 9, 10, 15, 27, 38, 43, 82.'
+    ];
+    var paso = 0;
+    function pintar() {
+      filasEl.innerHTML = '';
+      for (var r = 0; r <= paso; r++) {
+        var fila = document.createElement('div');
+        fila.className = 'arbol-fila ' + filas[r].tipo + (r === paso && paso > 0 ? ' nueva' : '');
+        var fase = document.createElement('span'); fase.className = 'fase'; fase.textContent = etiquetas[r];
+        var gs = document.createElement('div'); gs.className = 'grupos';
+        var esUltima = (r === filas.length - 1);
+        filas[r].grupos.forEach(function (g) {
+          var gd = document.createElement('div'); gd.className = 'grupo';
+          g.forEach(function (n) {
+            var c = document.createElement('span'); c.className = 'celda' + (esUltima && (modo === 'max' || g.length === L) ? ' final' : ''); c.textContent = n;
+            gd.appendChild(c);
+          });
+          gs.appendChild(gd);
+        });
+        fila.appendChild(fase); fila.appendChild(gs); filasEl.appendChild(fila);
+      }
+      msgEl.textContent = textos[paso];
+      infoEl.textContent = 'Paso ' + (paso + 1) + ' de ' + filas.length;
+      btnSig.disabled = (paso === filas.length - 1);
+    }
+    btnSig.addEventListener('click', function () { if (paso < filas.length - 1) { paso++; pintar(); } });
+    cont.querySelector('[data-accion="reiniciar"]').addEventListener('click', function () { paso = 0; pintar(); });
+    pintar();
+  }
+  crearArbol('arbol-max', 'max');
+  crearArbol('arbol-sort', 'sort');
+
+  /* ── Tabla n² contra n log n ──────────────────────────────── */
+  (function () {
+    var html = '';
+    [10, 100, 1000, 1000000].forEach(function (n) {
+      html += '<tr><td class="num">' + f(n) + '</td><td class="num">' + f(n * n) + '</td><td class="num">' + f(Math.round(n * Math.log(n) / Math.log(2))) + '</td></tr>';
+    });
+    document.getElementById('tabla-sort').innerHTML = html;
+  })();
+
+  /* ── Simulador de búsqueda binaria ───────────────────────── */
+  var lista = [3, 7, 12, 18, 21, 25, 30, 36, 41, 47, 52, 58, 64, 71, 80];
+  var filaBin = document.getElementById('fila-bin');
+  var selBin = document.getElementById('sel-bin');
+  var bLo, bHi, bPasos, bHecho, bMedio, bHallado;
+  function llenarSelBin() {
+    lista.forEach(function (v) { var o = document.createElement('option'); o.value = v; o.textContent = v; selBin.appendChild(o); });
+    [50, 5].forEach(function (v) { var o = document.createElement('option'); o.value = v; o.textContent = v + ' (no está)'; selBin.appendChild(o); });
+    selBin.value = '47';
+  }
+  function pasosLineal(t) { var i = lista.indexOf(t); return i === -1 ? lista.length : i + 1; }
+  function dibujarBin() {
+    filaBin.innerHTML = '';
+    lista.forEach(function (v, i) {
+      var pos = i + 1, c = document.createElement('div');
+      var cls = 'carta';
+      if (bHallado && pos === bMedio) cls += ' hallado';
+      else if (pos === bMedio) cls += ' medio';
+      else if (pos < bLo || pos > bHi) cls += ' visto';
+      c.className = cls;
+      c.innerHTML = v + '<span class="pos">pos. ' + pos + '</span>';
+      filaBin.appendChild(c);
+    });
+    document.getElementById('bin-pasos').textContent = bPasos;
+    document.getElementById('bin-vars').innerHTML = bPasos === 0
+      ? '<b>inicio = 1</b><b>fin = 15</b>'
+      : '<b>inicio = ' + bLo + '</b><b>fin = ' + bHi + '</b><b>medio = ' + bMedio + '</b>';
+  }
+  function reiniciarBin() {
+    bLo = 1; bHi = lista.length; bPasos = 0; bHecho = false; bMedio = 0; bHallado = false;
+    var m = document.getElementById('bin-msg'); m.className = 'sim-mensaje'; m.textContent = 'Presiona Siguiente paso para mirar el elemento de en medio.';
+    document.getElementById('btn-bin-sig').disabled = false;
+    dibujarBin();
+  }
+  function pasoBin() {
+    if (bHecho) return;
+    var t = parseInt(selBin.value, 10), m = document.getElementById('bin-msg');
+    bMedio = Math.floor((bLo + bHi) / 2); bPasos++;
+    var v = lista[bMedio - 1];
+    if (v === t) {
+      bHecho = true; bHallado = true; m.className = 'sim-mensaje ok';
+      m.textContent = 'Paso ' + bPasos + ': el de en medio (posición ' + bMedio + ') es ' + v + '. ¡Lo encontré! Búsqueda binaria: ' + bPasos + ' paso(s). Búsqueda lineal: ' + pasosLineal(t) + ' paso(s).';
+    } else if (v < t) {
+      m.className = 'sim-mensaje';
+      m.textContent = 'Paso ' + bPasos + ': el de en medio (posición ' + bMedio + ') es ' + v + '. Busco ' + t + ', que es MAYOR, así que descarto la mitad izquierda.';
+      bLo = bMedio + 1;
+    } else {
+      m.className = 'sim-mensaje';
+      m.textContent = 'Paso ' + bPasos + ': el de en medio (posición ' + bMedio + ') es ' + v + '. Busco ' + t + ', que es MENOR, así que descarto la mitad derecha.';
+      bHi = bMedio - 1;
+    }
+    if (!bHecho && bLo > bHi) {
+      bHecho = true; m.className = 'sim-mensaje mal';
+      m.textContent += ' Ya no queda nada por revisar: el ' + t + ' no está en la lista. Búsqueda binaria: ' + bPasos + ' paso(s). Búsqueda lineal: ' + pasosLineal(t) + ' paso(s).';
+    }
+    if (bHecho) document.getElementById('btn-bin-sig').disabled = true;
+    dibujarBin();
+  }
+  llenarSelBin();
+  document.getElementById('btn-bin-sig').addEventListener('click', pasoBin);
+  document.getElementById('btn-bin-reiniciar').addEventListener('click', reiniciarBin);
+  selBin.addEventListener('change', reiniciarBin);
+  reiniciarBin();
+
+  /* ── Calculadora lineal contra binaria ───────────────────── */
+  var tamanos = [8, 100, 1000, 1000000, 1000000000, 8000000000];
+  function mitades(n) { var c = 0, x = n; while (x >= 1) { x = Math.floor(x / 2); c++; } return c; }
+  function pintarCalc() {
+    var n = tamanos[document.getElementById('rango').value - 1];
+    document.getElementById('n-val').textContent = f(n);
+    document.getElementById('calc-body').innerHTML =
+      '<tr><td>Lineal (uno por uno)</td><td class="num">' + f(n) + '</td><td class="big">O(n)</td></tr>' +
+      '<tr><td>Binaria (por mitades)</td><td class="num">' + f(mitades(n)) + '</td><td class="big">O(log n)</td></tr>';
+  }
+  document.getElementById('rango').addEventListener('input', pintarCalc);
+  pintarCalc();
+
+  /* ── Botones "Copiar código" ──────────────────────────────── */
+  function copiarTexto(txt, btn) {
+    function listo() { btn.textContent = '¡Copiado!'; setTimeout(function () { btn.textContent = 'Copiar código'; }, 1800); }
+    function respaldo() {
+      var ta = document.createElement('textarea');
+      ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); listo(); } catch (e) { btn.textContent = 'Selecciona y copia a mano'; }
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(listo, respaldo);
+    else respaldo();
+  }
+  document.querySelectorAll('.code-panel').forEach(function (panel) {
+    var pre = panel.querySelector('pre'), head = panel.querySelector('.code-head');
+    if (!pre || !head) return;
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'copiar'; b.textContent = 'Copiar código';
+    b.addEventListener('click', function () { copiarTexto(pre.textContent, b); });
+    head.appendChild(b);
+  });
+
+  /* ── Comprobar respuestas ─────────────────────────────────── */
+  document.querySelectorAll('button.comprobar').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var g = btn.getAttribute('data-grupo');
+      var campos = document.querySelectorAll('[data-grupo="' + g + '"] [data-ans], [data-grupo="' + g + '"][data-ans]');
+      var total = 0, bien = 0, vacios = 0;
+      campos.forEach(function (c) {
+        total++;
+        var v = (c.value || '').trim();
+        c.classList.remove('ok', 'bad');
+        if (!v) { vacios++; c.classList.add('bad'); return; }
+        if (v === c.getAttribute('data-ans')) { bien++; c.classList.add('ok'); } else c.classList.add('bad');
+      });
+      var ver = document.querySelector('.veredicto[data-grupo="' + g + '"]');
+      var exp = document.querySelector('.explica[data-grupo="' + g + '"]');
+      if (bien === total) {
+        ver.className = 'veredicto ok'; ver.textContent = '¡Todo correcto!';
+        exp.classList.add('ver');
+      } else if (vacios > 0) {
+        ver.className = 'veredicto bad'; ver.textContent = 'Te faltan ' + vacios + ' respuesta(s) por completar.';
+      } else {
+        ver.className = 'veredicto bad'; ver.textContent = 'Llevas ' + bien + ' de ' + total + ' bien. Revisa los campos en rojo e inténtalo de nuevo.';
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>
