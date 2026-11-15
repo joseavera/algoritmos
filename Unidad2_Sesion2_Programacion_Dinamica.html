@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unidad 2, Sesión 2 — Programación dinámica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+
+  body { background: var(--white); }
+  .site-header { flex-wrap: wrap; }
+
+  .mixtle-tip { display: flex; gap: 1.25rem; align-items: flex-start; background: var(--guinda-light); border: 1px solid #D8A8BA; border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin: 1.8rem 0; }
+  .mixtle-tip img { width: 84px; height: auto; flex-shrink: 0; border-radius: var(--radius-md); }
+  .mixtle-tip .mixtle-name { font-family: var(--font-ui); font-size: .78rem; text-transform: uppercase; letter-spacing: .12em; color: var(--guinda); font-weight: 700; display: block; margin-bottom: .4rem; }
+  .mixtle-tip p { font-size: .97rem; margin-bottom: 0; }
+
+  .big { font-family: var(--font-mono); font-weight: 600; color: var(--guinda-dark); white-space: nowrap; }
+  code { font-family: var(--font-mono); font-size: .88em; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .1rem .4rem; color: var(--guinda-dark); }
+
+  .btn { display: inline-block; cursor: pointer; text-decoration: none; font-family: var(--font-ui); font-weight: 600; font-size: .92rem; padding: .65rem 1.3rem; border-radius: var(--radius-md); border: 1.5px solid var(--guinda); background: var(--guinda); color: var(--white); }
+  .btn:hover { background: var(--guinda-dark); }
+  .btn.sec { background: var(--white); color: var(--guinda); }
+  .btn.sec:hover { background: var(--guinda-light); }
+  .btn[disabled] { opacity: .5; cursor: not-allowed; }
+
+  .ejercicio-num { display: inline-block; font-family: var(--font-ui); font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; background: var(--guinda); color: var(--white); padding: .2rem .7rem; border-radius: 99px; margin-bottom: .5rem; }
+
+  /* Tres pasos */
+  .tres { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.2rem 0; }
+  .paso { background: var(--white); border: 1px solid var(--border); border-top: 5px solid var(--guinda); border-radius: var(--radius-lg); padding: 1.1rem 1.2rem; }
+  .paso.p1 { border-top-color: #C9A3B8; }
+  .paso.p2 { border-top-color: #A8689A; }
+  .paso.p3 { border-top-color: #490b58; }
+  .paso .quien { font-family: var(--font-ui); font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-muted); display: block; }
+  .paso .titulo { font-family: var(--font-display); font-size: 1.55rem; font-weight: 700; color: var(--guinda); display: block; margin: .15rem 0 .4rem; }
+  .paso p { font-size: .94rem; margin: .3rem 0 0; }
+
+  /* Simuladores */
+  .sim { background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-lg); padding: 1.3rem 1.5rem; margin: 1.2rem 0; }
+  .sim-controles { display: flex; gap: .8rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; font-family: var(--font-ui); font-size: .92rem; }
+  .sim-controles label { font-weight: 600; color: var(--guinda); }
+  .sim select, .sim input[type="text"] { font-family: var(--font-mono); font-size: .95rem; padding: .4rem .6rem; border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--white); }
+  .sim input[type="text"] { width: 5.5rem; }
+  .contador { font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; color: var(--guinda-dark); line-height: 1; }
+  .contador small { font-family: var(--font-ui); font-size: .8rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-muted); margin-left: .5rem; }
+  .sim-mensaje { margin-top: .8rem; font-family: var(--font-ui); font-size: .95rem; font-weight: 600; min-height: 3em; color: var(--guinda-dark); }
+  .sim-mensaje.ok { color: #2E7D32; }
+  .sim-mensaje.mal { color: #B3261E; }
+  .historial { list-style: none; padding: 0; margin: .8rem 0 0; font-family: var(--font-ui); font-size: .85rem; display: flex; flex-wrap: wrap; gap: .4rem; }
+  .historial li { padding: .25rem .65rem; border-radius: 99px; background: var(--white); border: 1px solid var(--border-strong); }
+  .historial li.ok { border-color: #2E7D32; color: #2E7D32; }
+
+  .rango-barra { position: relative; height: 16px; background: #EFEAEC; border-radius: 99px; margin: .4rem 0 .2rem; overflow: hidden; }
+  .rango-barra i { position: absolute; top: 0; bottom: 0; background: var(--guinda); border-radius: 99px; transition: left .25s, width .25s; }
+  .rango-leyenda { font-family: var(--font-ui); font-size: .85rem; color: var(--ink-secondary); display: flex; justify-content: space-between; }
+
+  .fila { display: grid; grid-template-columns: repeat(15, 1fr); gap: .35rem; margin: .8rem 0; }
+  .carta { position: relative; text-align: center; padding: .7rem .1rem .45rem; background: var(--white); border: 2px solid var(--border-strong); border-radius: var(--radius-md); font-family: var(--font-mono); font-size: 1rem; font-weight: 600; color: var(--ink); transition: background .2s, border-color .2s, transform .2s; }
+  .carta .pos { display: block; font-family: var(--font-ui); font-size: .64rem; color: var(--ink-muted); font-weight: 500; margin-top: .2rem; }
+  .carta.medio { border-color: var(--guinda); background: var(--guinda-light); transform: translateY(-5px); }
+  .carta.visto { background: #EFEAEC; color: var(--ink-muted); border-color: var(--border); }
+  .carta.hallado { background: #2E7D32; border-color: #2E7D32; color: var(--white); transform: translateY(-5px); }
+  .carta.hallado .pos { color: #D5EBD6; }
+  .vars { font-family: var(--font-mono); font-size: .9rem; color: var(--guinda-dark); margin: .4rem 0; }
+  .vars b { background: var(--white); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: .1rem .5rem; margin-right: .5rem; display: inline-block; }
+
+  /* Árbol dividir / combinar */
+  .arbol { background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-lg); padding: 1.1rem 1.3rem; margin: 1.2rem 0; }
+  .arbol-fila { display: grid; grid-template-columns: 7.5rem 1fr; gap: .7rem; align-items: center; margin: .5rem 0; }
+  .arbol-fila.nueva { animation: aparece .3s ease; }
+  @keyframes aparece { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+  .arbol-fila .fase { font-family: var(--font-ui); font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--guinda); }
+  .arbol-fila.comb .fase { color: #2E7D32; }
+  .grupos { display: flex; gap: .4rem; }
+  .grupo { flex: 1; display: flex; gap: 2px; justify-content: center; padding: .3rem; border: 2px solid var(--border-strong); border-radius: var(--radius-md); background: var(--white); }
+  .arbol-fila.comb .grupo { border-color: #8CC28F; background: #F3FAF3; }
+  .celda { font-family: var(--font-mono); font-weight: 600; font-size: .95rem; min-width: 1.5rem; text-align: center; padding: .25rem .15rem; background: var(--guinda-light); border-radius: 4px; color: var(--guinda-dark); }
+  .celda.final { background: #2E7D32; color: var(--white); }
+  .arbol-msg { font-family: var(--font-ui); font-size: .95rem; font-weight: 600; color: var(--guinda-dark); margin-top: .9rem; min-height: 3.2em; }
+  .arbol-ctrl { display: flex; gap: .7rem; flex-wrap: wrap; align-items: center; margin-top: .6rem; font-family: var(--font-ui); font-size: .85rem; color: var(--ink-secondary); }
+
+  /* Calculadora */
+  .calc { background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-lg); padding: 1.3rem 1.5rem; margin: 1.2rem 0; }
+  .calc label { font-family: var(--font-ui); font-weight: 600; color: var(--guinda); font-size: .9rem; display: block; margin-bottom: .4rem; }
+  .calc input[type="range"] { width: 100%; accent-color: #490b58; }
+  .calc .n-val { font-family: var(--font-display); font-size: 2.2rem; font-weight: 700; color: var(--guinda-dark); }
+  td.num { font-family: var(--font-mono); text-align: right; white-space: nowrap; }
+
+  /* Paneles de código */
+  .code-panel { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; margin: 1.1rem 0; }
+  .code-panel .code-head { background: var(--guinda); color: var(--white); padding: .5rem 1rem; font-family: var(--font-ui); font-size: .82rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; gap: .6rem; flex-wrap: wrap; }
+  .code-panel .code-head .badge { font-family: var(--font-mono); font-size: .72rem; background: rgba(255,255,255,.18); padding: .1rem .5rem; border-radius: 999px; }
+  .copiar { cursor: pointer; font-family: var(--font-ui); font-size: .75rem; font-weight: 600; color: var(--guinda); background: var(--white); border: none; border-radius: var(--radius-sm); padding: .3rem .7rem; }
+  .copiar:hover { background: var(--guinda-light); }
+  .code-panel pre { margin: 0; padding: 1rem 1.2rem; background: var(--white); font-family: var(--font-mono); font-size: .82rem; line-height: 1.7; color: var(--ink); overflow-x: auto; white-space: pre; }
+  .code-scroll { overflow-x: auto; }
+
+  /* Respuestas */
+  .registro td, .registro th { vertical-align: middle; }
+  .registro td.etq { font-family: var(--font-mono); font-weight: 500; }
+  input.resp, select.resp { font-family: var(--font-mono); font-size: .92rem; padding: .35rem .5rem; border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--white); color: var(--ink); max-width: 100%; }
+  input.resp { width: 6rem; }
+  select.resp { font-family: var(--font-ui); cursor: pointer; }
+  input.resp:focus, select.resp:focus { outline: 2px solid var(--guinda); border-color: var(--guinda); }
+  .resp.ok  { border-color: #2E7D32; background: #EEF7EE; }
+  .resp.bad { border-color: #B3261E; background: #FCEDEC; }
+  .pregunta { margin: .9rem 0; display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; font-size: .98rem; }
+  .comprobar-fila { margin-top: 1rem; display: flex; gap: .8rem; align-items: center; flex-wrap: wrap; }
+  .veredicto { font-family: var(--font-ui); font-size: .9rem; font-weight: 600; }
+  .veredicto.ok { color: #2E7D32; }
+  .veredicto.bad { color: #B3261E; }
+  .explica { display: none; margin-top: .9rem; }
+  .explica.ver { display: block; }
+
+  details.reto { background: var(--white); border: 1px solid var(--border); border-left: 4px solid var(--guinda); border-radius: var(--radius-md); padding: .8rem 1.1rem; margin: .8rem 0; }
+  details.reto summary { cursor: pointer; font-weight: 600; font-size: 1rem; }
+  details.reto .resp-txt { margin-top: .6rem; padding-top: .6rem; border-top: 1px dashed var(--border); font-size: .97rem; }
+
+  @media (max-width: 720px) {
+    .tres { grid-template-columns: 1fr; }
+    .fila { grid-template-columns: repeat(5, 1fr); }
+    .mixtle-tip { flex-direction: column; align-items: center; text-align: center; }
+    .arbol { padding: .9rem .8rem; }
+    .arbol-fila { grid-template-columns: 1fr; gap: .2rem; }
+    .grupo { padding: .15rem; border-width: 1px; gap: 1px; }
+    .celda { min-width: 0; padding: .2rem .1rem; font-size: .78rem; }
+    .grupos { gap: .25rem; }
+  }
+
+
+  /* Específicos de esta sesión */
+  .comparar { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.2rem 0; }
+  .carta.vacia { border-style: dashed; color: var(--ink-muted); background: var(--white); }
+  .barras { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.1rem 1.3rem 1.3rem; margin: 1rem 0; }
+  .barras h4 { font-family: var(--font-ui); font-size: .85rem; letter-spacing: .06em; text-transform: uppercase; color: var(--guinda); margin: 0 0 .7rem; }
+  .barra-fila { display: grid; grid-template-columns: 5.2rem 1fr 4.6rem; gap: .6rem; align-items: center; margin: .28rem 0; font-family: var(--font-ui); font-size: .82rem; }
+  .barra-fila .nombre { font-family: var(--font-mono); color: var(--ink-secondary); }
+  .barra-fila .valor { font-family: var(--font-mono); font-weight: 600; color: var(--guinda-dark); text-align: right; }
+  .pista { height: 14px; background: var(--guinda-light); border-radius: 99px; overflow: hidden; }
+  .pista i { display: block; height: 100%; background: var(--guinda); border-radius: 99px; transition: width .25s; }
+  .pista i.verde { background: #2E7D32; }
+  .total-linea { margin-top: .7rem; font-family: var(--font-ui); font-size: .92rem; font-weight: 600; color: var(--guinda-dark); }
+  .chips { list-style: none; padding: 0; margin: .8rem 0 0; display: flex; flex-wrap: wrap; gap: .4rem; font-family: var(--font-mono); font-size: .85rem; }
+  .chips li { padding: .3rem .7rem; border-radius: 99px; background: var(--white); border: 1px solid var(--border-strong); color: var(--guinda-dark); }
+  .tabla-escalera td, .tabla-escalera th { text-align: center; }
+  @media (max-width: 720px) {
+    .comparar { grid-template-columns: 1fr; }
+    .barra-fila { grid-template-columns: 4.2rem 1fr 3.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo-wrap">
+    <img src="imagen1.png" alt="Mixtle, mascota del curso">
+  </div>
+  <div class="header-text">
+    <span class="inst-name">Instituto de Educación Digital del Estado de Puebla</span>
+    <span class="doc-title">Licenciatura en Sistemas Computacionales · Análisis y Diseño de Algoritmos</span>
+  </div>
+</header>
+
+<section class="class-hero">
+  <div class="page-wrapper" style="padding:0;">
+    <span class="class-label">Unidad 2 · Estrategias de Diseño de Algoritmos · Sesión 2</span>
+    <h1>Programación dinámica</h1>
+    <span class="class-subtitle">Si ya resolviste una parte del problema, anótala y no la vuelvas a calcular.</span>
+
+    <div class="meta-row">
+      <div class="meta-item">Programa educativo<span>Lic. en Sistemas Computacionales</span></div>
+      <div class="meta-item">Asignatura<span>Análisis y Diseño de Algoritmos</span></div>
+      <div class="meta-item">Unidad<span>2. Estrategias de Diseño de Algoritmos</span></div>
+      <div class="meta-item">Tema<span>2.2 Programación dinámica</span></div>
+      <div class="meta-item">Fecha<span>15 de noviembre de 2026</span></div>
+    </div>
+  </div>
+</section>
+
+<main class="page-wrapper">
+
+  <!-- COMPETENCIAS -->
+  <section class="section">
+    <span class="section-label">Al finalizar esta sesión, el estudiante podrá</span>
+    <h2 class="section-title">Competencias a desarrollar</h2>
+
+    <div class="competency-card">
+      <span class="comp-num">01</span>
+      <span class="comp-text"><strong>Explicar</strong> qué es la programación dinámica y en qué se diferencia de divide y vencerás.</span>
+    </div>
+    <div class="competency-card">
+      <span class="comp-num">02</span>
+      <span class="comp-text"><strong>Identificar</strong> cuándo un problema repite los mismos subproblemas y conviene guardar sus respuestas.</span>
+    </div>
+    <div class="competency-card">
+      <span class="comp-num">03</span>
+      <span class="comp-text"><strong>Programar</strong> en PSeInt Web una solución que llena una tabla de resultados, con el ejemplo de Fibonacci.</span>
+    </div>
+    <div class="competency-card">
+      <span class="comp-num">04</span>
+      <span class="comp-text"><strong>Comparar</strong> cuántas operaciones se ahorran al guardar respuestas, y cuánta memoria cuesta ese ahorro.</span>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 1. REPASO -->
+  <section class="section">
+    <span class="section-label">Activa lo que ya sabes</span>
+    <h2 class="section-title">Repaso en un minuto</h2>
+    <p>La sesión pasada vimos <strong>divide y vencerás</strong>. Contesta de memoria:</p>
+
+    <div class="pregunta" data-grupo="r1">Los tres pasos son dividir,
+      <select class="resp" data-ans="conquistar" aria-label="Segundo paso">
+        <option value="">Elige…</option><option value="conquistar">conquistar</option><option value="ordenar">ordenar</option><option value="repetir">repetir</option>
+      </select>
+      y combinar. La búsqueda binaria es de orden
+      <select class="resp" data-ans="olog" aria-label="Orden de la búsqueda binaria">
+        <option value="">Elige…</option><option value="on">O(n)</option><option value="olog">O(log n)</option><option value="on2">O(n²)</option>
+      </select>
+    </div>
+    <div class="comprobar-fila">
+      <button class="btn sec comprobar" type="button" data-grupo="r1">Comprobar</button>
+      <span class="veredicto" data-grupo="r1"></span>
+    </div>
+    <div class="explica callout note" data-grupo="r1"><p>Correcto. En divide y vencerás las partes son <strong>distintas</strong> entre sí (la mitad izquierda y la mitad derecha). Hoy veremos qué hacer cuando <strong>las partes se repiten</strong>.</p></div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 2. ANALOGÍA -->
+  <section class="section">
+    <span class="section-label">Punto de partida</span>
+    <h2 class="section-title">El que no recuerda, repite el trabajo</h2>
+    <p>Imagina este diálogo:</p>
+
+    <div class="concept-box">
+      <span class="concept-title">Diálogo</span>
+      <p style="margin:0 0 .6rem"><strong>—¿Cuánto es</strong> 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1<strong>?</strong></p>
+      <p style="margin:0 0 .6rem"><strong>—Es 8.</strong></p>
+      <p style="margin:0 0 .6rem"><strong>—¿Y cuánto es</strong> 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 <strong>+ 1</strong>?</p>
+      <p style="margin:0"><strong>—Es 9.</strong> No vuelvo a contar desde el principio: ya sabía que lo anterior era 8 y solo le sumo 1.</p>
+    </div>
+
+    <p>Esa es la idea de la <strong>programación dinámica</strong>: <strong>guardar</strong> la respuesta de cada parte del problema en una <strong>tabla</strong> (como un cuaderno de resultados) y <strong>reutilizarla</strong> en lugar de calcularla otra vez.</p>
+
+    <div class="mixtle-tip">
+      <img src="imagen2.png" alt="Mixtle">
+      <div>
+        <span class="mixtle-name">Consejo de Mixtle</span>
+        <p>No dejes que "dinámica" te confunda: aquí no significa "en movimiento". Es solo una forma de resolver un problema grande <strong>construyendo la respuesta a partir de respuestas pequeñas que ya guardaste</strong>.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 3. IDEA CENTRAL -->
+  <section class="section">
+    <span class="section-label">La idea central</span>
+    <h2 class="section-title">¿Cuándo sirve la programación dinámica?</h2>
+    <p>Sirve cuando se cumplen <strong>dos condiciones</strong>:</p>
+
+    <ol class="step-list">
+      <li><span class="step-n">1</span><span class="step-content">El problema se puede resolver usando <strong>respuestas de problemas más pequeños</strong> (subproblemas).</span></li>
+      <li><span class="step-n">2</span><span class="step-content">Esos subproblemas <strong>se repiten</strong> muchas veces. Si no se repitieran, guardar la respuesta no ahorraría nada.</span></li>
+    </ol>
+
+    <p>La regla de trabajo es sencilla: <strong>cada subproblema se resuelve una sola vez</strong>, se guarda su respuesta y las siguientes veces solo se consulta. Hay dos formas de hacerlo:</p>
+
+    <div class="comparar">
+      <div class="paso p2">
+        <span class="quien">Forma 1</span>
+        <span class="titulo">Con memoria</span>
+        <p>Resuelves como siempre, pero <strong>antes de calcular</strong> revisas tu cuaderno. Si la respuesta ya está, la usas. A esto se le llama <em>memoización</em>.</p>
+      </div>
+      <div class="paso p3">
+        <span class="quien">Forma 2</span>
+        <span class="titulo">Llenando una tabla</span>
+        <p>Empiezas por los problemas <strong>más pequeños</strong> y vas llenando una tabla hacia los más grandes. Hoy practicaremos esta forma, que es la más sencilla.</p>
+      </div>
+    </div>
+
+    <div class="code-scroll">
+    <table>
+      <thead><tr><th></th><th>Divide y vencerás</th><th>Programación dinámica</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Las partes</strong></td><td>son distintas entre sí (mitad izquierda y mitad derecha)</td><td><strong>se repiten</strong> muchas veces</td></tr>
+        <tr><td><strong>Qué hace</strong></td><td>divide, resuelve y combina</td><td>resuelve cada parte <strong>una vez</strong> y guarda la respuesta</td></tr>
+        <tr><td><strong>Ejemplos</strong></td><td>búsqueda binaria, ordenamiento por mezcla</td><td>Fibonacci, subir una escalera, la mochila (más adelante)</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 4. FIBONACCI -->
+  <section class="section">
+    <span class="section-label">Ejemplo 1</span>
+    <h2 class="section-title">La serie de Fibonacci</h2>
+    <p>La serie de Fibonacci es: <span class="big">1, 1, 2, 3, 5, 8, 13, 21, 34, 55…</span> Cada número es la <strong>suma de los dos anteriores</strong>. Si llamamos <code>fib(n)</code> al número de la posición <em>n</em>:</p>
+
+    <div class="concept-box">
+      <span class="concept-title">La regla</span>
+      <p style="margin:0"><code>fib(1) = 1</code> y <code>fib(2) = 1</code> (son los casos base). Para cualquier otra posición: <code>fib(n) = fib(n − 1) + fib(n − 2)</code>. Por ejemplo, <code>fib(5) = fib(4) + fib(3) = 3 + 2 = 5</code>.</p>
+    </div>
+
+    <h3 style="font-family:var(--font-ui);font-size:1.05rem;color:var(--guinda);margin:1.6rem 0 .4rem">Primero, el camino sin memoria</h3>
+    <p>Para calcular <code>fib(6)</code> sin guardar nada, hay que calcular <code>fib(5)</code> y <code>fib(4)</code>. Pero <code>fib(5)</code> necesita <code>fib(4)</code> y <code>fib(3)</code>, y así sucesivamente. <strong>Elige una posición y mira cuántas veces se calcula cada valor:</strong></p>
+
+    <div class="sim">
+      <div class="sim-controles">
+        <label for="sel-fib-n">Calcular fib(</label>
+        <select id="sel-fib-n" aria-label="Posición de Fibonacci"></select>
+        <label>)</label>
+      </div>
+
+      <div class="barras" id="barras-sin">
+        <h4>Sin memoria: veces que se calcula cada valor</h4>
+        <div id="barras-sin-filas"></div>
+      </div>
+      <div class="barras" id="barras-con">
+        <h4>Con memoria: veces que se calcula cada valor</h4>
+        <div id="barras-con-filas"></div>
+      </div>
+      <div class="total-linea" id="fib-resumen"></div>
+    </div>
+
+    <div class="callout note">
+      <p><strong>Observa:</strong> sin memoria, <code>fib(2)</code> y <code>fib(1)</code> se calculan una y otra vez, siempre con el mismo resultado. Es trabajo repetido. Con memoria, <strong>cada valor se calcula una sola vez</strong>. Prueba con posiciones mayores y verás que la diferencia crece muy rápido.</p>
+    </div>
+
+    <h3 style="font-family:var(--font-ui);font-size:1.05rem;color:var(--guinda);margin:1.6rem 0 .4rem">Ahora, llenando la tabla</h3>
+    <p>Esta es la forma que programaremos en PSeInt: empezar por <code>fib[1]</code> y <code>fib[2]</code>, que ya sabemos, y llenar hacia adelante. Elige hasta qué posición quieres llegar y presiona <strong>Siguiente paso</strong>.</p>
+
+    <div class="sim">
+      <div class="sim-controles">
+        <label for="sel-tab-n">Llenar la tabla hasta la posición:</label>
+        <select id="sel-tab-n" aria-label="Posición final"></select>
+        <button class="btn" id="btn-tab-sig" type="button">Siguiente paso</button>
+        <button class="btn sec" id="btn-tab-reiniciar" type="button">Reiniciar</button>
+      </div>
+
+      <div class="fila" id="fila-tab" aria-label="Tabla de Fibonacci"></div>
+
+      <div class="contador"><span id="tab-sumas">0</span><small>sumas</small></div>
+      <div class="sim-mensaje" id="tab-msg"></div>
+    </div>
+
+    <div class="concept-box">
+      <span class="concept-title">¿Cuánto trabajo es?</span>
+      <p style="margin:0">Para llegar a la posición <em>n</em> con la tabla solo se hacen <strong>n − 2 sumas</strong>: una por cada casilla nueva. Eso es de orden <span class="big">O(n)</span>. Sin memoria, el trabajo casi <strong>se duplica</strong> cada vez que <em>n</em> aumenta en 1: es de orden <span class="big">O(2ⁿ)</span>, un crecimiento exponencial. Compáralo tú mismo:</p>
+    </div>
+
+    <div class="calc">
+      <label for="rango">Posición n que se quiere calcular</label>
+      <div class="n-val" id="n-val">30</div>
+      <input type="range" id="rango" min="1" max="6" step="1" value="4" aria-label="Posición n">
+
+      <div class="code-scroll">
+      <table style="margin-top:1rem">
+        <thead><tr><th>Forma de resolverlo</th><th>Sumas necesarias</th><th>Orden</th></tr></thead>
+        <tbody id="calc-body"></tbody>
+      </table>
+      </div>
+    </div>
+
+    <div class="mixtle-tip">
+      <img src="imagen2.png" alt="Mixtle">
+      <div>
+        <span class="mixtle-name">Consejo de Mixtle</span>
+        <p>Acuérdate de la sesión de <strong>complejidad espacial</strong>: el ahorro de tiempo no es gratis. La tabla ocupa <strong>memoria extra</strong> (n casillas, es decir, O(n)). En programación dinámica se paga un poco de memoria para ahorrar muchísimo tiempo.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 5. ESCALERA -->
+  <section class="section">
+    <span class="section-label">Ejemplo 2</span>
+    <h2 class="section-title">Subir una escalera</h2>
+    <p>Una escalera tiene <em>n</em> escalones. Puedes subir <strong>de 1 en 1</strong> o <strong>de 2 en 2</strong>. ¿De cuántas formas distintas puedes llegar hasta arriba? Elige el número de escalones y observa todas las formas:</p>
+
+    <div class="sim">
+      <div class="sim-controles">
+        <label for="sel-esc-n">Escalones:</label>
+        <select id="sel-esc-n" aria-label="Número de escalones"></select>
+      </div>
+      <div class="contador"><span id="esc-cuenta">0</span><small>formas</small></div>
+      <ul class="chips" id="esc-chips" aria-label="Formas de subir"></ul>
+    </div>
+
+    <p>Contar una por una funciona con pocos escalones, pero con 30 sería imposible. Mejor busquemos el patrón. Para llegar al escalón <em>n</em> solo hay <strong>dos formas de haber llegado</strong>: desde el escalón <em>n − 1</em> (subiendo 1) o desde el escalón <em>n − 2</em> (subiendo 2). Entonces:</p>
+
+    <div class="concept-box">
+      <span class="concept-title">La regla de la escalera</span>
+      <p style="margin:0"><code>formas(n) = formas(n − 1) + formas(n − 2)</code>, con <code>formas(1) = 1</code> y <code>formas(2) = 2</code>. Es casi la misma regla de Fibonacci, y los subproblemas también se repiten. Por eso se resuelve igual: <strong>llenando una tabla</strong>.</p>
+    </div>
+
+    <p>Completa la tabla usando la regla (cada casilla es la suma de las dos anteriores):</p>
+
+    <div class="code-scroll">
+    <table class="registro tabla-escalera" data-grupo="e1">
+      <thead><tr><th>Escalones</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Formas</strong></td><td class="etq">1</td><td class="etq">2</td><td class="etq">3</td>
+          <td><input class="resp" style="width:4rem" inputmode="numeric" data-ans="5" aria-label="Formas con 4 escalones"></td>
+          <td><input class="resp" style="width:4rem" inputmode="numeric" data-ans="8" aria-label="Formas con 5 escalones"></td>
+          <td><input class="resp" style="width:4rem" inputmode="numeric" data-ans="13" aria-label="Formas con 6 escalones"></td>
+          <td><input class="resp" style="width:4rem" inputmode="numeric" data-ans="21" aria-label="Formas con 7 escalones"></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="comprobar-fila">
+      <button class="btn sec comprobar" type="button" data-grupo="e1">Comprobar</button>
+      <span class="veredicto" data-grupo="e1"></span>
+    </div>
+    <div class="explica callout note" data-grupo="e1"><p>Con 4 escalones: 3 + 2 = <strong>5</strong>. Con 5: 5 + 3 = <strong>8</strong>. Con 6: 8 + 5 = <strong>13</strong>. Con 7: 13 + 8 = <strong>21</strong>. Puedes comprobar el 5 y el 6 en el simulador de arriba.</p></div>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 6. PSEINT -->
+  <section class="section">
+    <span class="ejercicio-num">Práctica en PSeInt Web</span>
+    <h2 class="section-title">Programa tu tabla de Fibonacci</h2>
+    <p>Este programa llena una lista (la tabla) desde la posición 3 hasta la que tú elijas y cuenta cuántas sumas hizo. <strong>Abre PSeInt Web, pega el código y ejecútalo varias veces.</strong></p>
+
+    <p><a class="btn" href="https://www.pseint-web.app/" target="_blank" rel="noopener">Abrir PSeInt Web</a></p>
+
+    <div class="code-panel">
+      <div class="code-head">FibonacciDinamico <span class="badge">llena una tabla</span></div>
+      <pre>Proceso FibonacciDinamico
+    Dimension fib[30];
+    Definir n, i, pasos Como Entero;
+
+    Escribir "¿Qué posición quieres calcular (de 1 a 30)?";
+    Leer n;
+
+    fib[1] &lt;- 1;
+    fib[2] &lt;- 1;
+    pasos &lt;- 0;
+
+    Para i &lt;- 3 Hasta n Hacer
+        fib[i] &lt;- fib[i - 1] + fib[i - 2];
+        pasos &lt;- pasos + 1;
+    FinPara
+
+    Escribir "Fibonacci(", n, ") = ", fib[n];
+    Escribir "Sumas realizadas: ", pasos;
+FinProceso</pre>
+    </div>
+
+    <div class="callout note">
+      <p><strong>Cómo leerlo:</strong> <code>fib[1]</code> y <code>fib[2]</code> son los casos base que ya conocemos. El ciclo <code>Para</code> llena cada casilla nueva con la suma de las dos anteriores, y cada casilla se calcula <strong>una sola vez</strong>. Escribe solo números del 1 al 30, porque la lista tiene 30 casillas. Si algún botón o menú de PSeInt Web se ve distinto a lo que tu docente explica, pregunta en clase.</p>
+    </div>
+
+    <p><strong>Predice</strong> el resultado y las sumas con cada posición y luego ejecuta para comprobar:</p>
+
+    <div class="code-scroll">
+    <table class="registro" data-grupo="p1">
+      <thead><tr><th>Posición que escribes</th><th>Fibonacci(n)</th><th>Sumas realizadas</th></tr></thead>
+      <tbody>
+        <tr><td class="etq">5</td><td><input class="resp" inputmode="numeric" data-ans="5" aria-label="Fibonacci de 5"></td><td><input class="resp" inputmode="numeric" data-ans="3" aria-label="Sumas para 5"></td></tr>
+        <tr><td class="etq">8</td><td><input class="resp" inputmode="numeric" data-ans="21" aria-label="Fibonacci de 8"></td><td><input class="resp" inputmode="numeric" data-ans="6" aria-label="Sumas para 8"></td></tr>
+        <tr><td class="etq">12</td><td><input class="resp" inputmode="numeric" data-ans="144" aria-label="Fibonacci de 12"></td><td><input class="resp" inputmode="numeric" data-ans="10" aria-label="Sumas para 12"></td></tr>
+        <tr><td class="etq">20</td><td><input class="resp" inputmode="numeric" data-ans="6765" aria-label="Fibonacci de 20"></td><td><input class="resp" inputmode="numeric" data-ans="18" aria-label="Sumas para 20"></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="comprobar-fila">
+      <button class="btn sec comprobar" type="button" data-grupo="p1">Comprobar</button>
+      <span class="veredicto" data-grupo="p1"></span>
+    </div>
+    <div class="explica callout note" data-grupo="p1"><p>Las sumas siempre son <strong>n − 2</strong>, porque las posiciones 1 y 2 ya están dadas. Para n = 20, el programa hace solo 18 sumas; sin memoria habría hecho más de 6,700. Los resultados son Fibonacci(5) = 5, (8) = 21, (12) = 144 y (20) = 6765.</p></div>
+  </section>
+
+  <section class="section">
+    <span class="ejercicio-num">Retos para modificar el programa</span>
+
+    <details class="reto">
+      <summary>Reto 1. Haz que el programa muestre toda la tabla, no solo el último valor.</summary>
+      <div class="resp-txt">Agrega, antes del <code>FinProceso</code>, un ciclo que recorra la tabla: <code>Para i &lt;- 1 Hasta n Hacer</code>, luego <code>Escribir fib[i];</code> y cierra con <code>FinPara</code>. Con n = 10 verás 1, 1, 2, 3, 5, 8, 13, 21, 34, 55.</div>
+    </details>
+    <details class="reto">
+      <summary>Reto 2. Convierte el programa en el de la escalera. ¿Qué cambias?</summary>
+      <div class="resp-txt">Solo cambia el segundo caso base: en lugar de <code>fib[2] &lt;- 1;</code> escribe <code>fib[2] &lt;- 2;</code>. La regla de las demás casillas es la misma. Con n = 10 escalones, el programa te dará 89 formas de subir.</div>
+    </details>
+    <details class="reto">
+      <summary>Reto 3. ¿Cuántas sumas hace el programa con n = 30? ¿Y cuánto vale Fibonacci(30)?</summary>
+      <div class="resp-txt">Hace 28 sumas (n − 2) y Fibonacci(30) = 832040. Sin memoria, el mismo cálculo necesitaría más de 800,000 sumas.</div>
+    </details>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- 7. APLICA -->
+  <section class="section">
+    <span class="section-label">Aplícalo</span>
+    <h2 class="section-title">¿Qué estrategia es?</h2>
+    <p>Clasifica cada situación según la estrategia que usa:</p>
+
+    <div class="code-scroll">
+    <table class="registro" data-grupo="v1">
+      <thead><tr><th>Situación</th><th>Estrategia</th></tr></thead>
+      <tbody>
+        <tr><td>Buscar un número en una lista ordenada, descartando la mitad en cada paso.</td>
+          <td><select class="resp" data-ans="dyv" aria-label="Situación 1"><option value="">Elige…</option><option value="dyv">Divide y vencerás</option><option value="pd">Programación dinámica</option></select></td></tr>
+        <tr><td>Calcular Fibonacci(40) guardando cada resultado en una tabla para no repetirlo.</td>
+          <td><select class="resp" data-ans="pd" aria-label="Situación 2"><option value="">Elige…</option><option value="dyv">Divide y vencerás</option><option value="pd">Programación dinámica</option></select></td></tr>
+        <tr><td>Ordenar una lista partiéndola en mitades y mezclándolas.</td>
+          <td><select class="resp" data-ans="dyv" aria-label="Situación 3"><option value="">Elige…</option><option value="dyv">Divide y vencerás</option><option value="pd">Programación dinámica</option></select></td></tr>
+        <tr><td>Contar las formas de subir una escalera usando las respuestas de los escalones anteriores.</td>
+          <td><select class="resp" data-ans="pd" aria-label="Situación 4"><option value="">Elige…</option><option value="dyv">Divide y vencerás</option><option value="pd">Programación dinámica</option></select></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="comprobar-fila">
+      <button class="btn sec comprobar" type="button" data-grupo="v1">Comprobar</button>
+      <span class="veredicto" data-grupo="v1"></span>
+    </div>
+    <div class="explica callout note" data-grupo="v1"><p>Cuando las partes son <strong>distintas</strong> entre sí (mitades de una lista), es divide y vencerás. Cuando las <strong>mismas partes se necesitan una y otra vez</strong> y conviene guardar sus respuestas en una tabla, es programación dinámica.</p></div>
+  </section>
+
+  <section class="section">
+    <span class="section-label">Pon a prueba lo aprendido</span>
+    <h2 class="section-title">Preguntas rápidas</h2>
+
+    <details class="reto">
+      <summary>1. ¿Qué dos condiciones debe cumplir un problema para que sirva la programación dinámica?</summary>
+      <div class="resp-txt">Que se pueda resolver con respuestas de subproblemas más pequeños, y que esos subproblemas se repitan. Si no se repiten, guardar las respuestas no ahorra trabajo.</div>
+    </details>
+    <details class="reto">
+      <summary>2. ¿Por qué Fibonacci sin memoria es tan lento?</summary>
+      <div class="resp-txt">Porque calcula muchas veces los mismos valores. Por ejemplo, para calcular fib(6) se calcula cinco veces fib(2). Cada aumento de n casi duplica el trabajo.</div>
+    </details>
+    <details class="reto">
+      <summary>3. ¿Cuál es el orden de Fibonacci llenando una tabla? ¿Y cuánta memoria extra necesita?</summary>
+      <div class="resp-txt">Tiempo de orden O(n), porque hace n − 2 sumas. Memoria extra de orden O(n), porque guarda una tabla de n casillas.</div>
+    </details>
+    <details class="reto">
+      <summary>4. ¿Se podría usar menos memoria en Fibonacci?</summary>
+      <div class="resp-txt">Sí. Para calcular cada valor solo hacen falta los dos anteriores, así que bastaría guardar esos dos en lugar de toda la tabla. Entonces la memoria extra sería de orden O(1).</div>
+    </details>
+    <details class="reto">
+      <summary>5. ¿Qué diferencia hay entre usar memoria y llenar una tabla?</summary>
+      <div class="resp-txt">Con memoria se resuelve el problema de forma normal, pero antes de calcular se revisa si la respuesta ya está guardada. Llenando una tabla se empieza por los casos más pequeños y se avanza hasta llegar al problema completo.</div>
+    </details>
+  </section>
+
+  <hr class="section-rule">
+
+  <!-- CONCLUSIÓN -->
+  <section class="section">
+    <span class="section-label">Cierre de la sesión</span>
+    <h2 class="section-title">Conclusión</h2>
+    <p>La programación dinámica resuelve un problema grande a partir de problemas más pequeños cuyas respuestas se <strong>guardan en una tabla</strong> para no calcularlas más de una vez. Se usa cuando los subproblemas <strong>se repiten</strong>, a diferencia de divide y vencerás, donde las partes son distintas. En Fibonacci, guardar las respuestas reduce el trabajo de un orden exponencial O(2ⁿ) a uno lineal O(n), a cambio de usar una tabla de memoria extra. La misma idea resuelve problemas como contar las formas de subir una escalera, y es la base de problemas más avanzados, como la mochila, que verás más adelante.</p>
+  </section>
+
+  <section class="section">
+    <span class="section-label">Consulta</span>
+    <h2 class="section-title">Referencias bibliográficas</h2>
+    <ul style="font-size:.92rem; color: var(--ink-secondary);">
+      <li>Castro, G. (2023). Resolución de subproblemas superpuestos mediante programación dinámica en bioinformática. <em>Journal of Computer Science &amp; Technology Latam</em>, 5(2), 112-128.</li>
+      <li>Méndez, F. (2022). <em>Paradigmas de diseño: divide y vencerás</em>. Tecnológico Nacional de México.</li>
+      <li>García, A. (2022). <em>Introducción a la algoritmia y lógica de programación: Una base sólida para sistemas</em>. Universidad Nacional Autónoma de México (UNAM).</li>
+      <li>PSeInt Web. (s. f.). <em>Editor en línea de pseudocódigo PSeInt</em>. https://www.pseint-web.app/</li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <span><strong>Análisis y Diseño de Algoritmos</strong> — Unidad 2, Sesión 2</span>
+  <span>Mtro. José Armando Vera Rodríguez · IEDEP · 15 de noviembre de 2026</span>
+</footer>
+
+<script>
+(function () {
+  function f(x) { return x.toLocaleString('es-MX'); }
+  function fibN(n) { var a = 1, b = 1; for (var i = 3; i <= n; i++) { var t = a + b; a = b; b = t; } return n <= 2 ? 1 : b; }
+
+  /* ── Barras: veces que se calcula cada valor ──────────────── */
+  var selFib = document.getElementById('sel-fib-n');
+  for (var k = 4; k <= 9; k++) { var o = document.createElement('option'); o.value = k; o.textContent = k; selFib.appendChild(o); }
+  selFib.value = '6';
+  function simular(k, c) { c[k] = (c[k] || 0) + 1; if (k > 2) { simular(k - 1, c); simular(k - 2, c); } }
+  function pintarBarras() {
+    var n = parseInt(selFib.value, 10), sin = {};
+    simular(n, sin);
+    var max = 0; for (var v = 1; v <= n; v++) max = Math.max(max, sin[v] || 0);
+    var h1 = '', h2 = '';
+    for (var v2 = n; v2 >= 1; v2--) {
+      var c1 = sin[v2] || 0;
+      h1 += '<div class="barra-fila"><span class="nombre">fib(' + v2 + ')</span><div class="pista"><i style="width:' + (c1 / max * 100) + '%"></i></div><span class="valor">' + c1 + (c1 === 1 ? ' vez' : ' veces') + '</span></div>';
+      h2 += '<div class="barra-fila"><span class="nombre">fib(' + v2 + ')</span><div class="pista"><i class="verde" style="width:' + (1 / max * 100) + '%"></i></div><span class="valor">1 vez</span></div>';
+    }
+    document.getElementById('barras-sin-filas').innerHTML = h1;
+    document.getElementById('barras-con-filas').innerHTML = h2;
+    document.getElementById('fib-resumen').textContent = 'fib(' + n + ') = ' + fibN(n) + '. Sumas sin memoria: ' + f(fibN(n) - 1) + '. Sumas con memoria: ' + (n - 2) + '.';
+  }
+  selFib.addEventListener('change', pintarBarras);
+  pintarBarras();
+
+  /* ── Tabla de Fibonacci paso a paso ───────────────────────── */
+  var selTab = document.getElementById('sel-tab-n');
+  for (var q = 5; q <= 15; q++) { var o2 = document.createElement('option'); o2.value = q; o2.textContent = q; selTab.appendChild(o2); }
+  selTab.value = '10';
+  var tabN, tabI, tabV, tabSumas;
+  function pintarTabla(nueva) {
+    var fila = document.getElementById('fila-tab'); fila.innerHTML = '';
+    for (var i = 1; i <= tabN; i++) {
+      var c = document.createElement('div');
+      var lleno = i <= tabI;
+      c.className = 'carta' + (lleno ? '' : ' vacia') + (i === nueva ? ' hallado' : '');
+      c.innerHTML = (lleno ? tabV[i] : '?') + '<span class="pos">fib[' + i + ']</span>';
+      fila.appendChild(c);
+    }
+    document.getElementById('tab-sumas').textContent = tabSumas;
+  }
+  function reiniciarTab() {
+    tabN = parseInt(selTab.value, 10); tabV = [0, 1, 1]; tabI = 2; tabSumas = 0;
+    var m = document.getElementById('tab-msg'); m.className = 'sim-mensaje';
+    m.textContent = 'Empezamos con los casos base: fib[1] = 1 y fib[2] = 1. Presiona Siguiente paso.';
+    document.getElementById('btn-tab-sig').disabled = false;
+    pintarTabla(0);
+  }
+  function pasoTab() {
+    if (tabI >= tabN) return;
+    var i = tabI + 1;
+    tabV[i] = tabV[i - 1] + tabV[i - 2]; tabI = i; tabSumas++;
+    var m = document.getElementById('tab-msg');
+    m.className = 'sim-mensaje' + (tabI === tabN ? ' ok' : '');
+    m.textContent = 'fib[' + i + '] = fib[' + (i - 1) + '] + fib[' + (i - 2) + '] = ' + tabV[i - 1] + ' + ' + tabV[i - 2] + ' = ' + tabV[i] + (tabI === tabN ? '. ¡Tabla completa con ' + tabSumas + ' sumas!' : '');
+    if (tabI >= tabN) document.getElementById('btn-tab-sig').disabled = true;
+    pintarTabla(i);
+  }
+  document.getElementById('btn-tab-sig').addEventListener('click', pasoTab);
+  document.getElementById('btn-tab-reiniciar').addEventListener('click', reiniciarTab);
+  selTab.addEventListener('change', reiniciarTab);
+  reiniciarTab();
+
+  /* ── Calculadora: sin memoria contra tabla ───────────────── */
+  var tamanos = [5, 10, 20, 30, 40, 50];
+  function pintarCalc() {
+    var n = tamanos[document.getElementById('rango').value - 1];
+    document.getElementById('n-val').textContent = n;
+    document.getElementById('calc-body').innerHTML =
+      '<tr><td>Sin memoria (repite trabajo)</td><td class="num">' + f(fibN(n) - 1) + '</td><td class="big">O(2ⁿ)</td></tr>' +
+      '<tr><td>Llenando la tabla</td><td class="num">' + f(n - 2) + '</td><td class="big">O(n)</td></tr>';
+  }
+  document.getElementById('rango').addEventListener('input', pintarCalc);
+  pintarCalc();
+
+  /* ── Escalera: todas las formas ───────────────────────────── */
+  function formas(n) {
+    if (n === 0) return [[]];
+    var r = [];
+    if (n >= 1) formas(n - 1).forEach(function (w) { r.push([1].concat(w)); });
+    if (n >= 2) formas(n - 2).forEach(function (w) { r.push([2].concat(w)); });
+    return r;
+  }
+  var selEsc = document.getElementById('sel-esc-n');
+  for (var e = 1; e <= 6; e++) { var o3 = document.createElement('option'); o3.value = e; o3.textContent = e; selEsc.appendChild(o3); }
+  selEsc.value = '4';
+  function pintarEscalera() {
+    var n = parseInt(selEsc.value, 10), todas = formas(n);
+    document.getElementById('esc-cuenta').textContent = todas.length;
+    document.getElementById('esc-chips').innerHTML = todas.map(function (w) { return '<li>' + w.join(' + ') + '</li>'; }).join('');
+  }
+  selEsc.addEventListener('change', pintarEscalera);
+  pintarEscalera();
+
+  /* ── Botones "Copiar código" ──────────────────────────────── */
+  function copiarTexto(txt, btn) {
+    function listo() { btn.textContent = '¡Copiado!'; setTimeout(function () { btn.textContent = 'Copiar código'; }, 1800); }
+    function respaldo() {
+      var ta = document.createElement('textarea');
+      ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); listo(); } catch (e) { btn.textContent = 'Selecciona y copia a mano'; }
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(listo, respaldo);
+    else respaldo();
+  }
+  document.querySelectorAll('.code-panel').forEach(function (panel) {
+    var pre = panel.querySelector('pre'), head = panel.querySelector('.code-head');
+    if (!pre || !head) return;
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'copiar'; b.textContent = 'Copiar código';
+    b.addEventListener('click', function () { copiarTexto(pre.textContent, b); });
+    head.appendChild(b);
+  });
+
+  /* ── Comprobar respuestas ─────────────────────────────────── */
+  document.querySelectorAll('button.comprobar').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var g = btn.getAttribute('data-grupo');
+      var campos = document.querySelectorAll('[data-grupo="' + g + '"] [data-ans], [data-grupo="' + g + '"][data-ans]');
+      var total = 0, bien = 0, vacios = 0;
+      campos.forEach(function (c) {
+        total++;
+        var v = (c.value || '').trim();
+        c.classList.remove('ok', 'bad');
+        if (!v) { vacios++; c.classList.add('bad'); return; }
+        if (v === c.getAttribute('data-ans')) { bien++; c.classList.add('ok'); } else c.classList.add('bad');
+      });
+      var ver = document.querySelector('.veredicto[data-grupo="' + g + '"]');
+      var exp = document.querySelector('.explica[data-grupo="' + g + '"]');
+      if (bien === total) {
+        ver.className = 'veredicto ok'; ver.textContent = '¡Todo correcto!';
+        exp.classList.add('ver');
+      } else if (vacios > 0) {
+        ver.className = 'veredicto bad'; ver.textContent = 'Te faltan ' + vacios + ' respuesta(s) por completar.';
+      } else {
+        ver.className = 'veredicto bad'; ver.textContent = 'Llevas ' + bien + ' de ' + total + ' bien. Revisa los campos en rojo e inténtalo de nuevo.';
+      }
+    });
+  });
+
+})();
+</script>
+</body>
+</html>
